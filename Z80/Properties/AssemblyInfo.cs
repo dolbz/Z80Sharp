@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("CPCSharp.Console")]
+[assembly: InternalsVisibleTo("Z80.Tests")]

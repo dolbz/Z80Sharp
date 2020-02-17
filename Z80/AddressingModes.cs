@@ -24,24 +24,93 @@ namespace Z80
         T AddressedValue { get; }
     }
 
+    public class RegIndirectWrite : IWriteAddressedOperand<byte>
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly MemWriteCycle _writeCycle;
+        private readonly WideRegister _register;
+
+        public byte AddressedValue
+        {
+            get => _writeCycle.DataToWrite;
+            set { _writeCycle.DataToWrite = value; }
+        }
+
+        public bool WriteReady => true;
+
+        public bool IsComplete => _writeCycle.IsComplete;
+
+        public RegIndirectWrite(Z80Cpu cpu, WideRegister register)
+        {
+            _cpu = cpu;
+            _writeCycle = new MemWriteCycle(cpu);
+            _register = register;
+        }
+
+        public void Clock()
+        {
+            _writeCycle.Clock();
+        }
+
+        public void Reset()
+        {
+            _writeCycle.Reset();
+            _writeCycle.Address = _register.GetValue(_cpu);
+        }
+    }
+
+    public struct RegIndirectRead : IReadAddressedOperand<byte>
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly MemReadCycle _readCycle;
+        private readonly WideRegister _register;
+
+        public byte AddressedValue
+        {
+            get => _readCycle.LatchedData;
+        }
+
+        public bool IsComplete => _readCycle.IsComplete;
+
+        public RegIndirectRead(Z80Cpu cpu, WideRegister register)
+        {
+            _cpu = cpu;
+            _readCycle = new MemReadCycle(cpu);
+            _register = register;
+        }
+
+        public void Clock()
+        {
+            _readCycle.Clock();
+        }
+
+        public void Reset()
+        {
+            _readCycle.Reset();
+            _readCycle.Address = _register.GetValue(_cpu);
+        }
+    }
+
     public struct IndexedRead : IReadAddressedOperand<byte>
     {
         private readonly Z80Cpu _cpu;
         private readonly MemReadCycle _offsetReadCycle;
         private readonly InternalCycle _internalCycle;
         private readonly MemReadCycle _targetReadCycle;
+        private readonly WideRegister _register;
 
         public byte AddressedValue { get; private set; }
 
         public bool IsComplete => _targetReadCycle.IsComplete;
 
-        public IndexedRead(Z80Cpu cpu, Register register)
+        public IndexedRead(Z80Cpu cpu, WideRegister register)
         {
-            if (register != Register.IX && register != Register.IY)
+            if (register != WideRegister.IX && register != WideRegister.IY)
             {
-                throw new InvalidOperationException("Invald index register specified");
+                throw new InvalidOperationException("Invalid index register specified");
             }
             AddressedValue = 0;
+            _register = register;
             _cpu = cpu;
             _offsetReadCycle = new MemReadCycle(cpu);
             _internalCycle = new InternalCycle(5);
@@ -72,7 +141,7 @@ namespace Z80
                 _internalCycle.Clock();
                 if (_internalCycle.IsComplete)
                 {
-                    _targetReadCycle.Address = _offsetReadCycle.LatchedData;
+                    _targetReadCycle.Address = (ushort)((_register == WideRegister.IX ? _cpu.IX : _cpu.IY) + (sbyte)_offsetReadCycle.LatchedData);
                     Console.WriteLine("Internal cycle complete");
                 }
                 return;
@@ -90,32 +159,153 @@ namespace Z80
         }
     }
 
-    public struct ExtendedPointerOperand : IReadAddressedOperand<byte>
+    public struct IndexedWrite : IWriteAddressedOperand<byte>
     {
-        private readonly ExtendedOperand _extendedOperand;
+        private readonly Z80Cpu _cpu;
+        private readonly MemReadCycle _offsetReadCycle;
+        private readonly InternalCycle _internalCycle;
+        private readonly MemWriteCycle _targetWriteCycle;
+        private readonly WideRegister _register;
+
+        public byte AddressedValue
+        {
+            get => _targetWriteCycle.DataToWrite;
+            set
+            {
+                _targetWriteCycle.DataToWrite = value;
+            }
+        }
+
+        public bool WriteReady => _offsetReadCycle.IsComplete;
+
+        public bool IsComplete => _targetWriteCycle.IsComplete;
+
+        public IndexedWrite(Z80Cpu cpu, WideRegister register, int internalCycleLength = 5)
+        {
+            if (register != WideRegister.IX && register != WideRegister.IY)
+            {
+                throw new InvalidOperationException("Invald index register specified");
+            }
+            _register = register;
+            _cpu = cpu;
+            _offsetReadCycle = new MemReadCycle(cpu);
+            _internalCycle = new InternalCycle(internalCycleLength);
+            _targetWriteCycle = new MemWriteCycle(cpu);
+        }
+
+        public void Reset()
+        {
+            _offsetReadCycle.Reset();
+            _internalCycle.Reset();
+            _targetWriteCycle.Reset();
+        }
+
+        public void Clock()
+        {
+            if (!_offsetReadCycle.IsComplete)
+            {
+                _offsetReadCycle.Clock();
+                return;
+            }
+
+            if (!_internalCycle.IsComplete)
+            {
+                _internalCycle.Clock();
+                if (_internalCycle.IsComplete)
+                {
+                    _targetWriteCycle.Address = (ushort)((_register == WideRegister.IX ? _cpu.IX : _cpu.IY) + (sbyte)_offsetReadCycle.LatchedData);
+                }
+                return;
+            }
+
+            if (!_targetWriteCycle.IsComplete)
+            {
+                _targetWriteCycle.Clock();
+            }
+        }
+    }
+
+    public struct ExtendedPointerWrite : IWriteAddressedOperand<byte>
+    {
+        private readonly ExtendedReadOperand _extendedOperand;
+        private readonly MemWriteCycle _writeCycle;
+
+        public byte AddressedValue
+        {
+            get => _writeCycle.DataToWrite;
+            set
+            {
+                _writeCycle.DataToWrite = value;
+            }
+        }
+
+        public bool IsComplete => _writeCycle.IsComplete;
+
+        public bool WriteReady => _extendedOperand.IsComplete;
+
+        public ExtendedPointerWrite(Z80Cpu cpu)
+        {
+            _extendedOperand = new ExtendedReadOperand(cpu);
+            _writeCycle = new MemWriteCycle(cpu);
+            AddressedValue = 0x0;
+        }
+
+        public void Clock()
+        {
+            if (!_extendedOperand.IsComplete)
+            {
+                _extendedOperand.Clock();
+                if (_extendedOperand.IsComplete)
+                {
+                    _writeCycle.Address = _extendedOperand.AddressedValue;
+                }
+                return;
+            }
+            if (!_writeCycle.IsComplete)
+            {
+                _writeCycle.Clock();
+            }
+        }
+
+        public void Reset()
+        {
+            _extendedOperand.Reset();
+            _writeCycle.Reset();
+        }
+    }
+
+    public struct ExtendedPointerRead : IReadAddressedOperand<byte>
+    {
+        private readonly ExtendedReadOperand _extendedOperand;
         private readonly MemReadCycle _readCycle;
 
         public byte AddressedValue { get; private set; }
 
         public bool IsComplete => _readCycle.IsComplete;
 
-        public ExtendedPointerOperand(Z80Cpu cpu) {
-            _extendedOperand = new ExtendedOperand(cpu);
+        public ExtendedPointerRead(Z80Cpu cpu)
+        {
+            _extendedOperand = new ExtendedReadOperand(cpu);
             _readCycle = new MemReadCycle(cpu);
             AddressedValue = 0x0;
         }
 
         public void Clock()
         {
-            if (!_extendedOperand.IsComplete) {
+            if (!_extendedOperand.IsComplete)
+            {
                 _extendedOperand.Clock();
-                if (_extendedOperand.IsComplete) {
+                if (_extendedOperand.IsComplete)
+                {
                     _readCycle.Address = _extendedOperand.AddressedValue;
                 }
+                return;
             }
-            if (!_readCycle.IsComplete) {
+            if (!_readCycle.IsComplete)
+            {
                 _readCycle.Clock();
-                if (_readCycle.IsComplete) {
+                if (_readCycle.IsComplete)
+                {
                     AddressedValue = _readCycle.LatchedData;
                 }
             }
@@ -128,7 +318,7 @@ namespace Z80
         }
     }
 
-    public struct ExtendedOperand : IReadAddressedOperand<ushort>
+    public class ExtendedReadOperand : IReadAddressedOperand<ushort>
     {
         private readonly MemReadCycle _readCycle;
         private readonly MemReadCycle _readCycle2;
@@ -137,7 +327,7 @@ namespace Z80
 
         public bool IsComplete => _readCycle2.IsComplete;
 
-        public ExtendedOperand(Z80Cpu cpu)
+        public ExtendedReadOperand(Z80Cpu cpu)
         {
             _readCycle = new MemReadCycle(cpu);
             _readCycle2 = new MemReadCycle(cpu);
@@ -155,9 +345,11 @@ namespace Z80
                 }
                 return;
             }
-            if (!_readCycle2.IsComplete) {
+            if (!_readCycle2.IsComplete)
+            {
                 _readCycle2.Clock();
-                if (_readCycle2.IsComplete) {
+                if (_readCycle2.IsComplete)
+                {
                     AddressedValue |= (ushort)(_readCycle2.LatchedData << 8);
                 }
             }
@@ -208,8 +400,8 @@ namespace Z80
         public readonly Z80Cpu _processor;
         public byte AddressedValue
         {
-            get => GetRegisterValue();
-            set => SetRegisterValue(value);
+            get => _register.GetValue(_processor);
+            set => _register.SetValueOnProcessor(_processor, value);
         }
 
         public bool IsComplete => true;
@@ -219,31 +411,6 @@ namespace Z80
         {
             _processor = processor;
             _register = register;
-        }
-
-        private byte GetRegisterValue()
-        {
-            switch (_register)
-            {
-                case Register.A:
-                    return _processor.A;
-                case Register.D:
-                    return _processor.D;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {_register}");
-            }
-        }
-
-        private void SetRegisterValue(byte value)
-        {
-            switch (_register)
-            {
-                case Register.A:
-                    _processor.A = value;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {_register}");
-            }
         }
 
         public void Reset()

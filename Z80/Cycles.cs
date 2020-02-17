@@ -131,7 +131,7 @@ namespace Z80
         public void Clock() {
             switch (RemainingTCycles) {
                 case 3:
-                    _cpu.Address = Address ?? _cpu.PC;
+                    _cpu.Address = Address ?? _cpu.PC++;
                     _cpu.RD = true;
                     _cpu.MREQ = true;
                     break;

@@ -31,7 +31,7 @@ namespace Z80 {
 
     internal class LD_8Bit : IInstruction
     {   
-        public bool IsComplete => _destination.IsComplete && _source.IsComplete;
+        public bool IsComplete => _remainingM1Cycles <= 0 && _destination.IsComplete && _source.IsComplete;
         public string Mnemonic { get; }
 
         private Z80Cpu _cpu;
@@ -45,12 +45,13 @@ namespace Z80 {
             _cpu = cpu;
             Mnemonic = "LD";
             _additionalM1TCycles = additionalM1TCycles;
+            _remainingM1Cycles = additionalM1TCycles;
             _destination = destination;
             _source = source;
         }
 
         public void StartExecution() {
-            if (_remainingM1Cycles == 0 && _destination.IsComplete && _source.IsComplete) {
+            if (_source.IsComplete) {
                 _destination.AddressedValue = _source.AddressedValue;
             }
         }
@@ -75,6 +76,7 @@ namespace Z80 {
                     if (_source.IsComplete) {
                         _destination.AddressedValue = _source.AddressedValue;
                     }
+                    return;
                 }
 
                 if (!_destination.IsComplete) {
