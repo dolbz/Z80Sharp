@@ -1,20 +1,9 @@
-using System;
 using NUnit.Framework;
 
 namespace Z80.Tests
 {
-    public class Load8BitTests
+    public class Load8BitTests : CpuRunTestBase
     {
-        private Z80Cpu _cpu = new Z80Cpu();
-        private byte[] _ram;
-
-        [SetUp]
-        public void Setup()
-        {
-            _cpu.Reset();
-            _ram = new byte[0xffff];
-        }
-
         [Test]
         public void LoadRegisterToRegister()
         {
@@ -217,23 +206,81 @@ namespace Z80.Tests
             // Assert
             Assert.That(_ram[0x52c4], Is.EqualTo(loadValue));
         }
-
-        private void RunUntil(int pc)
-        {
-            while (_cpu.PC < pc)
-            {
-                if (_cpu.MREQ && _cpu.RD)
-                {
-                    var data = _ram[_cpu.Address];
-                    _cpu.Data = data;
-                }
-                if (_cpu.MREQ && _cpu.WR)
-                {
-                    _ram[_cpu.Address] = _cpu.Data;
-                }
-                _cpu.Clock();
-            }
-        }
     }
 
+    public class Load16BitTests : CpuRunTestBase { 
+
+        [Test]
+        public void LoadRegisterToRegister()
+        {
+            // Arrange
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x4cf3);
+            _ram[0] = 0xf9; // LD SP, HL
+
+            // Act
+            RunUntil(3);
+
+            // Assert
+            Assert.That(WideRegister.SP.GetValue(_cpu), Is.EqualTo(0x4cf3));
+        }
+
+        [Test]
+        public void LoadImmediateExtendedPointerToWideRegister(){
+            // Arrange
+            var targetRegister = WideRegister.DE;
+            ushort loadValue = 0x1b40;
+
+            _ram[0] = 0xed; // LD DE, (nn)
+            _ram[1] = 0x5b;
+            _ram[2] = 0xe5;
+            _ram[3] = 0xf0;
+            _ram[0xf0e5] = (byte)(loadValue & 0xff);
+            _ram[0xf0e6] = (byte)(loadValue >> 8);
+
+            // Act
+            RunUntil(5);
+
+            // Assert
+            Assert.That(targetRegister.GetValue(_cpu), Is.EqualTo(loadValue));
+        }
+
+        [Test]
+        public void LoadImmediateExtendedValueToWideRegister(){
+            // Arrange
+            var targetRegister = WideRegister.BC;
+
+            _ram[0] = 0x01; // LD BC, nn
+            _ram[1] = 0x5b;
+            _ram[2] = 0xe5;
+
+            // Act
+            RunUntil(4);
+
+            // Assert
+            Assert.That(targetRegister.GetValue(_cpu), Is.EqualTo(0xe55b));
+        }
+
+        [Test]
+        public void LoadRegisterToImmediateExtendedPointer(){
+            // Arrange
+            var sourceRegister = WideRegister.IX;
+            ushort pointer = 0x62f1;
+            var msb = 0x91;
+            var lsb = 0x2d;
+
+            sourceRegister.SetValueOnProcessor(_cpu, (ushort)((msb << 8) | lsb));
+
+            _ram[0] = 0xdd; // LD (nn), IX
+            _ram[1] = 0x22;
+            _ram[2] = (byte)(pointer & 0xff);
+            _ram[3] = (byte)(pointer >> 8);
+
+            // Act
+            RunUntil(5);
+
+            // Assert
+            Assert.That(_ram[pointer], Is.EqualTo(lsb));
+            Assert.That(_ram[pointer+1], Is.EqualTo(msb));
+        }
+    }
 }

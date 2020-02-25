@@ -59,6 +59,98 @@ namespace Z80
         }
     }
 
+    public class RegIndirectWideWrite : IWriteAddressedOperand<ushort>
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly MemWriteCycle _writeCycle1;
+        private readonly MemWriteCycle _writeCycle2;
+        private readonly WideRegister _register;
+
+        public ushort AddressedValue
+        {
+            get => (ushort)(_writeCycle1.DataToWrite << 8 | _writeCycle2.DataToWrite);
+            set
+            {
+                _writeCycle1.DataToWrite = (byte)(value >> 8);
+                _writeCycle2.DataToWrite = (byte)(value & 0xff);
+            }
+        }
+
+        public bool WriteReady => true;
+
+        public bool IsComplete => _writeCycle2.IsComplete;
+
+        public RegIndirectWideWrite(Z80Cpu cpu, WideRegister register)
+        {
+            _cpu = cpu;
+            _writeCycle1 = new MemWriteCycle(cpu);
+            _writeCycle2 = new MemWriteCycle(cpu);
+            _register = register;
+        }
+
+        public void Clock()
+        {
+            if (!_writeCycle1.IsComplete) {
+                _writeCycle1.Clock();
+                return;
+            }
+            if (!_writeCycle2.IsComplete) {
+                _writeCycle2.Clock();
+            }
+        }
+
+        public void Reset()
+        {
+            _writeCycle1.Reset();
+            _writeCycle2.Reset();
+            var address = _register.GetValue(_cpu);
+            _writeCycle1.Address = --address; // TODO make indirect write indicate direction. If we're not writing to SP we probably want to imcrement instead of decrement
+            _writeCycle2.Address = --address;
+        }
+    }
+
+    public class RegIndirectWideRead : IReadAddressedOperand<ushort>
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly MemReadCycle _readCycle1;
+        private readonly MemReadCycle _readCycle2;
+        private readonly WideRegister _register;
+
+        public ushort AddressedValue => (ushort)(_readCycle2.LatchedData << 8 | _readCycle1.LatchedData);
+
+        public bool WriteReady => true;
+
+        public bool IsComplete => _readCycle2.IsComplete;
+
+        public RegIndirectWideRead(Z80Cpu cpu, WideRegister register)
+        {
+            _cpu = cpu;
+            _readCycle1 = new MemReadCycle(cpu);
+            _readCycle2 = new MemReadCycle(cpu);
+            _register = register;
+        }
+
+        public void Clock()
+        {
+            if (!_readCycle1.IsComplete) {
+                _readCycle1.Clock();
+                return;
+            }
+            if (!_readCycle2.IsComplete) {
+                _readCycle2.Clock();
+            }
+        }
+
+        public void Reset()
+        {
+            _readCycle1.Reset();
+            _readCycle2.Reset();
+            var address = _register.GetValue(_cpu);
+            _readCycle1.Address = address;
+            _readCycle2.Address = ++address;
+        }
+    }
+
     public struct RegIndirectRead : IReadAddressedOperand<byte>
     {
         private readonly Z80Cpu _cpu;
@@ -274,7 +366,126 @@ namespace Z80
         }
     }
 
-    public struct ExtendedPointerRead : IReadAddressedOperand<byte>
+    public class ExtendedPointerRead16Bit : IReadAddressedOperand<ushort>
+    {
+        private readonly ExtendedReadOperand _extendedOperand;
+        private readonly MemReadCycle _readCycle1;
+        private readonly MemReadCycle _readCycle2;
+
+        public ushort AddressedValue { get; private set; }
+
+        public bool IsComplete => _readCycle2.IsComplete;
+
+        public ExtendedPointerRead16Bit(Z80Cpu cpu)
+        {
+            _extendedOperand = new ExtendedReadOperand(cpu);
+            _readCycle1 = new MemReadCycle(cpu);
+            _readCycle2 = new MemReadCycle(cpu);
+            AddressedValue = 0x0;
+        }
+
+        public void Clock()
+        {
+            if (!_extendedOperand.IsComplete)
+            {
+                _extendedOperand.Clock();
+                if (_extendedOperand.IsComplete)
+                {
+                    _readCycle1.Address = _extendedOperand.AddressedValue;
+                    _readCycle2.Address = (ushort)(_extendedOperand.AddressedValue + 1);
+                }
+                return;
+            }
+            if (!_readCycle1.IsComplete)
+            {
+                _readCycle1.Clock();
+                if (_readCycle1.IsComplete)
+                {
+                    AddressedValue = _readCycle1.LatchedData;
+                }
+                return;
+            }
+            if (!_readCycle2.IsComplete)
+            {
+                _readCycle2.Clock();
+                if (_readCycle2.IsComplete)
+                {
+                    AddressedValue |= (ushort)(_readCycle2.LatchedData << 8);
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _extendedOperand.Reset();
+            _readCycle1.Reset();
+            _readCycle2.Reset();
+        }
+    }
+
+    public class ExtendedPointerWrite16Bit : IWriteAddressedOperand<ushort>
+    {
+        private readonly ExtendedReadOperand _extendedOperand;
+        private readonly MemWriteCycle _writeCycle1;
+        private readonly MemWriteCycle _writeCycle2;
+
+        public ushort AddressedValue
+        {
+            get
+            {
+                return (ushort)((_writeCycle2.DataToWrite << 8) | _writeCycle1.DataToWrite);
+            }
+            set
+            {
+                _writeCycle1.DataToWrite = (byte)(0xff & value);
+                _writeCycle2.DataToWrite = (byte)(value >> 8);
+            }
+        }
+
+        public bool IsComplete => _writeCycle2.IsComplete;
+
+        public bool WriteReady => _extendedOperand.IsComplete;
+
+        public ExtendedPointerWrite16Bit(Z80Cpu cpu)
+        {
+            _extendedOperand = new ExtendedReadOperand(cpu);
+            _writeCycle1 = new MemWriteCycle(cpu);
+            _writeCycle2 = new MemWriteCycle(cpu);
+            AddressedValue = 0x0;
+        }
+
+        public void Clock()
+        {
+            if (!_extendedOperand.IsComplete)
+            {
+                _extendedOperand.Clock();
+                if (_extendedOperand.IsComplete)
+                {
+                    _writeCycle1.Address = _extendedOperand.AddressedValue;
+                    _writeCycle2.Address = (ushort)(_extendedOperand.AddressedValue + 1);
+                }
+                return;
+            }
+            if (!_writeCycle1.IsComplete)
+            {
+                _writeCycle1.Clock();
+                return;
+            }
+            if (!_writeCycle2.IsComplete)
+            {
+                _writeCycle2.Clock();
+            }
+        }
+
+        public void Reset()
+        {
+            _extendedOperand.Reset();
+            _writeCycle1.Reset();
+            _writeCycle2.Reset();
+        }
+    }
+
+    public class ExtendedPointerRead8Bit : IReadAddressedOperand<byte>
     {
         private readonly ExtendedReadOperand _extendedOperand;
         private readonly MemReadCycle _readCycle;
@@ -283,7 +494,7 @@ namespace Z80
 
         public bool IsComplete => _readCycle.IsComplete;
 
-        public ExtendedPointerRead(Z80Cpu cpu)
+        public ExtendedPointerRead8Bit(Z80Cpu cpu)
         {
             _extendedOperand = new ExtendedReadOperand(cpu);
             _readCycle = new MemReadCycle(cpu);
@@ -391,6 +602,36 @@ namespace Z80
         public void Reset()
         {
             _readCycle.Reset();
+        }
+    }
+
+    public struct RegAddrMode16Bit : IWriteAddressedOperand<ushort>, IReadAddressedOperand<ushort>
+    {
+        public readonly WideRegister _register;
+        public readonly Z80Cpu _processor;
+        public ushort AddressedValue
+        {
+            get => _register.GetValue(_processor);
+            set => _register.SetValueOnProcessor(_processor, value);
+        }
+
+        public bool IsComplete => true;
+        public bool WriteReady => true;
+
+        public RegAddrMode16Bit(Z80Cpu processor, WideRegister register)
+        {
+            _processor = processor;
+            _register = register;
+        }
+
+        public void Reset()
+        {
+            // Nothing to do
+        }
+
+        public void Clock()
+        {
+            throw new InvalidOperationException("This isn't expected to be called as IsComplete is true");
         }
     }
 

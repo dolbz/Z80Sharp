@@ -27,7 +27,7 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0x0, 4 });
 
-            #region 8 Bit load instructions
+            #region 8 bit load instructions
 
             generated.Add(new object[] { 0x02, 7 }); // LD (BC), A
             generated.Add(new object[] { 0x0a, 7}); // LD A, (BC)
@@ -102,6 +102,66 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0xed57, 9 }); // LD A, I
             generated.Add(new object[] { 0xed5f, 9 }); // LD A, R
+            #endregion
+
+            #region 16 bit load instructions
+
+            // Load immediate
+            generated.Add(new object[] { 0x01, 10 });
+            generated.Add(new object[] { 0x11, 10 });
+            generated.Add(new object[] { 0x21, 10 });
+            generated.Add(new object[] { 0x31, 10 });
+            generated.Add(new object[] { 0xdd21, 14 });
+            generated.Add(new object[] { 0xfd21, 14 });
+
+            // Load immmediate pointer
+            generated.Add(new object[] { 0xed4b, 20 });
+            generated.Add(new object[] { 0xed5b, 20 });
+            generated.Add(new object[] { 0x2a, 16 });
+            generated.Add(new object[] { 0xed7b, 20 });
+            generated.Add(new object[] { 0xdd2a, 20 });
+            generated.Add(new object[] { 0xfd2a, 20 });
+
+            // Load register -> SP
+            generated.Add(new object[] { 0xf9, 6 });
+            generated.Add(new object[] { 0xddf9, 10 });
+            generated.Add(new object[] { 0xfdf9, 10 });
+
+            // Load register -> immediate pointer
+            generated.Add(new object[] { 0xed43, 20 });
+            generated.Add(new object[] { 0xed53, 20 });
+            generated.Add(new object[] { 0x22, 16 });
+            generated.Add(new object[] { 0xed73, 20 });
+            generated.Add(new object[] { 0xdd22, 20 });
+            generated.Add(new object[] { 0xfd22, 20 });
+
+            #endregion
+
+            #region Push instructions
+
+            generated.Add(new object[] { 0xc5, 11 });
+            generated.Add(new object[] { 0xd5, 11 });
+            generated.Add(new object[] { 0xe5, 11 });
+            generated.Add(new object[] { 0xf5, 11 });
+
+
+            generated.Add(new object[] { 0xdde5, 15 });
+            generated.Add(new object[] { 0xfde5, 15 });
+
+            #endregion
+
+            #region pop instructions
+
+            generated.Add(new object[] { 0xc1, 10 });
+            generated.Add(new object[] { 0xd1, 10 });
+            generated.Add(new object[] { 0xe1, 10 });
+            generated.Add(new object[] { 0xf1, 10 });
+
+
+            generated.Add(new object[] { 0xdde1, 14 });
+            generated.Add(new object[] { 0xfde1, 14 });
+
+
             #endregion
 
             return generated;
