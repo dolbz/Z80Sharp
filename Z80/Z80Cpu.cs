@@ -32,10 +32,15 @@ namespace Z80
 
     public enum WideRegister
     {
+        None = 0,
         AF,
+        AF_,
         BC,
+        BC_,
         DE,
+        DE_,
         HL,
+        HL_,
         SP,
         IX,
         IY
@@ -113,6 +118,14 @@ namespace Z80
                     return (ushort)(cpu.D << 8 | cpu.E);
                 case WideRegister.HL:
                     return (ushort)(cpu.H << 8 | cpu.L);
+                case WideRegister.AF_:
+                    return cpu.AF_;
+                case WideRegister.BC_:
+                    return cpu.BC_;
+                case WideRegister.DE_:
+                    return cpu.DE_;
+                case WideRegister.HL_:
+                    return cpu.HL_;
                 case WideRegister.SP:
                     return cpu.SP;
                 case WideRegister.IX:
@@ -153,6 +166,18 @@ namespace Z80
                 case WideRegister.IY:
                     cpu.IY = value;
                     break;
+                case WideRegister.AF_:
+                    cpu.AF_ = value;
+                    break;
+                case WideRegister.BC_:
+                    cpu.BC_ = value;
+                    break;
+                case WideRegister.DE_:
+                    cpu.DE_ = value;
+                    break;
+                case WideRegister.HL_:
+                    cpu.HL_ = value;
+                    break;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }
@@ -167,20 +192,16 @@ namespace Z80
         #region General Purpose Registers
         public byte A;
         public Z80Flags Flags;
-        public byte A_;
-        public byte Flags_;
         public byte B;
         public byte C;
         public byte D;
         public byte E;
         public byte H;
         public byte L;
-        public byte B_;
-        public byte C_;
-        public byte D_;
-        public byte E_;
-        public byte H_;
-        public byte L_;
+        public ushort AF_;
+        public ushort BC_;
+        public ushort DE_;
+        public ushort HL_;
 
         #endregion
 
@@ -230,6 +251,7 @@ namespace Z80
                     if (_currentInstruction.IsComplete)
                     {
                         Opcode = 0x0;
+                        _currentInstruction = null;
                         _fetchCycle.Reset();
                     }
                 }
@@ -434,12 +456,12 @@ namespace Z80
             instructions[0x31] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedReadOperand(this)); // LD SP, nn
 
             instructions[0xf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.HL), additionalM1TCycles: 2); // LD SP, HL
-            
+
             instructions[0xdd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedReadOperand(this)); // LD IX, nn
             instructions[0xdd22] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.IX)); // LD (nn), IX
             instructions[0xdd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedPointerRead16Bit(this)); // LD IX, (nn)
             instructions[0xddf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.IX), additionalM1TCycles: 2); // LD SP, IX
-            
+
             instructions[0xed43] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.BC)); // LD (nn), BC
             instructions[0xed4b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedPointerRead16Bit(this)); // LD BC, (nn)
             instructions[0xed53] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.DE)); // LD (nn), DE
@@ -477,6 +499,20 @@ namespace Z80
             instructions[0xfde1] = new POP(this, WideRegister.IY); // POP IY
 
             #endregion
+
+            #region Exchange instructions
+
+            instructions[0x08] = new Exchange(this, WideRegister.AF); // EX AF, AF'
+            instructions[0xd9] = new Exchange(this, new[] { WideRegister.BC, WideRegister.DE, WideRegister.HL }); // EXX
+            instructions[0xeb] = new Exchange(this, WideRegister.DE, WideRegister.HL); // EX DE, HL
+
+            instructions[0xe3] = new ExchangeStack(this, WideRegister.HL); // EX (SP), HL
+            instructions[0xdde3] = new ExchangeStack(this, WideRegister.IX); // EX (SP), IX
+            instructions[0xfde3] = new ExchangeStack(this, WideRegister.IY); // EX (SP), IY
+
+            #endregion
+
+
         }
     }
 }

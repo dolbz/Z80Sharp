@@ -65,14 +65,17 @@ namespace Z80
         private readonly MemWriteCycle _writeCycle1;
         private readonly MemWriteCycle _writeCycle2;
         private readonly WideRegister _register;
+        private readonly bool _decreasingAddress;
 
         public ushort AddressedValue
         {
             get => (ushort)(_writeCycle1.DataToWrite << 8 | _writeCycle2.DataToWrite);
             set
             {
-                _writeCycle1.DataToWrite = (byte)(value >> 8);
-                _writeCycle2.DataToWrite = (byte)(value & 0xff);
+                var msb = (byte)(value >> 8);
+                var lsb = (byte)(value & 0xff);
+                _writeCycle1.DataToWrite = _decreasingAddress ? msb : lsb;
+                _writeCycle2.DataToWrite =  _decreasingAddress ? lsb : msb;
             }
         }
 
@@ -80,12 +83,13 @@ namespace Z80
 
         public bool IsComplete => _writeCycle2.IsComplete;
 
-        public RegIndirectWideWrite(Z80Cpu cpu, WideRegister register)
+        public RegIndirectWideWrite(Z80Cpu cpu, WideRegister register, bool decreasingAddress)
         {
             _cpu = cpu;
             _writeCycle1 = new MemWriteCycle(cpu);
             _writeCycle2 = new MemWriteCycle(cpu);
             _register = register;
+            _decreasingAddress = decreasingAddress;
         }
 
         public void Clock()
@@ -104,8 +108,8 @@ namespace Z80
             _writeCycle1.Reset();
             _writeCycle2.Reset();
             var address = _register.GetValue(_cpu);
-            _writeCycle1.Address = --address; // TODO make indirect write indicate direction. If we're not writing to SP we probably want to imcrement instead of decrement
-            _writeCycle2.Address = --address;
+            _writeCycle1.Address = _decreasingAddress ? --address : address++;
+            _writeCycle2.Address = _decreasingAddress ? --address : address;
         }
     }
 

@@ -161,6 +161,17 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xdde1, 14 });
             generated.Add(new object[] { 0xfde1, 14 });
 
+            #endregion
+
+            #region exchange instructions
+
+            generated.Add(new object[] { 0x08, 4 });
+            generated.Add(new object[] { 0xd9, 4 });
+            generated.Add(new object[] { 0xeb, 4 });
+
+            generated.Add(new object[] { 0xe3, 19 });
+            generated.Add(new object[] { 0xdde3, 23 });
+            generated.Add(new object[] { 0xfde3, 23 });
 
             #endregion
 
