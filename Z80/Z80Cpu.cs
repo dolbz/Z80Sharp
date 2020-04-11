@@ -8,12 +8,12 @@ namespace Z80
     [Flags]
     public enum Z80Flags : byte
     {
-        Sign = 128,
-        Zero = 64,
-        HalfCarry = 16,
-        ParityOverflow = 4,
-        Subtract = 2,
-        Carry = 1
+        Sign_S = 128,
+        Zero_Z = 64,
+        HalfCarry_H = 16,
+        ParityOverflow_PV = 4,
+        AddSubtract_N = 2,
+        Carry_C = 1
     }
 
     public enum Register
@@ -509,6 +509,15 @@ namespace Z80
             instructions[0xe3] = new ExchangeStack(this, WideRegister.HL); // EX (SP), HL
             instructions[0xdde3] = new ExchangeStack(this, WideRegister.IX); // EX (SP), IX
             instructions[0xfde3] = new ExchangeStack(this, WideRegister.IY); // EX (SP), IY
+
+            #endregion
+
+            #region Block transfer instructions
+
+            instructions[0xeda0] = new LoadAndXcrement(this, true); // LDI
+            instructions[0xedb0] = new LoadAndXcrement(this, true, withRepeat: true); // LDIR
+            instructions[0xeda8] = new LoadAndXcrement(this, false); // LDD
+            instructions[0xedb8] = new LoadAndXcrement(this, false, withRepeat: true); // LDDR
 
             #endregion
 

@@ -175,6 +175,15 @@ namespace Z80.Tests
 
             #endregion
 
+            #region Block transfer instructions
+
+            generated.Add(new object[] { 0xeda0, 16 });
+            generated.Add(new object[] { 0xeda8, 16 });
+            generated.Add(new object[] { 0xedb0, 21 });
+            generated.Add(new object[] { 0xedb8, 21 });
+
+            #endregion
+
             return generated;
         }
 
@@ -187,6 +196,11 @@ namespace Z80.Tests
             if (opcode > 0xff)
             {
                 tCycleCount = 8;
+            }
+
+            if (opcode == 0xedb0 || opcode == 0xedb8) {
+                // Need to special case these two as they run through all of memory otherwise
+                WideRegister.BC.SetValueOnProcessor(_cpu, 2);
             }
 
             var instruction = _cpu.instructions[opcode];

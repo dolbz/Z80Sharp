@@ -158,7 +158,7 @@ namespace Z80
     {
         private Z80Cpu _cpu;
         private RegIndirectWideRead _read;
-        private RegIndirectWideWrite  _write;
+        private RegIndirectWideWrite _write;
 
         private WideRegister _targetRegister;
         private int _additionalReadCycles = 1;
@@ -168,7 +168,8 @@ namespace Z80
 
         public bool IsComplete => _additionalWriteCycles <= 0;
 
-        public ExchangeStack(Z80Cpu cpu, WideRegister exchangeRegister) {
+        public ExchangeStack(Z80Cpu cpu, WideRegister exchangeRegister)
+        {
             _cpu = cpu;
             _targetRegister = exchangeRegister;
             _read = new RegIndirectWideRead(cpu, WideRegister.SP);
@@ -177,20 +178,24 @@ namespace Z80
 
         public void Clock()
         {
-            if (!_read.IsComplete) {
+            if (!_read.IsComplete)
+            {
                 _read.Clock();
-                if (_read.IsComplete) {
+                if (_read.IsComplete)
+                {
                     _write.AddressedValue = _targetRegister.GetValue(_cpu);
                     _targetRegister.SetValueOnProcessor(_cpu, _read.AddressedValue);
                 }
                 return;
             }
-            if (_additionalReadCycles-- > 0) {
+            if (_additionalReadCycles-- > 0)
+            {
                 // http://www.baltazarstudios.com/files/xx.html#E3 shows that the cpu read/write signals aren't affected by
                 // the extended cycles so we can just do nothing for these cycles
                 return;
             }
-            if (!_write.IsComplete) {
+            if (!_write.IsComplete)
+            {
                 _write.Clock();
                 return;
             }
@@ -221,12 +226,14 @@ namespace Z80
 
         public bool IsComplete => true;
 
-        public Exchange(Z80Cpu cpu, WideRegister[] registers) {
+        public Exchange(Z80Cpu cpu, WideRegister[] registers)
+        {
             _cpu = cpu;
             _registers = registers;
         }
 
-        public Exchange(Z80Cpu cpu, WideRegister register, WideRegister exchangeRegister = WideRegister.None) : this(cpu, new [] { register }) {
+        public Exchange(Z80Cpu cpu, WideRegister register, WideRegister exchangeRegister = WideRegister.None) : this(cpu, new[] { register })
+        {
             _exchangeRegister = exchangeRegister;
         }
 
@@ -241,20 +248,24 @@ namespace Z80
 
         public void StartExecution()
         {
-            foreach (var register in _registers) {
+            foreach (var register in _registers)
+            {
                 var tempStorage = register.GetValue(_cpu);
                 var exchangeRegister = GetExchangeRegister(register);
                 register.SetValueOnProcessor(_cpu, exchangeRegister.GetValue(_cpu));
                 exchangeRegister.SetValueOnProcessor(_cpu, tempStorage);
             }
         }
-        
-        private WideRegister GetExchangeRegister(WideRegister register) {
-            if (_exchangeRegister != WideRegister.None) {
+
+        private WideRegister GetExchangeRegister(WideRegister register)
+        {
+            if (_exchangeRegister != WideRegister.None)
+            {
                 return _exchangeRegister;
             }
 
-            switch (register) {
+            switch (register)
+            {
                 case WideRegister.AF:
                     return WideRegister.AF_;
                 case WideRegister.BC:
@@ -266,6 +277,110 @@ namespace Z80
                 default:
                     throw new InvalidOperationException("Unexpected register value for exchange");
             }
+        }
+    }
+
+    internal class LoadAndXcrement : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly RegIndirectRead _readCycle;
+        private readonly RegIndirectWrite _writeCycle;
+        private readonly bool _increment;
+        private readonly bool _repeats;
+
+        private int _additionalCycles = 2;
+        private int _additionalRepeatCycles = 5;
+
+        public string Mnemonic => (_increment ? "LDI" : "LDD") + (_repeats ? "R" : "");
+
+        public bool IsComplete { get; private set;}
+
+        public LoadAndXcrement(Z80Cpu cpu, bool increment, bool withRepeat = false)
+        {
+            _cpu = cpu;
+            _increment = increment;
+            _readCycle = new RegIndirectRead(cpu, WideRegister.HL);
+            _writeCycle = new RegIndirectWrite(cpu, WideRegister.DE);
+            _repeats = withRepeat;
+        }
+
+        public void Clock()
+        {
+            // Read from HL pointed address
+            if (!_readCycle.IsComplete)
+            {
+                Console.WriteLine("Read cycle");
+                _readCycle.Clock();
+                if (_readCycle.IsComplete)
+                {
+                    _writeCycle.AddressedValue = _readCycle.AddressedValue;
+                }
+                return;
+            }
+            if (!_writeCycle.IsComplete)
+            {
+                Console.WriteLine("Write cycle");
+                _writeCycle.Clock();
+                return;
+            }
+            if ((!_repeats && --_additionalCycles > 0) || (_repeats && _additionalCycles-- > 0)) // If it's not repeating we need the last cycle of the additional cycles to carry out the instruction
+            {
+                return;
+            }
+
+            var bcValue = WideRegister.BC.GetValue(_cpu);
+            if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0){ // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
+                return;
+            }
+
+            var deValue = WideRegister.DE.GetValue(_cpu);
+            var hlValue = WideRegister.HL.GetValue(_cpu);
+
+            if (_increment)
+            {
+                deValue++;
+                hlValue++;
+            }
+            else
+            {
+                deValue--;
+                hlValue--;
+            }
+
+            WideRegister.DE.SetValueOnProcessor(_cpu, deValue);
+            WideRegister.HL.SetValueOnProcessor(_cpu, hlValue);
+
+            WideRegister.BC.SetValueOnProcessor(_cpu, --bcValue);
+
+            _cpu.Flags &= ~Z80Flags.HalfCarry_H;
+            _cpu.Flags &= ~Z80Flags.AddSubtract_N;
+            if (bcValue == 0)
+            {
+                _cpu.Flags |= Z80Flags.ParityOverflow_PV;
+            }
+            else
+            {
+                _cpu.Flags &= ~Z80Flags.ParityOverflow_PV;
+                if (_repeats)
+                {
+                    
+                    _cpu.PC -= 2;
+                }
+            }
+            IsComplete = true;
+        }
+
+        public void Reset()
+        {
+            _readCycle.Reset();
+            _writeCycle.Reset();
+            _additionalCycles = 2;
+            _additionalRepeatCycles = 5;
+            IsComplete = false;
+        }
+
+        public void StartExecution()
+        {
         }
     }
 }

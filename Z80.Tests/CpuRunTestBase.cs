@@ -10,7 +10,7 @@ namespace Z80.Tests
         public void Setup()
         {
             _cpu.Reset();
-            _ram = new byte[0xffff];
+            _ram = new byte[ushort.MaxValue + 1]; // +1 to account for zeroeth element
         }
 
         protected void RunUntil(int pc)
