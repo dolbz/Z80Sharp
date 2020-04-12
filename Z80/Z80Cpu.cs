@@ -16,6 +16,16 @@ namespace Z80
         Carry_C = 1
     }
 
+    public static class Z80FlagsExtensions {
+        public static void SetOrReset(this Z80Flags flag, Z80Cpu cpu, bool value) {
+            if (value) {
+                cpu.Flags |= flag;
+            } else {
+                cpu.Flags &= ~flag;
+            }
+        }
+    }
+
     public enum Register
     {
         A,

@@ -323,12 +323,13 @@ namespace Z80
                 _writeCycle.Clock();
                 return;
             }
-            if ((!_repeats && --_additionalCycles > 0) || (_repeats && _additionalCycles-- > 0)) // If it's not repeating we need the last cycle of the additional cycles to carry out the instruction
+
+            var bcValue = WideRegister.BC.GetValue(_cpu);
+            if (((!_repeats || bcValue == 1) && --_additionalCycles > 0) || (_repeats && _additionalCycles-- > 0)) // If it's not repeating we need the last cycle of the additional cycles to carry out the instruction
             {
                 return;
             }
 
-            var bcValue = WideRegister.BC.GetValue(_cpu);
             if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0){ // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
                 return;
             }
@@ -352,18 +353,15 @@ namespace Z80
 
             WideRegister.BC.SetValueOnProcessor(_cpu, --bcValue);
 
-            _cpu.Flags &= ~Z80Flags.HalfCarry_H;
-            _cpu.Flags &= ~Z80Flags.AddSubtract_N;
-            if (bcValue == 0)
-            {
-                _cpu.Flags |= Z80Flags.ParityOverflow_PV;
-            }
-            else
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, bcValue == 0);
+            if (bcValue != 0)
             {
                 _cpu.Flags &= ~Z80Flags.ParityOverflow_PV;
                 if (_repeats)
                 {
-                    
                     _cpu.PC -= 2;
                 }
             }

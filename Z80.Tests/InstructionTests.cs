@@ -179,12 +179,23 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0xeda0, 16 });
             generated.Add(new object[] { 0xeda8, 16 });
+
+            // LDIR and LDDR tested separately as the cycle count is variable
             generated.Add(new object[] { 0xedb0, 21 });
             generated.Add(new object[] { 0xedb8, 21 });
 
             #endregion
 
             return generated;
+        }
+
+        [TestCase(0xedb0)]
+        [TestCase(0xedb8)]
+        public void LoadIncOrDecRepeatCycleCount(int opcode) {
+            WideRegister.BC.SetValueOnProcessor(_cpu, 2);
+
+            CycleCounts(opcode, 21);
+            CycleCounts(opcode, 16); // Second time through BC should be 1 going to 0 so only 16 cycles
         }
 
         [TestCaseSource("GenerateCycleCountParams")]
@@ -198,12 +209,8 @@ namespace Z80.Tests
                 tCycleCount = 8;
             }
 
-            if (opcode == 0xedb0 || opcode == 0xedb8) {
-                // Need to special case these two as they run through all of memory otherwise
-                WideRegister.BC.SetValueOnProcessor(_cpu, 2);
-            }
-
             var instruction = _cpu.instructions[opcode];
+            instruction.Reset();
 
             // Act
             while (!instruction.IsComplete)
