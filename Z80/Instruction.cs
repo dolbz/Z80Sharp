@@ -402,14 +402,15 @@ namespace Z80
         {
             if (!_readCycle.IsComplete) {
                 _readCycle.Clock();
-            }
-
-            if ((!_repeats && --_additionalCycles > 0) || (_repeats && _additionalCycles-- > 0)) // If it's not repeating we need the last cycle of the additional cycles to carry out the instruction
-            {
                 return;
             }
 
             var bcValue = WideRegister.BC.GetValue(_cpu);
+            if (((!_repeats || bcValue == 1) && --_additionalCycles > 0) || (_repeats && _additionalCycles-- > 0)) // If it's not repeating we need the last cycle of the additional cycles to carry out the instruction
+            {
+                return;
+            }
+
             if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0){ // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
                 return;
             }

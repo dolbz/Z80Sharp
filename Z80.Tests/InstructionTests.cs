@@ -177,12 +177,17 @@ namespace Z80.Tests
 
             #region Block transfer instructions
 
+            // LDIR and LDDR tested separately as the cycle count is variable
             generated.Add(new object[] { 0xeda0, 16 });
             generated.Add(new object[] { 0xeda8, 16 });
 
-            // LDIR and LDDR tested separately as the cycle count is variable
-            generated.Add(new object[] { 0xedb0, 21 });
-            generated.Add(new object[] { 0xedb8, 21 });
+            #endregion
+
+            #region Block search instructions
+
+            // CPIR and CPDR tested separartely as the cycle count is variable
+            generated.Add(new object[] { 0xeda1, 16 });
+            generated.Add(new object[] { 0xeda9, 16 });
 
             #endregion
 
@@ -192,6 +197,15 @@ namespace Z80.Tests
         [TestCase(0xedb0)]
         [TestCase(0xedb8)]
         public void LoadIncOrDecRepeatCycleCount(int opcode) {
+            WideRegister.BC.SetValueOnProcessor(_cpu, 2);
+
+            CycleCounts(opcode, 21);
+            CycleCounts(opcode, 16); // Second time through BC should be 1 going to 0 so only 16 cycles
+        }
+
+        [TestCase(0xedb1)]
+        [TestCase(0xedb9)]
+        public void CompareIncOrDecRepeatCycleCount(int opcode) {
             WideRegister.BC.SetValueOnProcessor(_cpu, 2);
 
             CycleCounts(opcode, 21);
