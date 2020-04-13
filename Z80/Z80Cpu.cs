@@ -531,7 +531,14 @@ namespace Z80
 
             #endregion
 
+            #region Block search instructions
+            
+            instructions[0xeda1] = new CompareAndXcrement(this, true); // CPI
+            instructions[0xedb1] = new CompareAndXcrement(this, true, withRepeat: true); // CPIR
+            instructions[0xeda9] = new CompareAndXcrement(this, false); // CPD
+            instructions[0xedb9] = new CompareAndXcrement(this, false, withRepeat: true); // CPDR
 
+            #endregion
         }
     }
 }

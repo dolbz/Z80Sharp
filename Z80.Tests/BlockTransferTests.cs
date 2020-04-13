@@ -10,12 +10,12 @@ namespace Z80.Tests
         public void LoadAndIncrementTest()
         {
             // Arrange
-            var sourceAddress = 0xf1bc;
-            var destinationAddress = 0x42d4;
+            ushort sourceAddress = 0xf1bc;
+            ushort destinationAddress = 0x42d4;
 
             _ram[sourceAddress] = 0xf7;
-            WideRegister.HL.SetValueOnProcessor(_cpu, (ushort)sourceAddress);
-            WideRegister.DE.SetValueOnProcessor(_cpu, (ushort)destinationAddress);
+            WideRegister.HL.SetValueOnProcessor(_cpu, sourceAddress);
+            WideRegister.DE.SetValueOnProcessor(_cpu, destinationAddress);
             WideRegister.BC.SetValueOnProcessor(_cpu, 10);
 
             _ram[0] = 0xed;
