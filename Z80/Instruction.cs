@@ -458,4 +458,54 @@ namespace Z80
         {
         }
     }
+
+    internal class Add : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly IReadAddressedOperand<byte> _readOperand;
+        private readonly bool _withCarry;
+
+        public string Mnemonic => _withCarry ? "ADC" : "ADD";
+
+        public bool IsComplete => _readOperand.IsComplete;
+
+        public Add(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false) {
+            _cpu = cpu;
+            _readOperand = readOperand;
+            _withCarry = withCarry;
+        }
+
+        public void Clock()
+        {
+            if (!_readOperand.IsComplete) {
+                _readOperand.Clock();
+                if (_readOperand.IsComplete) {
+                    PerformAdd();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _readOperand.Reset();
+        }
+
+        public void StartExecution()
+        {
+            if (_readOperand.IsComplete) {
+                PerformAdd();
+            }
+        }
+
+        private void PerformAdd() {
+            var result = _cpu.A + _readOperand.AddressedValue;
+            Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
+            Z80Flags.Carry_C.SetOrReset(_cpu, result > 0xff);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 0x7f);
+            Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0xf) + (_readOperand.AddressedValue & 0xf)) & 0x10) == 0x10);
+            _cpu.A = (byte)(0xff & result);
+        }
+    }
 }

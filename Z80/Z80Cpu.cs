@@ -539,6 +539,25 @@ namespace Z80
             instructions[0xedb9] = new CompareAndXcrement(this, false, withRepeat: true); // CPDR
 
             #endregion
+
+            #region 8-bit arithmetic and logic
+
+            instructions[0x87] = new Add(this, new RegAddrMode8Bit(this, Register.A)); // ADD A, A
+            instructions[0x80] = new Add(this, new RegAddrMode8Bit(this, Register.B)); // ADD A, B
+            instructions[0x81] = new Add(this, new RegAddrMode8Bit(this, Register.C)); // ADD A, C
+            instructions[0x82] = new Add(this, new RegAddrMode8Bit(this, Register.D)); // ADD A, D
+            instructions[0x83] = new Add(this, new RegAddrMode8Bit(this, Register.E)); // ADD A, E
+            instructions[0x84] = new Add(this, new RegAddrMode8Bit(this, Register.H)); // ADD A, H
+            instructions[0x85] = new Add(this, new RegAddrMode8Bit(this, Register.L)); // ADD A, L
+
+            instructions[0x86] = new Add(this, new RegIndirectRead(this, WideRegister.HL)); // ADD A, (HL)
+
+            instructions[0xdd86] = new Add(this, new IndexedRead(this, WideRegister.IX)); // ADD A, (IX+d)
+            instructions[0xfd86] = new Add(this, new IndexedRead(this, WideRegister.IY)); // ADD A, (IY+d)
+
+            instructions[0xc6] = new Add(this, new ImmediateOperand(this)); // ADD A, n
+
+            #endregion
         }
     }
 }

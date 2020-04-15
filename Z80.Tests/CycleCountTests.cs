@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Z80.Tests
 {
-    public class InstructionTests
+    public class CycleCountTests
     {
         private Z80Cpu _cpu;
 
@@ -188,6 +188,21 @@ namespace Z80.Tests
             // CPIR and CPDR tested separartely as the cycle count is variable
             generated.Add(new object[] { 0xeda1, 16 });
             generated.Add(new object[] { 0xeda9, 16 });
+
+            #endregion
+
+            #region 8-bit arithmetic and logic
+
+            for (int i = 0x80; i < 0x88; i++) {
+                if (i == 0x86) {
+                    generated.Add(new object[] { i, 7}); // ADD A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // ADD A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd86, 19 }); // ADD A, (IX+d)
+            generated.Add(new object[] { 0xfd86, 19 }); // ADD A, (IY+d)
 
             #endregion
 
