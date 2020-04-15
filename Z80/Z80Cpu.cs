@@ -557,6 +557,22 @@ namespace Z80
 
             instructions[0xc6] = new Add(this, new ImmediateOperand(this)); // ADD A, n
 
+
+            instructions[0x8f] = new Add(this, new RegAddrMode8Bit(this, Register.A), true); // ADC A, B
+            instructions[0x88] = new Add(this, new RegAddrMode8Bit(this, Register.B), true); // ADC A, B
+            instructions[0x89] = new Add(this, new RegAddrMode8Bit(this, Register.C), true); // ADC A, C
+            instructions[0x8a] = new Add(this, new RegAddrMode8Bit(this, Register.D), true); // ADC A, D
+            instructions[0x8b] = new Add(this, new RegAddrMode8Bit(this, Register.E), true); // ADC A, E
+            instructions[0x8c] = new Add(this, new RegAddrMode8Bit(this, Register.H), true); // ADC A, H
+            instructions[0x8d] = new Add(this, new RegAddrMode8Bit(this, Register.L), true); // ADC A, L
+
+            instructions[0x8e] = new Add(this, new RegIndirectRead(this, WideRegister.HL), true); // ADC A, (HL)
+
+            instructions[0xdd8e] = new Add(this, new IndexedRead(this, WideRegister.IX), true); // ADC A, (IX+d)
+            instructions[0xfd8e] = new Add(this, new IndexedRead(this, WideRegister.IY), true); // ADC A, (IY+d)
+
+            instructions[0xce] = new Add(this, new ImmediateOperand(this), true); // ADC A, n
+
             #endregion
         }
     }

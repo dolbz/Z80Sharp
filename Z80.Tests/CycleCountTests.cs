@@ -204,6 +204,22 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xdd86, 19 }); // ADD A, (IX+d)
             generated.Add(new object[] { 0xfd86, 19 }); // ADD A, (IY+d)
 
+            generated.Add(new object[] { 0xc6, 7 }); // ADD A, n
+
+
+            for (int i = 0x88; i < 0x90; i++) {
+                if (i == 0x8e) {
+                    generated.Add(new object[] { i, 7}); // ADC A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // ADC A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd8e, 19 }); // ADC A, (IX+d)
+            generated.Add(new object[] { 0xfd8e, 19 }); // ADC A, (IY+d)
+
+            generated.Add(new object[] { 0xce, 7 }); // ADC A, n
+
             #endregion
 
             return generated;
