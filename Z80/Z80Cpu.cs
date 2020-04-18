@@ -605,6 +605,23 @@ namespace Z80
 
             instructions[0xde] = new Subtract(this, new ImmediateOperand(this), true); // SBC A, n
 
+
+            instructions[0xa7] = new AND(this, new RegAddrMode8Bit(this, Register.A)); // AND A, B
+            instructions[0xa0] = new AND(this, new RegAddrMode8Bit(this, Register.B)); // AND A, B
+            instructions[0xa1] = new AND(this, new RegAddrMode8Bit(this, Register.C)); // AND A, C
+            instructions[0xa2] = new AND(this, new RegAddrMode8Bit(this, Register.D)); // AND A, D
+            instructions[0xa3] = new AND(this, new RegAddrMode8Bit(this, Register.E)); // AND A, E
+            instructions[0xa4] = new AND(this, new RegAddrMode8Bit(this, Register.H)); // AND A, H
+            instructions[0xa5] = new AND(this, new RegAddrMode8Bit(this, Register.L)); // AND A, L
+
+            instructions[0xa6] = new AND(this, new RegIndirectRead(this, WideRegister.HL)); // AND A, (HL)
+
+            instructions[0xdda6] = new AND(this, new IndexedRead(this, WideRegister.IX)); // AND A, (IX+d)
+            instructions[0xfda6] = new AND(this, new IndexedRead(this, WideRegister.IY)); // AND A, (IY+d)
+
+            instructions[0xe6] = new AND(this, new ImmediateOperand(this)); // AND A, n
+
+            
             #endregion
         }
     }

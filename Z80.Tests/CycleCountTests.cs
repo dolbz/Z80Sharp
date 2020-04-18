@@ -248,6 +248,20 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0xde, 7 }); // SBC A, n
 
+
+            for (int i = 0xa0; i < 0xa8; i++) {
+                if (i == 0xa6) {
+                    generated.Add(new object[] { i, 7}); // AND A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // AND A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xdda6, 19 }); // AND A, (IX+d)
+            generated.Add(new object[] { 0xfda6, 19 }); // AND A, (IY+d)
+
+            generated.Add(new object[] { 0xe6, 7 }); // AND A, n
+
             #endregion
 
             return generated;

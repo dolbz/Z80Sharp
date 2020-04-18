@@ -566,4 +566,52 @@ namespace Z80
             _cpu.A = (byte)(0xff & result);
         }
     }
+
+    internal class AND : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly IReadAddressedOperand<byte> _readOperand;
+
+        public string Mnemonic =>  "AND";
+
+        public bool IsComplete => _readOperand.IsComplete;
+
+        public AND(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand) {
+            _cpu = cpu;
+            _readOperand = readOperand;
+        }
+
+        public void Clock()
+        {
+            if (!_readOperand.IsComplete) {
+                _readOperand.Clock();
+                if (_readOperand.IsComplete) {
+                    PerformAND();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _readOperand.Reset();
+        }
+
+        public void StartExecution()
+        {
+            if (_readOperand.IsComplete) {
+                PerformAND();
+            }
+        }
+
+        private void PerformAND() {
+            var result = _cpu.A & _readOperand.AddressedValue;
+            Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
+            Z80Flags.Carry_C.SetOrReset(_cpu, false);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A & 0x80) != (result & 0x80));
+            Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, true);
+            _cpu.A = (byte)(0xff & result);
+        }
+    }
 }
