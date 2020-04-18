@@ -104,8 +104,6 @@ namespace Z80.Tests
             _ram[0] = 0xed;
             _ram[1] = 0xa1;
 
-            ushort searchAddress = 0x19da;
-
             var rnd = new Random();
             var randomState = rnd.Next(2) == 0;
 

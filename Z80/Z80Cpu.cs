@@ -573,6 +573,38 @@ namespace Z80
 
             instructions[0xce] = new Add(this, new ImmediateOperand(this), true); // ADC A, n
 
+
+            instructions[0x97] = new Subtract(this, new RegAddrMode8Bit(this, Register.A)); // SUB A, A
+            instructions[0x90] = new Subtract(this, new RegAddrMode8Bit(this, Register.B)); // SUB A, B
+            instructions[0x91] = new Subtract(this, new RegAddrMode8Bit(this, Register.C)); // SUB A, C
+            instructions[0x92] = new Subtract(this, new RegAddrMode8Bit(this, Register.D)); // SUB A, D
+            instructions[0x93] = new Subtract(this, new RegAddrMode8Bit(this, Register.E)); // SUB A, E
+            instructions[0x94] = new Subtract(this, new RegAddrMode8Bit(this, Register.H)); // SUB A, H
+            instructions[0x95] = new Subtract(this, new RegAddrMode8Bit(this, Register.L)); // SUB A, L
+
+            instructions[0x96] = new Subtract(this, new RegIndirectRead(this, WideRegister.HL)); // SUB A, (HL)
+
+            instructions[0xdd96] = new Subtract(this, new IndexedRead(this, WideRegister.IX)); // SUB A, (IX+d)
+            instructions[0xfd96] = new Subtract(this, new IndexedRead(this, WideRegister.IY)); // SUB A, (IY+d)
+
+            instructions[0xd6] = new Subtract(this, new ImmediateOperand(this)); // SUB A, n
+
+
+            instructions[0x9f] = new Subtract(this, new RegAddrMode8Bit(this, Register.A), true); // SBC A, B
+            instructions[0x98] = new Subtract(this, new RegAddrMode8Bit(this, Register.B), true); // SBC A, B
+            instructions[0x99] = new Subtract(this, new RegAddrMode8Bit(this, Register.C), true); // SBC A, C
+            instructions[0x9a] = new Subtract(this, new RegAddrMode8Bit(this, Register.D), true); // SBC A, D
+            instructions[0x9b] = new Subtract(this, new RegAddrMode8Bit(this, Register.E), true); // SBC A, E
+            instructions[0x9c] = new Subtract(this, new RegAddrMode8Bit(this, Register.H), true); // SBC A, H
+            instructions[0x9d] = new Subtract(this, new RegAddrMode8Bit(this, Register.L), true); // SBC A, L
+
+            instructions[0x9e] = new Subtract(this, new RegIndirectRead(this, WideRegister.HL), true); // SBC A, (HL)
+
+            instructions[0xdd9e] = new Subtract(this, new IndexedRead(this, WideRegister.IX), true); // SBC A, (IX+d)
+            instructions[0xfd9e] = new Subtract(this, new IndexedRead(this, WideRegister.IY), true); // SBC A, (IY+d)
+
+            instructions[0xde] = new Subtract(this, new ImmediateOperand(this), true); // SBC A, n
+
             #endregion
         }
     }

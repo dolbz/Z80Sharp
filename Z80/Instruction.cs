@@ -505,10 +505,64 @@ namespace Z80
             var result = _cpu.A + _readOperand.AddressedValue + carryIn;
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
             Z80Flags.Carry_C.SetOrReset(_cpu, result > 0xff);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 0x7f);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A & 0x80) != (result & 0x80));
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
-            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0xf) + (_readOperand.AddressedValue & 0xf) + carryIn) & 0x10) == 0x10);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0x1f) - (_readOperand.AddressedValue & 0xf) - carryIn) & 0x10) == 0);
+            _cpu.A = (byte)(0xff & result);
+        }
+    }
+
+    internal class Subtract : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly IReadAddressedOperand<byte> _readOperand;
+        private readonly bool _withCarry;
+
+        public string Mnemonic => _withCarry ? "SBC" : "SUB";
+
+        public bool IsComplete => _readOperand.IsComplete;
+
+        public Subtract(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false) {
+            _cpu = cpu;
+            _readOperand = readOperand;
+            _withCarry = withCarry;
+        }
+
+        public void Clock()
+        {
+            if (!_readOperand.IsComplete) {
+                _readOperand.Clock();
+                if (_readOperand.IsComplete) {
+                    PerformSubtraction();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _readOperand.Reset();
+        }
+
+        public void StartExecution()
+        {
+            if (_readOperand.IsComplete) {
+                PerformSubtraction();
+            }
+        }
+
+        private void PerformSubtraction() {
+            var carryIn = 0;
+            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C)) {
+                carryIn = 1;
+            }
+            var result = _cpu.A - _readOperand.AddressedValue - carryIn;
+            Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
+            Z80Flags.Carry_C.SetOrReset(_cpu, result < 0);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A & 0x80) != (result & 0x80));
+            Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, true);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0xf) - (_readOperand.AddressedValue & 0xf) - carryIn) & 0x10) == 0x10);
             _cpu.A = (byte)(0xff & result);
         }
     }

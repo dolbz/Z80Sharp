@@ -220,6 +220,34 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0xce, 7 }); // ADC A, n
 
+
+            for (int i = 0x90; i < 0x98; i++) {
+                if (i == 0x96) {
+                    generated.Add(new object[] { i, 7}); // SUB A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // SUB A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd96, 19 }); // SUB A, (IX+d)
+            generated.Add(new object[] { 0xfd96, 19 }); // SUB A, (IY+d)
+
+            generated.Add(new object[] { 0xd6, 7 }); // SUB A, n
+
+
+            for (int i = 0x98; i < 0xa0; i++) {
+                if (i == 0x9e) {
+                    generated.Add(new object[] { i, 7}); // SBC A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // SBC A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd9e, 19 }); // SBC A, (IX+d)
+            generated.Add(new object[] { 0xfd9e, 19 }); // SBC A, (IY+d)
+
+            generated.Add(new object[] { 0xde, 7 }); // SBC A, n
+
             #endregion
 
             return generated;
