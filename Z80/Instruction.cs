@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using System;
 using System.Diagnostics;
 namespace Z80
@@ -12,6 +13,17 @@ namespace Z80
         // fetch cycle can be started immediately. Otherwise the IInstruction object
         // receives future Clock() invocations until IsComplete returns true 
         void StartExecution();
+    }
+
+    internal static class ByteExtensions
+    {
+        public static bool IsEvenParity(this byte value)
+        {
+            value ^= (byte)(value >> 4);
+            value ^= (byte)(value >> 2);
+            value ^= (byte)(value >> 1);
+            return (value & 0x1) == 0;
+        }
     }
 
     internal class NOP : IInstruction
@@ -293,7 +305,7 @@ namespace Z80
 
         public string Mnemonic => (_increment ? "LDI" : "LDD") + (_repeats ? "R" : "");
 
-        public bool IsComplete { get; private set;}
+        public bool IsComplete { get; private set; }
 
         public LoadAndXcrement(Z80Cpu cpu, bool increment, bool withRepeat = false)
         {
@@ -330,7 +342,8 @@ namespace Z80
                 return;
             }
 
-            if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0){ // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
+            if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0)
+            { // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
                 return;
             }
 
@@ -387,11 +400,12 @@ namespace Z80
 
         private int _additionalCycles = 5;
         private int _additionalRepeatCycles = 5;
-        
+
         public string Mnemonic => (_increment ? "CPI" : "CPD") + (_repeats ? "R" : "");
         public bool IsComplete { get; private set; }
 
-        public CompareAndXcrement(Z80Cpu cpu, bool increment, bool withRepeat = false) {
+        public CompareAndXcrement(Z80Cpu cpu, bool increment, bool withRepeat = false)
+        {
             _cpu = cpu;
             _increment = increment;
             _repeats = withRepeat;
@@ -400,7 +414,8 @@ namespace Z80
 
         public void Clock()
         {
-            if (!_readCycle.IsComplete) {
+            if (!_readCycle.IsComplete)
+            {
                 _readCycle.Clock();
                 return;
             }
@@ -411,7 +426,8 @@ namespace Z80
                 return;
             }
 
-            if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0){ // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
+            if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0)
+            { // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
                 return;
             }
 
@@ -469,7 +485,8 @@ namespace Z80
 
         public bool IsComplete => _readOperand.IsComplete;
 
-        public Add(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false) {
+        public Add(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false)
+        {
             _cpu = cpu;
             _readOperand = readOperand;
             _withCarry = withCarry;
@@ -477,9 +494,11 @@ namespace Z80
 
         public void Clock()
         {
-            if (!_readOperand.IsComplete) {
+            if (!_readOperand.IsComplete)
+            {
                 _readOperand.Clock();
-                if (_readOperand.IsComplete) {
+                if (_readOperand.IsComplete)
+                {
                     PerformAdd();
                 }
             }
@@ -492,14 +511,17 @@ namespace Z80
 
         public void StartExecution()
         {
-            if (_readOperand.IsComplete) {
+            if (_readOperand.IsComplete)
+            {
                 PerformAdd();
             }
         }
 
-        private void PerformAdd() {
+        private void PerformAdd()
+        {
             var carryIn = 0;
-            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C)) {
+            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C))
+            {
                 carryIn = 1;
             }
             var result = _cpu.A + _readOperand.AddressedValue + carryIn;
@@ -513,27 +535,46 @@ namespace Z80
         }
     }
 
-    internal class Subtract : IInstruction
+    internal class SubtractOrCompare : IInstruction
     {
         private readonly Z80Cpu _cpu;
         private readonly IReadAddressedOperand<byte> _readOperand;
         private readonly bool _withCarry;
 
-        public string Mnemonic => _withCarry ? "SBC" : "SUB";
+        private readonly bool _updateAccumulator;
+
+        public string Mnemonic
+        {
+            get
+            {
+                if (_updateAccumulator)
+                {
+                    return _withCarry ? "SBC" : "SUB";
+                }
+                else
+                {
+                    return "CP";
+                }
+            }
+        }
 
         public bool IsComplete => _readOperand.IsComplete;
 
-        public Subtract(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false) {
+        public SubtractOrCompare(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand, bool withCarry = false, bool updateAccumulator = true)
+        {
             _cpu = cpu;
             _readOperand = readOperand;
             _withCarry = withCarry;
+            _updateAccumulator = updateAccumulator;
         }
 
         public void Clock()
         {
-            if (!_readOperand.IsComplete) {
+            if (!_readOperand.IsComplete)
+            {
                 _readOperand.Clock();
-                if (_readOperand.IsComplete) {
+                if (_readOperand.IsComplete)
+                {
                     PerformSubtraction();
                 }
             }
@@ -546,24 +587,30 @@ namespace Z80
 
         public void StartExecution()
         {
-            if (_readOperand.IsComplete) {
+            if (_readOperand.IsComplete)
+            {
                 PerformSubtraction();
             }
         }
 
-        private void PerformSubtraction() {
+        private void PerformSubtraction()
+        {
             var carryIn = 0;
-            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C)) {
+            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C))
+            {
                 carryIn = 1;
             }
             var result = _cpu.A - _readOperand.AddressedValue - carryIn;
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
             Z80Flags.Carry_C.SetOrReset(_cpu, result < 0);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A & 0x80) != (result & 0x80));
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result < -128 || result > 127);
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, true);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0xf) - (_readOperand.AddressedValue & 0xf) - carryIn) & 0x10) == 0x10);
-            _cpu.A = (byte)(0xff & result);
+            if (_updateAccumulator)
+            {
+                _cpu.A = (byte)(0xff & result);
+            }
         }
     }
 
@@ -572,20 +619,23 @@ namespace Z80
         private readonly Z80Cpu _cpu;
         private readonly IReadAddressedOperand<byte> _readOperand;
 
-        public string Mnemonic =>  "AND";
+        public string Mnemonic => "AND";
 
         public bool IsComplete => _readOperand.IsComplete;
 
-        public AND(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand) {
+        public AND(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand)
+        {
             _cpu = cpu;
             _readOperand = readOperand;
         }
 
         public void Clock()
         {
-            if (!_readOperand.IsComplete) {
+            if (!_readOperand.IsComplete)
+            {
                 _readOperand.Clock();
-                if (_readOperand.IsComplete) {
+                if (_readOperand.IsComplete)
+                {
                     PerformAND();
                 }
             }
@@ -598,20 +648,128 @@ namespace Z80
 
         public void StartExecution()
         {
-            if (_readOperand.IsComplete) {
+            if (_readOperand.IsComplete)
+            {
                 PerformAND();
             }
         }
 
-        private void PerformAND() {
-            var result = _cpu.A & _readOperand.AddressedValue;
+        private void PerformAND()
+        {
+            var result = (byte)(_cpu.A & _readOperand.AddressedValue);
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
             Z80Flags.Carry_C.SetOrReset(_cpu, false);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A & 0x80) != (result & 0x80));
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result.IsEvenParity());
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, true);
+            _cpu.A = result;
+        }
+    }
+
+    internal class OR : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly IReadAddressedOperand<byte> _readOperand;
+
+        public string Mnemonic => "OR";
+
+        public bool IsComplete => _readOperand.IsComplete;
+
+        public OR(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand)
+        {
+            _cpu = cpu;
+            _readOperand = readOperand;
+        }
+
+        public void Clock()
+        {
+            if (!_readOperand.IsComplete)
+            {
+                _readOperand.Clock();
+                if (_readOperand.IsComplete)
+                {
+                    PerformOR();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _readOperand.Reset();
+        }
+
+        public void StartExecution()
+        {
+            if (_readOperand.IsComplete)
+            {
+                PerformOR();
+            }
+        }
+
+        private void PerformOR()
+        {
+            byte result = (byte)(_cpu.A | _readOperand.AddressedValue);
+            Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
+            Z80Flags.Carry_C.SetOrReset(_cpu, false);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result.IsEvenParity());
+            Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
             _cpu.A = (byte)(0xff & result);
+        }
+    }
+
+    internal class XOR : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly IReadAddressedOperand<byte> _readOperand;
+
+        public string Mnemonic => "XOR";
+
+        public bool IsComplete => _readOperand.IsComplete;
+
+        public XOR(Z80Cpu cpu, IReadAddressedOperand<byte> readOperand)
+        {
+            _cpu = cpu;
+            _readOperand = readOperand;
+        }
+
+        public void Clock()
+        {
+            if (!_readOperand.IsComplete)
+            {
+                _readOperand.Clock();
+                if (_readOperand.IsComplete)
+                {
+                    PerformXOR();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            _readOperand.Reset();
+        }
+
+        public void StartExecution()
+        {
+            if (_readOperand.IsComplete)
+            {
+                PerformXOR();
+            }
+        }
+
+        private void PerformXOR()
+        {
+            byte result = (byte)(_cpu.A ^ _readOperand.AddressedValue);
+            Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
+            Z80Flags.Carry_C.SetOrReset(_cpu, false);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result.IsEvenParity());
+            Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
+            _cpu.A = result;
         }
     }
 }

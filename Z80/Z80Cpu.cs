@@ -574,36 +574,36 @@ namespace Z80
             instructions[0xce] = new Add(this, new ImmediateOperand(this), true); // ADC A, n
 
 
-            instructions[0x97] = new Subtract(this, new RegAddrMode8Bit(this, Register.A)); // SUB A, A
-            instructions[0x90] = new Subtract(this, new RegAddrMode8Bit(this, Register.B)); // SUB A, B
-            instructions[0x91] = new Subtract(this, new RegAddrMode8Bit(this, Register.C)); // SUB A, C
-            instructions[0x92] = new Subtract(this, new RegAddrMode8Bit(this, Register.D)); // SUB A, D
-            instructions[0x93] = new Subtract(this, new RegAddrMode8Bit(this, Register.E)); // SUB A, E
-            instructions[0x94] = new Subtract(this, new RegAddrMode8Bit(this, Register.H)); // SUB A, H
-            instructions[0x95] = new Subtract(this, new RegAddrMode8Bit(this, Register.L)); // SUB A, L
+            instructions[0x97] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A)); // SUB A, A
+            instructions[0x90] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B)); // SUB A, B
+            instructions[0x91] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.C)); // SUB A, C
+            instructions[0x92] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.D)); // SUB A, D
+            instructions[0x93] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E)); // SUB A, E
+            instructions[0x94] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H)); // SUB A, H
+            instructions[0x95] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L)); // SUB A, L
 
-            instructions[0x96] = new Subtract(this, new RegIndirectRead(this, WideRegister.HL)); // SUB A, (HL)
+            instructions[0x96] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL)); // SUB A, (HL)
 
-            instructions[0xdd96] = new Subtract(this, new IndexedRead(this, WideRegister.IX)); // SUB A, (IX+d)
-            instructions[0xfd96] = new Subtract(this, new IndexedRead(this, WideRegister.IY)); // SUB A, (IY+d)
+            instructions[0xdd96] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX)); // SUB A, (IX+d)
+            instructions[0xfd96] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY)); // SUB A, (IY+d)
 
-            instructions[0xd6] = new Subtract(this, new ImmediateOperand(this)); // SUB A, n
+            instructions[0xd6] = new SubtractOrCompare(this, new ImmediateOperand(this)); // SUB A, n
 
 
-            instructions[0x9f] = new Subtract(this, new RegAddrMode8Bit(this, Register.A), true); // SBC A, B
-            instructions[0x98] = new Subtract(this, new RegAddrMode8Bit(this, Register.B), true); // SBC A, B
-            instructions[0x99] = new Subtract(this, new RegAddrMode8Bit(this, Register.C), true); // SBC A, C
-            instructions[0x9a] = new Subtract(this, new RegAddrMode8Bit(this, Register.D), true); // SBC A, D
-            instructions[0x9b] = new Subtract(this, new RegAddrMode8Bit(this, Register.E), true); // SBC A, E
-            instructions[0x9c] = new Subtract(this, new RegAddrMode8Bit(this, Register.H), true); // SBC A, H
-            instructions[0x9d] = new Subtract(this, new RegAddrMode8Bit(this, Register.L), true); // SBC A, L
+            instructions[0x9f] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A), true); // SBC A, B
+            instructions[0x98] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B), true); // SBC A, B
+            instructions[0x99] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.C), true); // SBC A, C
+            instructions[0x9a] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.D), true); // SBC A, D
+            instructions[0x9b] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E), true); // SBC A, E
+            instructions[0x9c] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H), true); // SBC A, H
+            instructions[0x9d] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L), true); // SBC A, L
 
-            instructions[0x9e] = new Subtract(this, new RegIndirectRead(this, WideRegister.HL), true); // SBC A, (HL)
+            instructions[0x9e] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL), true); // SBC A, (HL)
 
-            instructions[0xdd9e] = new Subtract(this, new IndexedRead(this, WideRegister.IX), true); // SBC A, (IX+d)
-            instructions[0xfd9e] = new Subtract(this, new IndexedRead(this, WideRegister.IY), true); // SBC A, (IY+d)
+            instructions[0xdd9e] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX), true); // SBC A, (IX+d)
+            instructions[0xfd9e] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY), true); // SBC A, (IY+d)
 
-            instructions[0xde] = new Subtract(this, new ImmediateOperand(this), true); // SBC A, n
+            instructions[0xde] = new SubtractOrCompare(this, new ImmediateOperand(this), true); // SBC A, n
 
 
             instructions[0xa7] = new AND(this, new RegAddrMode8Bit(this, Register.A)); // AND A, B
@@ -621,7 +621,53 @@ namespace Z80
 
             instructions[0xe6] = new AND(this, new ImmediateOperand(this)); // AND A, n
 
-            
+
+            instructions[0xaf] = new XOR(this, new RegAddrMode8Bit(this, Register.A)); // XOR A, B
+            instructions[0xa8] = new XOR(this, new RegAddrMode8Bit(this, Register.B)); // XOR A, B
+            instructions[0xa9] = new XOR(this, new RegAddrMode8Bit(this, Register.C)); // XOR A, C
+            instructions[0xaa] = new XOR(this, new RegAddrMode8Bit(this, Register.D)); // XOR A, D
+            instructions[0xab] = new XOR(this, new RegAddrMode8Bit(this, Register.E)); // XOR A, E
+            instructions[0xac] = new XOR(this, new RegAddrMode8Bit(this, Register.H)); // XOR A, H
+            instructions[0xad] = new XOR(this, new RegAddrMode8Bit(this, Register.L)); // XOR A, L
+
+            instructions[0xae] = new XOR(this, new RegIndirectRead(this, WideRegister.HL)); // XOR A, (HL)
+
+            instructions[0xddae] = new XOR(this, new IndexedRead(this, WideRegister.IX)); // XOR A, (IX+d)
+            instructions[0xfdae] = new XOR(this, new IndexedRead(this, WideRegister.IY)); // XOR A, (IY+d)
+
+            instructions[0xee] = new XOR(this, new ImmediateOperand(this)); // XOR A, n
+
+
+            instructions[0xb7] = new OR(this, new RegAddrMode8Bit(this, Register.A)); // OR A, B
+            instructions[0xb0] = new OR(this, new RegAddrMode8Bit(this, Register.B)); // OR A, B
+            instructions[0xb1] = new OR(this, new RegAddrMode8Bit(this, Register.C)); // OR A, C
+            instructions[0xb2] = new OR(this, new RegAddrMode8Bit(this, Register.D)); // OR A, D
+            instructions[0xb3] = new OR(this, new RegAddrMode8Bit(this, Register.E)); // OR A, E
+            instructions[0xb4] = new OR(this, new RegAddrMode8Bit(this, Register.H)); // OR A, H
+            instructions[0xb5] = new OR(this, new RegAddrMode8Bit(this, Register.L)); // OR A, L
+
+            instructions[0xb6] = new OR(this, new RegIndirectRead(this, WideRegister.HL)); // OR A, (HL)
+
+            instructions[0xddb6] = new OR(this, new IndexedRead(this, WideRegister.IX)); // OR A, (IX+d)
+            instructions[0xfdb6] = new OR(this, new IndexedRead(this, WideRegister.IY)); // OR A, (IY+d)
+
+            instructions[0xf6] = new OR(this, new ImmediateOperand(this)); // OR A, n
+
+
+            instructions[0xbf] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A), updateAccumulator: false); // CP A, B
+            instructions[0xb8] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B), updateAccumulator: false); // CP A, B
+            instructions[0xb9] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.C), updateAccumulator: false); // CP A, C
+            instructions[0xba] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.D), updateAccumulator: false); // CP A, D
+            instructions[0xbb] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E), updateAccumulator: false); // CP A, E
+            instructions[0xbc] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H), updateAccumulator: false); // CP A, H
+            instructions[0xbd] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L), updateAccumulator: false); // CP A, L
+
+            instructions[0xbe] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL), updateAccumulator: false); // CP A, (HL)
+
+            instructions[0xddbe] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX), updateAccumulator: false); // CP A, (IX+d)
+            instructions[0xfdbe] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY), updateAccumulator: false); // CP A, (IY+d)
+
+            instructions[0xfe] = new SubtractOrCompare(this, new ImmediateOperand(this), updateAccumulator: false); // CP A, n
             #endregion
         }
     }

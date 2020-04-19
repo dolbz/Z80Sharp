@@ -62,7 +62,7 @@ namespace Z80.Tests
             _ram[0] = 0xdd;
             _ram[1] = 0x86;
             _ram[2] = 3;
-            _ram[pointerAddress+3] = 58;
+            _ram[pointerAddress + 3] = 58;
 
             _cpu.A = 12;
             WideRegister.IX.SetValueOnProcessor(_cpu, pointerAddress);
@@ -74,7 +74,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithOverflowSetsOverflowAndNegativeFlags() {
+        public void AddWithOverflowSetsOverflowAndNegativeFlags()
+        {
             // Arrange
             _ram[0] = 0x84;
 
@@ -88,9 +89,10 @@ namespace Z80.Tests
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
         }
-        
+
         [Test]
-        public void AddWithZeroResultSetsZeroFlagAndCarryFlag() {
+        public void AddWithZeroResultSetsZeroFlagAndCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x82;
 
@@ -107,7 +109,8 @@ namespace Z80.Tests
 
 
         [Test]
-        public void AddWithHalfCarrySetsHalfCarryFlag() {
+        public void AddWithHalfCarrySetsHalfCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x82;
 
@@ -204,7 +207,7 @@ namespace Z80.Tests
             _ram[0] = 0xfd;
             _ram[1] = 0x8e;
             _ram[2] = 5;
-            _ram[pointerAddress+5] = 110;
+            _ram[pointerAddress + 5] = 110;
 
             _cpu.A = 56;
             WideRegister.IY.SetValueOnProcessor(_cpu, pointerAddress);
@@ -218,7 +221,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithOverflowSetsOverflowAndNegativeFlags() {
+        public void AddWithOverflowSetsOverflowAndNegativeFlags()
+        {
             // Arrange
             _ram[0] = 0x89;
 
@@ -226,7 +230,7 @@ namespace Z80.Tests
             _cpu.C = 1;
             _cpu.Flags = 0;
             Z80Flags.Carry_C.SetOrReset(_cpu, true);
-            
+
             // Act
             RunUntil(2);
 
@@ -234,9 +238,10 @@ namespace Z80.Tests
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
         }
-        
+
         [Test]
-        public void AddWithZeroResultSetsZeroFlagAndCarryFlag() {
+        public void AddWithZeroResultSetsZeroFlagAndCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x8a;
 
@@ -253,7 +258,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithHalfCarrySetsHalfCarryFlag() {
+        public void AddWithHalfCarrySetsHalfCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x8a;
 
@@ -329,7 +335,7 @@ namespace Z80.Tests
             _ram[0] = 0xdd;
             _ram[1] = 0x96;
             _ram[2] = 5;
-            _ram[pointerAddress+5] = 22;
+            _ram[pointerAddress + 5] = 22;
 
             _cpu.A = 127;
             WideRegister.IX.SetValueOnProcessor(_cpu, pointerAddress);
@@ -341,7 +347,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithOverflowSetsOverflowAndNegativeFlags() {
+        public void SubtractWithOverflowSetsOverflowAndNegativeFlags()
+        {
             // Arrange
             _ram[0] = 0x94;
 
@@ -355,9 +362,10 @@ namespace Z80.Tests
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
         }
-        
+
         [Test]
-        public void SubtractWithZeroResultSetsZeroFlag() {
+        public void SubtractWithZeroResultSetsZeroFlag()
+        {
             // Arrange
             _ram[0] = 0x92;
 
@@ -373,7 +381,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithLessThanZeroResultSetsCarryFlag() {
+        public void SubtractWithLessThanZeroResultSetsCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x92;
 
@@ -389,7 +398,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithHalfCarrySetsHalfCarryFlag() {
+        public void SubtractWithHalfCarrySetsHalfCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x92;
 
@@ -487,7 +497,7 @@ namespace Z80.Tests
             _ram[0] = 0xfd;
             _ram[1] = 0x9e;
             _ram[2] = 9;
-            _ram[pointerAddress+9] = 12;
+            _ram[pointerAddress + 9] = 12;
 
             _cpu.A = 87;
             WideRegister.IY.SetValueOnProcessor(_cpu, pointerAddress);
@@ -501,7 +511,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithCarryInWithOverflowSetsOverflowAndNegativeFlags() {
+        public void SubtractWithCarryInWithOverflowSetsOverflowAndNegativeFlags()
+        {
             // Arrange
             _ram[0] = 0x99;
 
@@ -518,9 +529,10 @@ namespace Z80.Tests
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S), Is.Not.True);
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
         }
-        
+
         [Test]
-        public void SubtractWithCarryInWithZeroResultSetsZeroFlagAndCarryFlag() {
+        public void SubtractWithCarryInWithZeroResultSetsZeroFlagAndCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x9a;
 
@@ -536,7 +548,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithCarryInWithLessThanZeroResultSetsCarryFlag() {
+        public void SubtractWithCarryInWithLessThanZeroResultSetsCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x9a;
 
@@ -553,7 +566,8 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithCarryInHalfCarrySetsHalfCarryFlag() {
+        public void SubtractWithCarryInHalfCarrySetsHalfCarryFlag()
+        {
             // Arrange
             _ram[0] = 0x9a;
 
@@ -561,7 +575,7 @@ namespace Z80.Tests
             _cpu.D = 1;
             _cpu.Flags = 0;
             Z80Flags.Carry_C.SetOrReset(_cpu, true);
-            
+
             // Act
             RunUntil(2);
 
@@ -596,7 +610,7 @@ namespace Z80.Tests
 
             _cpu.A = 0x0;
             _cpu.H = 0x0;
-            
+
             // Set fixed flags to the opposite of what they should be after execution
             _cpu.Flags = Z80Flags.AddSubtract_N | Z80Flags.Carry_C;
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
@@ -611,13 +625,14 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void ANDResultsInOverflowFlagSet() {
+        public void ANDWithEvenParityResult_ParityFlagIsSet()
+        {
             // Arrange
             _ram[0] = 0xa4;
 
             _cpu.A = 0x8f;
             _cpu.H = 0x03;
-            
+
             Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, false);
 
             // Act
@@ -628,13 +643,32 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void ANDResultsInZeroFlagSet() {
+        public void ANDWithOddParityResult_ParityFlagIsNotSet()
+        {
+            // Arrange
+            _ram[0] = 0xa4;
+
+            _cpu.A = 0x8f;
+            _cpu.H = 0x02;
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, true);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV), Is.Not.True);
+        }
+
+        [Test]
+        public void ANDResultsInZeroFlagSet()
+        {
             // Arrange
             _ram[0] = 0xa4;
 
             _cpu.A = 0xff;
             _cpu.H = 0x00;
-            
+
             Z80Flags.Zero_Z.SetOrReset(_cpu, false);
 
             // Act
@@ -645,13 +679,14 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void ANDResultsInSignFlagSet() {
+        public void ANDResultsInSignFlagSet()
+        {
             // Arrange
             _ram[0] = 0xa4;
 
             _cpu.A = 0xff;
             _cpu.H = 0xf1;
-            
+
             Z80Flags.Sign_S.SetOrReset(_cpu, false);
 
             // Act
@@ -659,6 +694,342 @@ namespace Z80.Tests
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+        }
+    }
+
+    public class ORTests : CpuRunTestBase
+    {
+        [Test]
+        public void ORTest()
+        {
+            // Arrange
+            _ram[0] = 0xb1;
+
+            _cpu.A = 0b11001100;
+            _cpu.C = 0b10000110;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.A, Is.EqualTo(0b11001110));
+        }
+
+        [Test]
+        public void ORFixedFlagsTest()
+        {
+            // Arrange
+            _ram[0] = 0xb4;
+
+            _cpu.A = 0x0;
+            _cpu.H = 0x0;
+
+            // Set fixed flags to the opposite of what they should be after execution
+            _cpu.Flags = Z80Flags.AddSubtract_N | Z80Flags.Carry_C | Z80Flags.HalfCarry_H;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.Not.True);
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.Not.True);
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C), Is.Not.True);
+        }
+
+        [Test]
+        public void ORWithEvenParityResult_ParityFlagIsSet()
+        {
+            // Arrange
+            _ram[0] = 0xb4;
+
+            _cpu.A = 0b01101000;
+            _cpu.H = 0b11101000;
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
+        }
+
+        [Test]
+        public void ORWithOddParityResult_ParityFlagIsNotSet()
+        {
+            // Arrange
+            _ram[0] = 0xb4;
+
+            _cpu.A = 0b01100001;
+            _cpu.H = 0b10010000;
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, true);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV), Is.Not.True);
+        }
+
+        [Test]
+        public void ORResultsInZeroFlagSet()
+        {
+            // Arrange
+            _ram[0] = 0xb4;
+
+            _cpu.A = 0x00;
+            _cpu.H = 0x00;
+
+            Z80Flags.Zero_Z.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+        }
+
+        [Test]
+        public void ORResultsInSignFlagSet()
+        {
+            // Arrange
+            _ram[0] = 0xb4;
+
+            _cpu.A = 0x00;
+            _cpu.H = 0x80;
+
+            Z80Flags.Sign_S.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+        }
+    }
+
+    public class XORTests : CpuRunTestBase
+    {
+        [Test]
+        public void XORTest()
+        {
+            // Arrange
+            _ram[0] = 0xaa;
+
+            _cpu.A = 0b11001100;
+            _cpu.D = 0b10000110;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.A, Is.EqualTo(0b01001010));
+        }
+
+        [Test]
+        public void XORFixedFlagsTest()
+        {
+            // Arrange
+            _ram[0] = 0xa9;
+
+            _cpu.A = 0x0;
+            _cpu.C = 0x0;
+
+            // Set fixed flags to the opposite of what they should be after execution
+            _cpu.Flags = Z80Flags.AddSubtract_N | Z80Flags.Carry_C | Z80Flags.HalfCarry_H;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.Not.True);
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.Not.True);
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C), Is.Not.True);
+        }
+
+        [Test]
+        public void XORWithEvenParityResult_ParityFlagIsSet()
+        {
+            // Arrange
+            _ram[0] = 0xad;
+
+            _cpu.A = 0b01101000;
+            _cpu.L = 0b11100000;
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
+        }
+
+        [Test]
+        public void XORWithOddParityResult_ParityFlagIsNotSet()
+        {
+            // Arrange
+            _ram[0] = 0xa8;
+
+            _cpu.A = 0b01100001;
+            _cpu.B = 0b11110000;
+
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, true);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV), Is.Not.True);
+        }
+
+        [Test]
+        public void XORResultsInZeroFlagSet()
+        {
+            // Arrange
+            _ram[0] = 0xac;
+
+            _cpu.A = 0b11001010;
+            _cpu.H = 0b11001010;
+
+            Z80Flags.Zero_Z.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+        }
+
+        [Test]
+        public void XORResultsInSignFlagSet()
+        {
+            // Arrange
+            _ram[0] = 0xac;
+
+            _cpu.A = 0b00001011;
+            _cpu.H = 0b10001001;
+
+            Z80Flags.Sign_S.SetOrReset(_cpu, false);
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+        }
+    }
+
+    public class CompareTests : CpuRunTestBase
+    { 
+        [Test]
+        public void ComparedValuesAreEqual() {
+            // Arrange
+            _ram[0] = 0xb8;
+
+            _cpu.A = 0x43;
+            _cpu.B = 0x43;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+        }
+
+        [Test]
+        public void ComparedValuesAreNotEqual() {
+            // Arrange
+            _ram[0] = 0xb8;
+
+            _cpu.A = 0x9a;
+            _cpu.B = 0x43;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z), Iz.Not.True);
+        }
+
+        [Test]
+        public void SignFlagIsSetWhenResultIsNegative() {
+            // Arrange
+            _ram[0] = 0xba;
+
+            _cpu.A = 0x9a;
+            _cpu.D = 0xa5;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+        }
+
+        [Test]
+        public void HalfCarryFlagIsSetOnHalfCarry() 
+        {
+            // Arrange
+            _ram[0] = 0xbb;
+
+            _cpu.A = 0x10;
+            _cpu.E = 0xa5;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+
+        [Test]
+        public void OverflowFlagIsSetOnOverflow() 
+        {
+            // Arrange
+            _ram[0] = 0xbb;
+
+            _cpu.A = 0x4;
+            _cpu.E = 0xa5;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
+        }
+
+        [Test]
+        public void SubtractFlagIsSet() 
+        {
+            // Arrange
+            _ram[0] = 0xbb;
+
+            _cpu.A = 0x4;
+            _cpu.E = 0xa5;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N));
+        }
+
+        [Test]
+        public void CarryFlagIsSetOnCarry() 
+        {
+                        // Arrange
+            _ram[0] = 0xbb;
+
+            _cpu.A = 0x0b;
+            _cpu.E = 0x15;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C));
         }
     }
 }

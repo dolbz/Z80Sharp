@@ -262,6 +262,47 @@ namespace Z80.Tests
 
             generated.Add(new object[] { 0xe6, 7 }); // AND A, n
 
+
+            for (int i = 0xa8; i < 0xb0; i++) {
+                if (i == 0xae) {
+                    generated.Add(new object[] { i, 7}); // XOR A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // XOR A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xddae, 19 }); // XOR A, (IX+d)
+            generated.Add(new object[] { 0xfdae, 19 }); // XOR A, (IY+d)
+
+            generated.Add(new object[] { 0xee, 7 }); // XOR A, n
+
+
+            for (int i = 0xb0; i < 0xb8; i++) {
+                if (i == 0xb6) {
+                    generated.Add(new object[] { i, 7}); // OR A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // OR A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xddb6, 19 }); // OR A, (IX+d)
+            generated.Add(new object[] { 0xfdb6, 19 }); // OR A, (IY+d)
+
+            generated.Add(new object[] { 0xf6, 7 }); // OR A, n
+
+            
+            for (int i = 0xb8; i < 0xc0; i++) {
+                if (i == 0xbe) {
+                    generated.Add(new object[] { i, 7}); // CP A, (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // CP A, r
+                }
+            }
+
+            generated.Add(new object[] { 0xddbe, 19 }); // CP A, (IX+d)
+            generated.Add(new object[] { 0xfdbe, 19 }); // CP A, (IY+d)
+
+            generated.Add(new object[] { 0xfe, 7 }); // CP A, n
             #endregion
 
             return generated;
