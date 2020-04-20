@@ -74,7 +74,7 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithOverflowSetsOverflowAndNegativeFlags()
+        public void AddWithOverflowSetsOverflowAndSignFlags()
         {
             // Arrange
             _ram[0] = 0x84;
@@ -91,7 +91,7 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithZeroResultSetsZeroFlagAndCarryFlag()
+        public void AddWithZeroResultSetsZeroFlag()
         {
             // Arrange
             _ram[0] = 0x82;
@@ -104,6 +104,21 @@ namespace Z80.Tests
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+        }
+
+        [Test]
+        public void AddWithCarryOutSetsCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0x82;
+
+            _cpu.A = 0x80;
+            _cpu.D = 0xff;
+            _cpu.Flags = 0;
+            // Act
+            RunUntil(2);
+
+            // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C));
         }
 
@@ -221,7 +236,7 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void AddWithOverflowSetsOverflowAndNegativeFlags()
+        public void AddWithOverflowSetsOverflowAndSignFlags()
         {
             // Arrange
             _ram[0] = 0x89;
@@ -347,7 +362,7 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithOverflowSetsOverflowAndNegativeFlags()
+        public void SubtractWithNegativeResultSetsSignFlag()
         {
             // Arrange
             _ram[0] = 0x94;
@@ -360,6 +375,22 @@ namespace Z80.Tests
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+        }
+
+        [Test]
+        public void SubtractWithOverflowSetsOverflowFlag()
+        {
+            // Arrange
+            _ram[0] = 0x94;
+
+            _cpu.A = 0x0;
+            _cpu.H = 0x81;
+            _cpu.Flags = 0;
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
         }
 
@@ -511,7 +542,7 @@ namespace Z80.Tests
         }
 
         [Test]
-        public void SubtractWithCarryInWithOverflowSetsOverflowAndNegativeFlags()
+        public void SubtractWithCarryInWithOverflowSetsOverflowAndSignFlags()
         {
             // Arrange
             _ram[0] = 0x99;
@@ -936,6 +967,21 @@ namespace Z80.Tests
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+        }
+
+        [Test]
+        public void AccumulatorValueIsNotChangedOnExecution() {
+            // Arrange
+            _ram[0] = 0xb8;
+
+            _cpu.A = 0x43;
+            _cpu.B = 0xa4;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.A, Is.EqualTo(0x43));
         }
 
         [Test]
