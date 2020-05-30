@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using System.Diagnostics;
 using System;
+using Z80.Instructions;
+using Z80.AddressingModes;
 
 namespace Z80
 {
@@ -86,6 +88,9 @@ namespace Z80
                 case Register.L:
                     cpu.L = value;
                     break;
+                case Register.R:
+                    cpu.R = value;
+                    break;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }
@@ -111,6 +116,8 @@ namespace Z80
                     return cpu.I;
                 case Register.L:
                     return cpu.L;
+                case Register.R:
+                    return cpu.R;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }
@@ -322,22 +329,22 @@ namespace Z80
             #region 8 bit LD instructions
 
             // Load instructions
-            instructions[0x02] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.BC), new RegAddrMode8Bit(this, Register.A)); // LD (BC), A
+            instructions[0x02] = new LD_8Bit(this, new RegIndirect(this, WideRegister.BC), new RegAddrMode8Bit(this, Register.A)); // LD (BC), A
             instructions[0x06] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new ImmediateOperand(this)); // LD B, n
-            instructions[0x0a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirectRead(this, WideRegister.BC)); // LD A, (BC))
+            instructions[0x0a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirect(this, WideRegister.BC)); // LD A, (BC))
             instructions[0x0e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new ImmediateOperand(this)); // LD C, n
-            instructions[0x12] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.DE), new RegAddrMode8Bit(this, Register.A)); // LD (DE), A
+            instructions[0x12] = new LD_8Bit(this, new RegIndirect(this, WideRegister.DE), new RegAddrMode8Bit(this, Register.A)); // LD (DE), A
             instructions[0x16] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new ImmediateOperand(this)); // LD D, n
-            instructions[0x1a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirectRead(this, WideRegister.DE)); // LD A, (DE))
+            instructions[0x1a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirect(this, WideRegister.DE)); // LD A, (DE))
             instructions[0x1e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new ImmediateOperand(this)); // LD E, n
             instructions[0x26] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new ImmediateOperand(this)); // LD H, n
             instructions[0x2e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new ImmediateOperand(this)); // LD L, n
 
-            instructions[0x32] = new LD_8Bit(this, new ExtendedPointerWrite(this), new RegAddrMode8Bit(this, Register.A)); // LD (nn), A
+            instructions[0x32] = new LD_8Bit(this, new ExtendedPointer(this), new RegAddrMode8Bit(this, Register.A)); // LD (nn), A
 
-            instructions[0x36] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new ImmediateOperand(this)); // LD (HL), n
+            instructions[0x36] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new ImmediateOperand(this)); // LD (HL), n
 
-            instructions[0x3a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new ExtendedPointerRead8Bit(this)); // LD A,(nn)
+            instructions[0x3a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new ExtendedPointer(this)); // LD A,(nn)
             instructions[0x3e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new ImmediateOperand(this)); // LD A, n
 
             instructions[0x40] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.B)); // LD B, B
@@ -346,7 +353,7 @@ namespace Z80
             instructions[0x43] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.E)); // LD B, E
             instructions[0x44] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.H)); // LD B, H
             instructions[0x45] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.L)); // LD B, L
-            instructions[0x46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegIndirectRead(this, WideRegister.HL)); // LD B, (HL)
+            instructions[0x46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegIndirect(this, WideRegister.HL)); // LD B, (HL)
             instructions[0x47] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.A)); // LD B, A
 
             instructions[0x48] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.B)); // LD C, B
@@ -355,7 +362,7 @@ namespace Z80
             instructions[0x4b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.E)); // LD C, E
             instructions[0x4c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.H)); // LD C, H
             instructions[0x4d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.L)); // LD C, L
-            instructions[0x4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegIndirectRead(this, WideRegister.HL)); // LD C, (HL)
+            instructions[0x4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegIndirect(this, WideRegister.HL)); // LD C, (HL)
             instructions[0x4f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.A)); // LD C, A
 
             instructions[0x50] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.B)); // LD D, B
@@ -364,7 +371,7 @@ namespace Z80
             instructions[0x53] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.E)); // LD D, E
             instructions[0x54] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.H)); // LD D, H
             instructions[0x55] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.L)); // LD D, L
-            instructions[0x56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegIndirectRead(this, WideRegister.HL)); // LD D, (HL)
+            instructions[0x56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegIndirect(this, WideRegister.HL)); // LD D, (HL)
             instructions[0x57] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.A)); // LD D, A
 
             instructions[0x58] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.B)); // LD E, B
@@ -373,7 +380,7 @@ namespace Z80
             instructions[0x5b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.E)); // LD E, E
             instructions[0x5c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.H)); // LD E, H
             instructions[0x5d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.L)); // LD E, L
-            instructions[0x5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegIndirectRead(this, WideRegister.HL)); // LD E, (HL)
+            instructions[0x5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegIndirect(this, WideRegister.HL)); // LD E, (HL)
             instructions[0x5f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.A)); // LD E, A
 
             instructions[0x60] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegAddrMode8Bit(this, Register.B)); // LD H, B
@@ -382,7 +389,7 @@ namespace Z80
             instructions[0x63] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegAddrMode8Bit(this, Register.E)); // LD H, E
             instructions[0x64] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegAddrMode8Bit(this, Register.H)); // LD H, H
             instructions[0x65] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegAddrMode8Bit(this, Register.L)); // LD H, L
-            instructions[0x66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegIndirectRead(this, WideRegister.HL)); // LD H, (HL)
+            instructions[0x66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegIndirect(this, WideRegister.HL)); // LD H, (HL)
             instructions[0x67] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new RegAddrMode8Bit(this, Register.A)); // LD H, A
 
             instructions[0x68] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegAddrMode8Bit(this, Register.B)); // LD L, B
@@ -391,16 +398,16 @@ namespace Z80
             instructions[0x6b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegAddrMode8Bit(this, Register.E)); // LD L, E
             instructions[0x6c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegAddrMode8Bit(this, Register.H)); // LD L, H
             instructions[0x6d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegAddrMode8Bit(this, Register.L)); // LD L, L
-            instructions[0x6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegIndirectRead(this, WideRegister.HL)); // LD L, (HL)
+            instructions[0x6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegIndirect(this, WideRegister.HL)); // LD L, (HL)
             instructions[0x6f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new RegAddrMode8Bit(this, Register.A)); // LD L, A
 
-            instructions[0x70] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.B)); // LD (HL), B
-            instructions[0x71] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.C)); // LD (HL), C
-            instructions[0x72] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.D)); // LD (HL), D
-            instructions[0x73] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.E)); // LD (HL), E
-            instructions[0x74] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.H)); // LD (HL), H
-            instructions[0x75] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.L)); // LD (HL), L
-            instructions[0x77] = new LD_8Bit(this, new RegIndirectWrite(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.A)); // LD (HL), A
+            instructions[0x70] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.B)); // LD (HL), B
+            instructions[0x71] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.C)); // LD (HL), C
+            instructions[0x72] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.D)); // LD (HL), D
+            instructions[0x73] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.E)); // LD (HL), E
+            instructions[0x74] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.H)); // LD (HL), H
+            instructions[0x75] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.L)); // LD (HL), L
+            instructions[0x77] = new LD_8Bit(this, new RegIndirect(this, WideRegister.HL), new RegAddrMode8Bit(this, Register.A)); // LD (HL), A
 
             instructions[0x78] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.B)); // LD A, B
             instructions[0x79] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.C)); // LD A, C 
@@ -408,51 +415,51 @@ namespace Z80
             instructions[0x7b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.E)); // LD A, E
             instructions[0x7c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.H)); // LD A, H
             instructions[0x7d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.L)); // LD A, L
-            instructions[0x7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirectRead(this, WideRegister.HL)); // LD A, (HL)
+            instructions[0x7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegIndirect(this, WideRegister.HL)); // LD A, (HL)
             instructions[0x7f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.A)); // LD A, A
 
-            instructions[0xdd36] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX, internalCycleLength: 2), new ImmediateOperand(this)); // LD (IX+d), n
+            instructions[0xdd36] = new LD_8Bit(this, new Indexed(this, WideRegister.IX, internalCycleLength: 2), new ImmediateOperand(this)); // LD (IX+d), n
 
-            instructions[0xdd46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new IndexedRead(this, WideRegister.IX)); // LD B, (IX+d)
-            instructions[0xdd4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new IndexedRead(this, WideRegister.IX)); // LD C, (IX+d)
-            instructions[0xdd56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new IndexedRead(this, WideRegister.IX)); // LD D, (IX+d)
-            instructions[0xdd5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new IndexedRead(this, WideRegister.IX)); // LD E, (IX+d)
-            instructions[0xdd66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new IndexedRead(this, WideRegister.IX)); // LD H, (IX+d)
-            instructions[0xdd6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new IndexedRead(this, WideRegister.IX)); // LD L, (IX+d)
+            instructions[0xdd46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new Indexed(this, WideRegister.IX)); // LD B, (IX+d)
+            instructions[0xdd4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new Indexed(this, WideRegister.IX)); // LD C, (IX+d)
+            instructions[0xdd56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new Indexed(this, WideRegister.IX)); // LD D, (IX+d)
+            instructions[0xdd5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new Indexed(this, WideRegister.IX)); // LD E, (IX+d)
+            instructions[0xdd66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new Indexed(this, WideRegister.IX)); // LD H, (IX+d)
+            instructions[0xdd6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new Indexed(this, WideRegister.IX)); // LD L, (IX+d)
 
-            instructions[0xdd70] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.B)); // LD (IX+d), B
-            instructions[0xdd71] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.C)); // LD (IX+d), C
-            instructions[0xdd72] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.D)); // LD (IX+d), D
-            instructions[0xdd73] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.E)); // LD (IX+d), E
-            instructions[0xdd74] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.H)); // LD (IX+d), H
-            instructions[0xdd75] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.L)); // LD (IX+d), L
-            instructions[0xdd77] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.A)); // LD (IX+d), A
+            instructions[0xdd70] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.B)); // LD (IX+d), B
+            instructions[0xdd71] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.C)); // LD (IX+d), C
+            instructions[0xdd72] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.D)); // LD (IX+d), D
+            instructions[0xdd73] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.E)); // LD (IX+d), E
+            instructions[0xdd74] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.H)); // LD (IX+d), H
+            instructions[0xdd75] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.L)); // LD (IX+d), L
+            instructions[0xdd77] = new LD_8Bit(this, new Indexed(this, WideRegister.IX), new RegAddrMode8Bit(this, Register.A)); // LD (IX+d), A
 
-            instructions[0xdd7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new IndexedRead(this, WideRegister.IX)); // LD A, (IX+d)
+            instructions[0xdd7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new Indexed(this, WideRegister.IX)); // LD A, (IX+d)
 
             instructions[0xed47] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.I), new RegAddrMode8Bit(this, Register.A), 1); // LD I, A
             instructions[0xed4f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.R), new RegAddrMode8Bit(this, Register.A), 1); // LD R, A
             instructions[0xed57] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.I), 1); // LD A, I
             instructions[0xed5f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.R), 1); // LD A, R
 
-            instructions[0xfd36] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY, internalCycleLength: 2), new ImmediateOperand(this)); // LD (IY+d), n
+            instructions[0xfd36] = new LD_8Bit(this, new Indexed(this, WideRegister.IY, internalCycleLength: 2), new ImmediateOperand(this)); // LD (IY+d), n
 
-            instructions[0xfd46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new IndexedRead(this, WideRegister.IY)); // LD B, (IY+d)
-            instructions[0xfd4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new IndexedRead(this, WideRegister.IY)); // LD C, (IY+d)
-            instructions[0xfd56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new IndexedRead(this, WideRegister.IY)); // LD D, (IY+d)
-            instructions[0xfd5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new IndexedRead(this, WideRegister.IY)); // LD E, (IY+d)
-            instructions[0xfd66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new IndexedRead(this, WideRegister.IY)); // LD H, (IY+d)
-            instructions[0xfd6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new IndexedRead(this, WideRegister.IY)); // LD L, (IY+d)
+            instructions[0xfd46] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new Indexed(this, WideRegister.IY)); // LD B, (IY+d)
+            instructions[0xfd4e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new Indexed(this, WideRegister.IY)); // LD C, (IY+d)
+            instructions[0xfd56] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new Indexed(this, WideRegister.IY)); // LD D, (IY+d)
+            instructions[0xfd5e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new Indexed(this, WideRegister.IY)); // LD E, (IY+d)
+            instructions[0xfd66] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.H), new Indexed(this, WideRegister.IY)); // LD H, (IY+d)
+            instructions[0xfd6e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.L), new Indexed(this, WideRegister.IY)); // LD L, (IY+d)
 
-            instructions[0xfd70] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.B)); // LD (IY+d), B
-            instructions[0xfd71] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.C)); // LD (IY+d), C
-            instructions[0xfd72] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.D)); // LD (IY+d), D
-            instructions[0xfd73] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.E)); // LD (IY+d), E
-            instructions[0xfd74] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.H)); // LD (IY+d), H
-            instructions[0xfd75] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.L)); // LD (IY+d), L
-            instructions[0xfd77] = new LD_8Bit(this, new IndexedWrite(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.A)); // LD (IY+d), A
+            instructions[0xfd70] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.B)); // LD (IY+d), B
+            instructions[0xfd71] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.C)); // LD (IY+d), C
+            instructions[0xfd72] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.D)); // LD (IY+d), D
+            instructions[0xfd73] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.E)); // LD (IY+d), E
+            instructions[0xfd74] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.H)); // LD (IY+d), H
+            instructions[0xfd75] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.L)); // LD (IY+d), L
+            instructions[0xfd77] = new LD_8Bit(this, new Indexed(this, WideRegister.IY), new RegAddrMode8Bit(this, Register.A)); // LD (IY+d), A
 
-            instructions[0xfd7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new IndexedRead(this, WideRegister.IY)); // LD A, (IY+d)
+            instructions[0xfd7e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new Indexed(this, WideRegister.IY)); // LD A, (IY+d)
 
             #endregion
 
@@ -461,27 +468,27 @@ namespace Z80
             instructions[0x01] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedReadOperand(this)); // LD BC, nn
             instructions[0x11] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.DE), new ExtendedReadOperand(this)); // LD DE, nn
             instructions[0x21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedReadOperand(this)); // LD HL, nn
-            instructions[0x22] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.HL)); // LD (nn), HL
-            instructions[0x2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedPointerRead16Bit(this)); // LD HL, (nn)
+            instructions[0x22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.HL)); // LD (nn), HL
+            instructions[0x2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedPointer16Bit(this)); // LD HL, (nn)
             instructions[0x31] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedReadOperand(this)); // LD SP, nn
 
             instructions[0xf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.HL), additionalM1TCycles: 2); // LD SP, HL
 
             instructions[0xdd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedReadOperand(this)); // LD IX, nn
-            instructions[0xdd22] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.IX)); // LD (nn), IX
-            instructions[0xdd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedPointerRead16Bit(this)); // LD IX, (nn)
+            instructions[0xdd22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.IX)); // LD (nn), IX
+            instructions[0xdd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedPointer16Bit(this)); // LD IX, (nn)
             instructions[0xddf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.IX), additionalM1TCycles: 2); // LD SP, IX
 
-            instructions[0xed43] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.BC)); // LD (nn), BC
-            instructions[0xed4b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedPointerRead16Bit(this)); // LD BC, (nn)
-            instructions[0xed53] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.DE)); // LD (nn), DE
-            instructions[0xed5b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.DE), new ExtendedPointerRead16Bit(this)); // LD DE, (nn)
-            instructions[0xed73] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.SP)); // LD (nn), SP
-            instructions[0xed7b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedPointerRead16Bit(this)); // LD SP, (nn)
+            instructions[0xed43] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.BC)); // LD (nn), BC
+            instructions[0xed4b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedPointer16Bit(this)); // LD BC, (nn)
+            instructions[0xed53] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.DE)); // LD (nn), DE
+            instructions[0xed5b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.DE), new ExtendedPointer16Bit(this)); // LD DE, (nn)
+            instructions[0xed73] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.SP)); // LD (nn), SP
+            instructions[0xed7b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedPointer16Bit(this)); // LD SP, (nn)
 
             instructions[0xfd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedReadOperand(this)); // LD IY, nn
-            instructions[0xfd22] = new LD_16Bit(this, new ExtendedPointerWrite16Bit(this), new RegAddrMode16Bit(this, WideRegister.IY)); // LD (nn), IY
-            instructions[0xfd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedPointerRead16Bit(this)); // LD IY, (nn)
+            instructions[0xfd22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.IY)); // LD (nn), IY
+            instructions[0xfd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedPointer16Bit(this)); // LD IY, (nn)
             instructions[0xfdf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.IY), additionalM1TCycles: 2); // LD SP, IY
 
             #endregion
@@ -515,7 +522,6 @@ namespace Z80
             instructions[0x08] = new Exchange(this, WideRegister.AF); // EX AF, AF'
             instructions[0xd9] = new Exchange(this, new[] { WideRegister.BC, WideRegister.DE, WideRegister.HL }); // EXX
             instructions[0xeb] = new Exchange(this, WideRegister.DE, WideRegister.HL); // EX DE, HL
-
             instructions[0xe3] = new ExchangeStack(this, WideRegister.HL); // EX (SP), HL
             instructions[0xdde3] = new ExchangeStack(this, WideRegister.IX); // EX (SP), IX
             instructions[0xfde3] = new ExchangeStack(this, WideRegister.IY); // EX (SP), IY
@@ -549,14 +555,10 @@ namespace Z80
             instructions[0x83] = new Add(this, new RegAddrMode8Bit(this, Register.E)); // ADD A, E
             instructions[0x84] = new Add(this, new RegAddrMode8Bit(this, Register.H)); // ADD A, H
             instructions[0x85] = new Add(this, new RegAddrMode8Bit(this, Register.L)); // ADD A, L
-
-            instructions[0x86] = new Add(this, new RegIndirectRead(this, WideRegister.HL)); // ADD A, (HL)
-
-            instructions[0xdd86] = new Add(this, new IndexedRead(this, WideRegister.IX)); // ADD A, (IX+d)
-            instructions[0xfd86] = new Add(this, new IndexedRead(this, WideRegister.IY)); // ADD A, (IY+d)
-
+            instructions[0x86] = new Add(this, new RegIndirect(this, WideRegister.HL)); // ADD A, (HL)
+            instructions[0xdd86] = new Add(this, new Indexed(this, WideRegister.IX)); // ADD A, (IX+d)
+            instructions[0xfd86] = new Add(this, new Indexed(this, WideRegister.IY)); // ADD A, (IY+d)
             instructions[0xc6] = new Add(this, new ImmediateOperand(this)); // ADD A, n
-
 
             instructions[0x8f] = new Add(this, new RegAddrMode8Bit(this, Register.A), true); // ADC A, B
             instructions[0x88] = new Add(this, new RegAddrMode8Bit(this, Register.B), true); // ADC A, B
@@ -565,14 +567,10 @@ namespace Z80
             instructions[0x8b] = new Add(this, new RegAddrMode8Bit(this, Register.E), true); // ADC A, E
             instructions[0x8c] = new Add(this, new RegAddrMode8Bit(this, Register.H), true); // ADC A, H
             instructions[0x8d] = new Add(this, new RegAddrMode8Bit(this, Register.L), true); // ADC A, L
-
-            instructions[0x8e] = new Add(this, new RegIndirectRead(this, WideRegister.HL), true); // ADC A, (HL)
-
-            instructions[0xdd8e] = new Add(this, new IndexedRead(this, WideRegister.IX), true); // ADC A, (IX+d)
-            instructions[0xfd8e] = new Add(this, new IndexedRead(this, WideRegister.IY), true); // ADC A, (IY+d)
-
+            instructions[0x8e] = new Add(this, new RegIndirect(this, WideRegister.HL), true); // ADC A, (HL)
+            instructions[0xdd8e] = new Add(this, new Indexed(this, WideRegister.IX), true); // ADC A, (IX+d)
+            instructions[0xfd8e] = new Add(this, new Indexed(this, WideRegister.IY), true); // ADC A, (IY+d)
             instructions[0xce] = new Add(this, new ImmediateOperand(this), true); // ADC A, n
-
 
             instructions[0x97] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A)); // SUB A, A
             instructions[0x90] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B)); // SUB A, B
@@ -581,14 +579,10 @@ namespace Z80
             instructions[0x93] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E)); // SUB A, E
             instructions[0x94] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H)); // SUB A, H
             instructions[0x95] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L)); // SUB A, L
-
-            instructions[0x96] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL)); // SUB A, (HL)
-
-            instructions[0xdd96] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX)); // SUB A, (IX+d)
-            instructions[0xfd96] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY)); // SUB A, (IY+d)
-
+            instructions[0x96] = new SubtractOrCompare(this, new RegIndirect(this, WideRegister.HL)); // SUB A, (HL)
+            instructions[0xdd96] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IX)); // SUB A, (IX+d)
+            instructions[0xfd96] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IY)); // SUB A, (IY+d)
             instructions[0xd6] = new SubtractOrCompare(this, new ImmediateOperand(this)); // SUB A, n
-
 
             instructions[0x9f] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A), true); // SBC A, B
             instructions[0x98] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B), true); // SBC A, B
@@ -597,14 +591,10 @@ namespace Z80
             instructions[0x9b] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E), true); // SBC A, E
             instructions[0x9c] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H), true); // SBC A, H
             instructions[0x9d] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L), true); // SBC A, L
-
-            instructions[0x9e] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL), true); // SBC A, (HL)
-
-            instructions[0xdd9e] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX), true); // SBC A, (IX+d)
-            instructions[0xfd9e] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY), true); // SBC A, (IY+d)
-
+            instructions[0x9e] = new SubtractOrCompare(this, new RegIndirect(this, WideRegister.HL), true); // SBC A, (HL)
+            instructions[0xdd9e] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IX), true); // SBC A, (IX+d)
+            instructions[0xfd9e] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IY), true); // SBC A, (IY+d)
             instructions[0xde] = new SubtractOrCompare(this, new ImmediateOperand(this), true); // SBC A, n
-
 
             instructions[0xa7] = new AND(this, new RegAddrMode8Bit(this, Register.A)); // AND A, B
             instructions[0xa0] = new AND(this, new RegAddrMode8Bit(this, Register.B)); // AND A, B
@@ -613,14 +603,10 @@ namespace Z80
             instructions[0xa3] = new AND(this, new RegAddrMode8Bit(this, Register.E)); // AND A, E
             instructions[0xa4] = new AND(this, new RegAddrMode8Bit(this, Register.H)); // AND A, H
             instructions[0xa5] = new AND(this, new RegAddrMode8Bit(this, Register.L)); // AND A, L
-
-            instructions[0xa6] = new AND(this, new RegIndirectRead(this, WideRegister.HL)); // AND A, (HL)
-
-            instructions[0xdda6] = new AND(this, new IndexedRead(this, WideRegister.IX)); // AND A, (IX+d)
-            instructions[0xfda6] = new AND(this, new IndexedRead(this, WideRegister.IY)); // AND A, (IY+d)
-
+            instructions[0xa6] = new AND(this, new RegIndirect(this, WideRegister.HL)); // AND A, (HL)
+            instructions[0xdda6] = new AND(this, new Indexed(this, WideRegister.IX)); // AND A, (IX+d)
+            instructions[0xfda6] = new AND(this, new Indexed(this, WideRegister.IY)); // AND A, (IY+d)
             instructions[0xe6] = new AND(this, new ImmediateOperand(this)); // AND A, n
-
 
             instructions[0xaf] = new XOR(this, new RegAddrMode8Bit(this, Register.A)); // XOR A, B
             instructions[0xa8] = new XOR(this, new RegAddrMode8Bit(this, Register.B)); // XOR A, B
@@ -629,14 +615,10 @@ namespace Z80
             instructions[0xab] = new XOR(this, new RegAddrMode8Bit(this, Register.E)); // XOR A, E
             instructions[0xac] = new XOR(this, new RegAddrMode8Bit(this, Register.H)); // XOR A, H
             instructions[0xad] = new XOR(this, new RegAddrMode8Bit(this, Register.L)); // XOR A, L
-
-            instructions[0xae] = new XOR(this, new RegIndirectRead(this, WideRegister.HL)); // XOR A, (HL)
-
-            instructions[0xddae] = new XOR(this, new IndexedRead(this, WideRegister.IX)); // XOR A, (IX+d)
-            instructions[0xfdae] = new XOR(this, new IndexedRead(this, WideRegister.IY)); // XOR A, (IY+d)
-
+            instructions[0xae] = new XOR(this, new RegIndirect(this, WideRegister.HL)); // XOR A, (HL)
+            instructions[0xddae] = new XOR(this, new Indexed(this, WideRegister.IX)); // XOR A, (IX+d)
+            instructions[0xfdae] = new XOR(this, new Indexed(this, WideRegister.IY)); // XOR A, (IY+d)
             instructions[0xee] = new XOR(this, new ImmediateOperand(this)); // XOR A, n
-
 
             instructions[0xb7] = new OR(this, new RegAddrMode8Bit(this, Register.A)); // OR A, B
             instructions[0xb0] = new OR(this, new RegAddrMode8Bit(this, Register.B)); // OR A, B
@@ -645,14 +627,10 @@ namespace Z80
             instructions[0xb3] = new OR(this, new RegAddrMode8Bit(this, Register.E)); // OR A, E
             instructions[0xb4] = new OR(this, new RegAddrMode8Bit(this, Register.H)); // OR A, H
             instructions[0xb5] = new OR(this, new RegAddrMode8Bit(this, Register.L)); // OR A, L
-
-            instructions[0xb6] = new OR(this, new RegIndirectRead(this, WideRegister.HL)); // OR A, (HL)
-
-            instructions[0xddb6] = new OR(this, new IndexedRead(this, WideRegister.IX)); // OR A, (IX+d)
-            instructions[0xfdb6] = new OR(this, new IndexedRead(this, WideRegister.IY)); // OR A, (IY+d)
-
+            instructions[0xb6] = new OR(this, new RegIndirect(this, WideRegister.HL)); // OR A, (HL)
+            instructions[0xddb6] = new OR(this, new Indexed(this, WideRegister.IX)); // OR A, (IX+d)
+            instructions[0xfdb6] = new OR(this, new Indexed(this, WideRegister.IY)); // OR A, (IY+d)
             instructions[0xf6] = new OR(this, new ImmediateOperand(this)); // OR A, n
-
 
             instructions[0xbf] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.A), updateAccumulator: false); // CP A, B
             instructions[0xb8] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.B), updateAccumulator: false); // CP A, B
@@ -661,13 +639,12 @@ namespace Z80
             instructions[0xbb] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.E), updateAccumulator: false); // CP A, E
             instructions[0xbc] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.H), updateAccumulator: false); // CP A, H
             instructions[0xbd] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.L), updateAccumulator: false); // CP A, L
-
-            instructions[0xbe] = new SubtractOrCompare(this, new RegIndirectRead(this, WideRegister.HL), updateAccumulator: false); // CP A, (HL)
-
-            instructions[0xddbe] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IX), updateAccumulator: false); // CP A, (IX+d)
-            instructions[0xfdbe] = new SubtractOrCompare(this, new IndexedRead(this, WideRegister.IY), updateAccumulator: false); // CP A, (IY+d)
-
+            instructions[0xbe] = new SubtractOrCompare(this, new RegIndirect(this, WideRegister.HL), updateAccumulator: false); // CP A, (HL)
+            instructions[0xddbe] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IX), updateAccumulator: false); // CP A, (IX+d)
+            instructions[0xfdbe] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IY), updateAccumulator: false); // CP A, (IY+d)
             instructions[0xfe] = new SubtractOrCompare(this, new ImmediateOperand(this), updateAccumulator: false); // CP A, n
+
+            instructions[0x3c] = new Increment(this, new RegAddrMode8Bit(this, Register.A));
             #endregion
         }
     }

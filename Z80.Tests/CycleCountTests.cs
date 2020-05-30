@@ -339,6 +339,7 @@ namespace Z80.Tests
 
             var instruction = _cpu.instructions[opcode];
             instruction.Reset();
+            instruction.StartExecution();
 
             // Act
             while (!instruction.IsComplete)

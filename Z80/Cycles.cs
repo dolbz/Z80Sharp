@@ -1,11 +1,7 @@
 namespace Z80
 {
-    public interface IMachineCycle {
-        bool IsComplete { get; }
-
-        void Reset();
-
-        void Clock();
+    public interface IMachineCycle : IClockable 
+    {
     }
 
     public class M1Cycle : IMachineCycle {
