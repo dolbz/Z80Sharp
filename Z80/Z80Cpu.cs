@@ -652,8 +652,19 @@ namespace Z80
             instructions[0x24] = new Increment(this, new RegAddrMode8Bit(this, Register.H)); // INC H
             instructions[0x2c] = new Increment(this, new RegAddrMode8Bit(this, Register.L)); // INC L
             instructions[0x34] = new Increment(this, new RegIndirect(this, WideRegister.HL, 1)); // INC (HL)
-            instructions[0xdd34] = new Increment(this, new Indexed(this, WideRegister.IX, 6)); // INC (IX+d)
-            instructions[0xfd34] = new Increment(this, new Indexed(this, WideRegister.IY, 6)); // INC (IY+d)
+            instructions[0xdd34] = new Increment(this, new Indexed(this, WideRegister.IX, additionalCycleOnRead: true)); // INC (IX+d)
+            instructions[0xfd34] = new Increment(this, new Indexed(this, WideRegister.IY, additionalCycleOnRead: true)); // INC (IY+d)
+
+            instructions[0x3d] = new Decrement(this, new RegAddrMode8Bit(this, Register.A)); // DEC A
+            instructions[0x05] = new Decrement(this, new RegAddrMode8Bit(this, Register.B)); // DEC B
+            instructions[0x0d] = new Decrement(this, new RegAddrMode8Bit(this, Register.C)); // DEC C
+            instructions[0x15] = new Decrement(this, new RegAddrMode8Bit(this, Register.D)); // DEC D
+            instructions[0x1d] = new Decrement(this, new RegAddrMode8Bit(this, Register.E)); // DEC E
+            instructions[0x25] = new Decrement(this, new RegAddrMode8Bit(this, Register.H)); // DEC H
+            instructions[0x2d] = new Decrement(this, new RegAddrMode8Bit(this, Register.L)); // DEC L
+            instructions[0x35] = new Decrement(this, new RegIndirect(this, WideRegister.HL, 1)); // DEC (HL)
+            instructions[0xdd35] = new Decrement(this, new Indexed(this, WideRegister.IX, additionalCycleOnRead: true)); // DEC (IX+d)
+            instructions[0xfd35] = new Decrement(this, new Indexed(this, WideRegister.IY, additionalCycleOnRead: true)); // DEC (IY+d)
 
             #endregion
         }
