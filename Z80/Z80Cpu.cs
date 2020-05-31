@@ -644,7 +644,17 @@ namespace Z80
             instructions[0xfdbe] = new SubtractOrCompare(this, new Indexed(this, WideRegister.IY), updateAccumulator: false); // CP A, (IY+d)
             instructions[0xfe] = new SubtractOrCompare(this, new ImmediateOperand(this), updateAccumulator: false); // CP A, n
 
-            instructions[0x3c] = new Increment(this, new RegAddrMode8Bit(this, Register.A));
+            instructions[0x3c] = new Increment(this, new RegAddrMode8Bit(this, Register.A)); // INC A
+            instructions[0x04] = new Increment(this, new RegAddrMode8Bit(this, Register.B)); // INC B
+            instructions[0x0c] = new Increment(this, new RegAddrMode8Bit(this, Register.C)); // INC C
+            instructions[0x14] = new Increment(this, new RegAddrMode8Bit(this, Register.D)); // INC D
+            instructions[0x1c] = new Increment(this, new RegAddrMode8Bit(this, Register.E)); // INC E
+            instructions[0x24] = new Increment(this, new RegAddrMode8Bit(this, Register.H)); // INC H
+            instructions[0x2c] = new Increment(this, new RegAddrMode8Bit(this, Register.L)); // INC L
+            instructions[0x34] = new Increment(this, new RegIndirect(this, WideRegister.HL, 1)); // INC (HL)
+            instructions[0xdd34] = new Increment(this, new Indexed(this, WideRegister.IX, 6)); // INC (IX+d)
+            instructions[0xfd34] = new Increment(this, new Indexed(this, WideRegister.IY, 6)); // INC (IY+d)
+
             #endregion
         }
     }

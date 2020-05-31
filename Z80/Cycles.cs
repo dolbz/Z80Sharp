@@ -1,3 +1,4 @@
+using System;
 namespace Z80
 {
     public interface IMachineCycle : IClockable 
@@ -56,6 +57,9 @@ namespace Z80
 
         public void Clock()
         {
+            if (_remainingTCycles == 0) {
+                throw new InvalidOperationException();
+            }
             _remainingTCycles--;
         }
 

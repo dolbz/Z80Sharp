@@ -303,6 +303,18 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xfdbe, 19 }); // CP A, (IY+d)
 
             generated.Add(new object[] { 0xfe, 7 }); // CP A, n
+
+            for (int i = 0x04; i <= 0x3c; i += 8) {
+                if (i == 0x34) {
+                    generated.Add(new object[] { i, 11 }); // INC (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // INC r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd34, 23 }); // INC (IX+d)
+            generated.Add(new object[] { 0xfd34, 23 }); // INC (IY+d)
+
             #endregion
 
             return generated;
