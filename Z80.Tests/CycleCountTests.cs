@@ -315,6 +315,17 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xdd34, 23 }); // INC (IX+d)
             generated.Add(new object[] { 0xfd34, 23 }); // INC (IY+d)
 
+            for (int i = 0x05; i <= 0x3d; i += 8) {
+                if (i == 0x35) {
+                    generated.Add(new object[] { i, 11 }); // DEC (HL)
+                } else {
+                    generated.Add(new object[] { i, 4 }); // DEC r
+                }
+            }
+
+            generated.Add(new object[] { 0xdd35, 23 }); // DEC (IX+d)
+            generated.Add(new object[] { 0xfd35, 23 }); // DEC (IY+d)
+
             #endregion
 
             return generated;

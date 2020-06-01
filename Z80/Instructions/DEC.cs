@@ -3,9 +3,9 @@
 namespace Z80.Instructions
 {
 
-    public class Increment : IInstruction
+    public class Decrement : IInstruction
     {
-        public string Mnemonic => "INC";
+        public string Mnemonic => "DEC";
 
         public bool IsComplete => _valueWriter != null && _valueWriter.IsComplete;
 
@@ -14,7 +14,7 @@ namespace Z80.Instructions
         private IReadAddressedOperand<byte> _valueReader;
         private IWriteAddressedOperand<byte> _valueWriter;
 
-        public Increment(Z80Cpu cpu, IAddressMode<byte> addressMode) 
+        public Decrement(Z80Cpu cpu, IAddressMode<byte> addressMode) 
         {
             _cpu = cpu;
             _addressMode = addressMode;
@@ -29,7 +29,7 @@ namespace Z80.Instructions
                     _valueReader = _addressMode.Reader;
                     _valueWriter = _addressMode.Writer;
                     if (_valueReader.IsComplete) {
-                        PerformIncrement();
+                        PerformDecrement();
                     }
                 }
                 return;
@@ -37,7 +37,7 @@ namespace Z80.Instructions
             if (!_valueReader.IsComplete) {
                 _valueReader.Clock();
                 if (_valueReader.IsComplete) {
-                    PerformIncrement();
+                    PerformDecrement();
                 }
                 return;
             }
@@ -60,22 +60,23 @@ namespace Z80.Instructions
                 _valueReader = _addressMode.Reader;
                 _valueWriter = _addressMode.Writer;
                 if (_valueReader.IsComplete) {
-                    PerformIncrement();
+                    PerformDecrement();
                 }
             }
         }
 
-        private void PerformIncrement() 
+        private void PerformDecrement() 
         {
-            var result = _valueReader.AddressedValue + 1;
+            var addressedValue = _valueReader.AddressedValue;
+            var result = addressedValue - 1;
 
             _valueWriter.AddressedValue = (byte)result;
             
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result == 128);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result == 127);
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
-            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
-            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (result & 0xf) == 0);
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, true);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (addressedValue & 0xf) == 0);
         }
     }
 }
