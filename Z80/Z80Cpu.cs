@@ -667,6 +667,12 @@ namespace Z80
             instructions[0xfd35] = new Decrement(this, new Indexed(this, WideRegister.IY, additionalCycleOnRead: true)); // DEC (IY+d)
 
             #endregion
+
+            #region General purpose AF operations
+
+            instructions[0x27] = new DecimalAdjustAccumulator(this); // DAA
+
+            #endregion
         }
     }
 }

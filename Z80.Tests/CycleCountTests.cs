@@ -328,6 +328,12 @@ namespace Z80.Tests
 
             #endregion
 
+            #region General purpose AF operations
+
+            generated.Add(new object[] { 0x27, 4 }); // DAA
+
+            #endregion
+
             return generated;
         }
 
