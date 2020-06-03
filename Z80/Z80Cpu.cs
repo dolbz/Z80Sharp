@@ -671,6 +671,7 @@ namespace Z80
             #region General purpose AF operations
 
             instructions[0x27] = new DecimalAdjustAccumulator(this); // DAA
+            instructions[0x2f] = new ComplementAccumulator(this); // CPL
 
             #endregion
         }

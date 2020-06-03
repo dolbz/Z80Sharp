@@ -331,6 +331,7 @@ namespace Z80.Tests
             #region General purpose AF operations
 
             generated.Add(new object[] { 0x27, 4 }); // DAA
+            generated.Add(new object[] { 0x2f, 4 }); // CPL
 
             #endregion
 
