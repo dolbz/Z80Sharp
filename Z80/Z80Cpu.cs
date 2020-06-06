@@ -673,6 +673,7 @@ namespace Z80
             instructions[0x27] = new DecimalAdjustAccumulator(this); // DAA
             instructions[0x2f] = new ComplementAccumulator(this); // CPL
             instructions[0xed44] = new NegateAccumulator(this); // NEG
+            instructions[0x3f] = new ComplementCarryFlag(this); // CCF
 
             #endregion
         }

@@ -333,6 +333,7 @@ namespace Z80.Tests
             generated.Add(new object[] { 0x27, 4 }); // DAA
             generated.Add(new object[] { 0x2f, 4 }); // CPL
             generated.Add(new object[] { 0xed44, 8 }); // NEG
+            generated.Add(new object[] { 0x3f, 4 }); // CCF
 
             #endregion
 
