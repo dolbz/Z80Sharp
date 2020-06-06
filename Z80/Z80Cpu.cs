@@ -674,6 +674,7 @@ namespace Z80
             instructions[0x2f] = new ComplementAccumulator(this); // CPL
             instructions[0xed44] = new NegateAccumulator(this); // NEG
             instructions[0x3f] = new ComplementCarryFlag(this); // CCF
+            instructions[0x37] = new SetCarryFlag(this); // SCF
 
             #endregion
         }

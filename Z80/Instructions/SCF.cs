@@ -1,14 +1,14 @@
 using System;
 namespace Z80.Instructions
 {
-    public class ComplementCarryFlag : IInstruction
+    public class SetCarryFlag : IInstruction
     {
         private Z80Cpu _cpu;
-        public string Mnemonic => "CCF";
+        public string Mnemonic => "SCF";
 
         public bool IsComplete => true;
 
-        public ComplementCarryFlag(Z80Cpu cpu) 
+        public SetCarryFlag(Z80Cpu cpu) 
         {
             _cpu = cpu;
         }
@@ -24,9 +24,9 @@ namespace Z80.Instructions
 
         public void StartExecution()
         {
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
-            Z80Flags.HalfCarry_H.SetOrReset(_cpu, _cpu.Flags.HasFlag(Z80Flags.Carry_C));
-            Z80Flags.Carry_C.SetOrReset(_cpu, !_cpu.Flags.HasFlag(Z80Flags.Carry_C));
+            Z80Flags.Carry_C.SetOrReset(_cpu, true);
         }
     }
 }
