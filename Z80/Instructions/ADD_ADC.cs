@@ -38,7 +38,9 @@ namespace Z80.Instructions
             }
             if (!_valueReader.IsComplete) {
                 _valueReader.Clock();
-                PerformAdd();
+                if (_valueReader.IsComplete) {
+                    PerformAdd();
+                }
             }
         }
 
@@ -75,8 +77,76 @@ namespace Z80.Instructions
             Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 127);
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
-            Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0x1f) - (_valueReader.AddressedValue & 0xf) - carryIn) & 0x10) == 0);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, ((_cpu.A & 0xf) + (_valueReader.AddressedValue & 0xf) + carryIn >= 0x10));
             _cpu.A = (byte)(0xff & result);
+        }
+    }
+
+    internal class Add_16bit : IInstruction
+    {
+        private readonly Z80Cpu _cpu;
+        private readonly RegAddrMode16Bit _destinationAddressMode;
+        private readonly RegAddrMode16Bit _sourceAddressMode;
+        private readonly bool _withCarry;
+        private InternalCycle _internalCycle;
+
+        public string Mnemonic => _withCarry ? "ADC" : "ADD";
+
+        public bool IsComplete => _internalCycle.IsComplete;
+
+        public Add_16bit(Z80Cpu cpu, RegAddrMode16Bit destinationAddressMode, RegAddrMode16Bit sourceAddressMode, int internalCycleLength, bool withCarry = false)
+        {
+            _cpu = cpu;
+            _destinationAddressMode = destinationAddressMode;
+            _sourceAddressMode = sourceAddressMode;
+            _withCarry = withCarry;
+            _internalCycle = new InternalCycle(internalCycleLength);
+        }
+
+        public void Clock()
+        {
+            // Destination and source for 16-bit add instructions are always 16-bit register pairs
+            // This means we don't need to check address mode completion or reader/writer completion
+            // as it's known they are always complete and can be used immediately. We just need to wait
+            // for the internal cycle to complete
+
+            if (!_internalCycle.IsComplete) {
+                _internalCycle.Clock();
+
+                if (_internalCycle.IsComplete) {
+                    PerformAdd();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            // There is no need to call reset on the source/destination as register address modes 
+            // don't have any behaviour on reset
+            _internalCycle.Reset();
+        }
+
+        public void StartExecution()
+        {
+            // Never anything to do for 16-bit additions immediately
+        }
+
+        private void PerformAdd()
+        {
+            var carryIn = 0;
+            if (_withCarry && _cpu.Flags.HasFlag(Z80Flags.Carry_C))
+            {
+                carryIn = 1;
+            }
+            var destOriginalValue = _destinationAddressMode.Reader.AddressedValue;
+            var sourceOriginalValue = _sourceAddressMode.Reader.AddressedValue;
+
+            var result = destOriginalValue + sourceOriginalValue + carryIn;
+            Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+            Z80Flags.Carry_C.SetOrReset(_cpu, result > 0xffff);
+            Z80Flags.HalfCarry_H.SetOrReset(_cpu, ((destOriginalValue & 0xfff) + (sourceOriginalValue & 0xfff) + carryIn >= 0x1000));
+
+            _destinationAddressMode.Writer.AddressedValue = (ushort)result;
         }
     }
 }

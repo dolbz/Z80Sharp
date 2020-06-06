@@ -677,6 +677,15 @@ namespace Z80
             instructions[0x37] = new SetCarryFlag(this); // SCF
 
             #endregion
+
+            #region 16-bit arithmetic
+
+            instructions[0x09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.BC), 7); // ADD HL, BC
+            instructions[0x19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE), 7); // ADD HL, DE
+            instructions[0x29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL), 7); // ADD HL, HL
+            instructions[0x39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP), 7); // ADD HL, SP
+
+            #endregion
         }
     }
 }

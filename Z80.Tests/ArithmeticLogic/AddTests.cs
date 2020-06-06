@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Z80.Tests.ArithmeticLogic
 {
-    public class AddTests : CpuRunTestBase
+    public class AddTests_8Bit : CpuRunTestBase
     {
         [Test]
         public void AddRegisterTest()
@@ -131,11 +131,98 @@ namespace Z80.Tests.ArithmeticLogic
             _cpu.A = 0xf;
             _cpu.D = 1;
             _cpu.Flags = 0;
+
             // Act
             RunUntil(2);
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+
+        [Test]
+        public void AddWithoutHalfCarryDoesntSetHalfCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0x82;
+
+            _cpu.A = 0x9;
+            _cpu.D = 1;
+            _cpu.Flags = 0;
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.Not.True);
+        }
+    }
+
+    public class AddTests_16Bit : CpuRunTestBase
+    {
+        [Test]
+        public void AddToHL()
+        {
+            // Arrange
+            _ram[0] = 0x09;
+
+            WideRegister.BC.SetValueOnProcessor(_cpu, 0x23fc);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x5e94);
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(WideRegister.HL.GetValue(_cpu), Is.EqualTo(0x8290));
+        }
+
+       [Test]
+        public void AddWithUpperByteHalfCarrySetsHalfCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0x19;
+
+            WideRegister.DE.SetValueOnProcessor(_cpu, 0x3400);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x0c00);
+            _cpu.Flags = 0;
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+
+        [Test]
+        public void AddWithCarryOut()
+        {
+            // Arrange
+            _ram[0] = 0x19;
+
+            WideRegister.DE.SetValueOnProcessor(_cpu, 0x3000);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0xd000);
+            _cpu.Flags = 0;
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C));
+        }
+
+        [Test]
+        public void AddResetsNFlag()
+        {
+            // Arrange
+            _ram[0] = 0x19;
+
+            WideRegister.DE.SetValueOnProcessor(_cpu, 0x3000);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0xd000);
+            _cpu.Flags = Z80Flags.AddSubtract_N;
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.Not.True);
         }
     }
 }

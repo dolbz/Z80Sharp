@@ -338,6 +338,15 @@ namespace Z80.Tests
 
             #endregion
 
+            #region 16-bit arithmetic operations
+
+            generated.Add(new object[] { 0x09, 11 }); // ADD HL, BC
+            generated.Add(new object[] { 0x19, 11 }); // ADD HL, DE
+            generated.Add(new object[] { 0x29, 11 }); // ADD HL, HL
+            generated.Add(new object[] { 0x39, 11 }); // ADD HL, SP
+
+            #endregion
+
             return generated;
         }
 

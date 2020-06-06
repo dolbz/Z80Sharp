@@ -145,8 +145,8 @@ namespace Z80.Tests.ArithmeticLogic
             // Arrange
             _ram[0] = 0x92;
 
-            _cpu.A = 0xf0;
-            _cpu.D = 1;
+            _cpu.A = 0x8;
+            _cpu.D = 9;
             _cpu.Flags = 0;
 
             // Act
@@ -154,6 +154,23 @@ namespace Z80.Tests.ArithmeticLogic
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+
+        [Test]
+        public void SubtractWithoutHalfCarryDoesNotSetHalfCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0x92;
+
+            _cpu.A = 0x6;
+            _cpu.D = 5;
+            _cpu.Flags = 0;
+
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.Not.True);
         }
     }
 }
