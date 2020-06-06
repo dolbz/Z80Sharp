@@ -94,13 +94,13 @@ namespace Z80.Instructions
 
         public bool IsComplete => _internalCycle.IsComplete;
 
-        public Add_16bit(Z80Cpu cpu, RegAddrMode16Bit destinationAddressMode, RegAddrMode16Bit sourceAddressMode, int internalCycleLength, bool withCarry = false)
+        public Add_16bit(Z80Cpu cpu, RegAddrMode16Bit destinationAddressMode, RegAddrMode16Bit sourceAddressMode, bool withCarry = false)
         {
             _cpu = cpu;
             _destinationAddressMode = destinationAddressMode;
             _sourceAddressMode = sourceAddressMode;
             _withCarry = withCarry;
-            _internalCycle = new InternalCycle(internalCycleLength);
+            _internalCycle = new InternalCycle(7);
         }
 
         public void Clock()
@@ -142,6 +142,14 @@ namespace Z80.Instructions
             var sourceOriginalValue = _sourceAddressMode.Reader.AddressedValue;
 
             var result = destOriginalValue + sourceOriginalValue + carryIn;
+
+            if (_withCarry) {
+                // Instructions with carry affect the Sign and Zero flags
+                Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xffff) == 0);
+                Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x8000) == 0x8000);
+                Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 0x7fff);
+            }
+
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
             Z80Flags.Carry_C.SetOrReset(_cpu, result > 0xffff);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, ((destOriginalValue & 0xfff) + (sourceOriginalValue & 0xfff) + carryIn >= 0x1000));

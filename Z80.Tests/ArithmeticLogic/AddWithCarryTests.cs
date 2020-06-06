@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Z80.Tests.ArithmeticLogic
 {
-    public class AddWithCarryTests : CpuRunTestBase
+    public class AddWithCarryTests_8bit : CpuRunTestBase
     {
         [Test]
         public void AddRegisterWithCarryInTest()
@@ -147,6 +147,100 @@ namespace Z80.Tests.ArithmeticLogic
 
             // Act
             RunUntil(2);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+    }
+
+    public class AddWithCarryTests_16bit : CpuRunTestBase
+    {
+        [Test]
+        public void AddWithCarryInTest()
+        {
+            // Arrange
+            _ram[0] = 0xed;
+            _ram[1] = 0x4a;
+ 
+            WideRegister.BC.SetValueOnProcessor(_cpu, 0x4ac3);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x0);
+            Z80Flags.Carry_C.SetOrReset(_cpu, true);
+
+            // Act
+            RunUntil(3);
+
+            // Assert
+            Assert.That(WideRegister.HL.GetValue(_cpu), Is.EqualTo(0x4ac4));
+        }
+
+        [Test]
+        public void AddWithNoCarryInTest()
+        {
+            // Arrange
+            _ram[0] = 0xed;
+            _ram[1] = 0x4a;
+ 
+            WideRegister.BC.SetValueOnProcessor(_cpu, 0x4ac3);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x0);
+
+            // Act
+            RunUntil(3);
+
+            // Assert
+            Assert.That(WideRegister.HL.GetValue(_cpu), Is.EqualTo(0x4ac3));
+        }
+
+        [Test]
+        public void AddWithOverflowSetsOverflowAndSignFlags()
+        {
+            // Arrange
+            _ram[0] = 0xed;
+            _ram[1] = 0x5a;
+ 
+            WideRegister.DE.SetValueOnProcessor(_cpu, 0x4ac3);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x4000);
+
+            // Act
+            RunUntil(3);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Sign_S));
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.ParityOverflow_PV));
+        }
+
+        [Test]
+        public void AddWithZeroResultSetsZeroFlagAndCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0xed;
+            _ram[1] = 0x7a;
+ 
+            WideRegister.SP.SetValueOnProcessor(_cpu, 0xfff0);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x000f);
+
+            _cpu.Flags = Z80Flags.Carry_C;
+
+            // Act
+            RunUntil(3);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z));
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Carry_C));
+        }
+
+        [Test]
+        public void AddWithHalfCarrySetsHalfCarryFlag()
+        {
+            // Arrange
+            _ram[0] = 0xed;
+            _ram[1] = 0x5a;
+
+            WideRegister.DE.SetValueOnProcessor(_cpu, 0x3400);
+            WideRegister.HL.SetValueOnProcessor(_cpu, 0x0bff);
+            _cpu.Flags = Z80Flags.Carry_C;
+            
+            // Act
+            RunUntil(3);
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));

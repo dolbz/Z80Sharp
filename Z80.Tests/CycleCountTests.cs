@@ -345,6 +345,26 @@ namespace Z80.Tests
             generated.Add(new object[] { 0x29, 11 }); // ADD HL, HL
             generated.Add(new object[] { 0x39, 11 }); // ADD HL, SP
 
+            generated.Add(new object[] { 0xdd09, 15 }); // ADD IX, BC
+            generated.Add(new object[] { 0xdd19, 15 }); // ADD IX, DE
+            generated.Add(new object[] { 0xdd39, 15 }); // ADD IX, SP
+            generated.Add(new object[] { 0xdd29, 15 }); // ADD IX, IX
+
+            generated.Add(new object[] { 0xfd09, 15 }); // ADD IY, BC
+            generated.Add(new object[] { 0xfd19, 15 }); // ADD IY, DE
+            generated.Add(new object[] { 0xfd39, 15 }); // ADD IY, SP
+            generated.Add(new object[] { 0xfd29, 15 }); // ADD IY, IY
+
+            generated.Add(new object[] { 0xed4a, 15 }); // ADC HL, BC
+            generated.Add(new object[] { 0xed5a, 15 }); // ADC HL, DE
+            generated.Add(new object[] { 0xed6a, 15 }); // ADC HL, HL
+            generated.Add(new object[] { 0xed7a, 15 }); // ADC HL, SP
+
+            generated.Add(new object[] { 0xed42, 15 }); // SBC HL, BC
+            generated.Add(new object[] { 0xed52, 15 }); // SBC HL, DE
+            generated.Add(new object[] { 0xed62, 15 }); // SBC HL, HL
+            generated.Add(new object[] { 0xed72, 15 }); // SBC HL, SP
+
             #endregion
 
             return generated;

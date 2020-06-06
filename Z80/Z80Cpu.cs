@@ -680,11 +680,31 @@ namespace Z80
 
             #region 16-bit arithmetic
 
-            instructions[0x09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.BC), 7); // ADD HL, BC
-            instructions[0x19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE), 7); // ADD HL, DE
-            instructions[0x29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL), 7); // ADD HL, HL
-            instructions[0x39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP), 7); // ADD HL, SP
+            instructions[0x09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.BC)); // ADD HL, BC
+            instructions[0x19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD HL, DE
+            instructions[0x29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL)); // ADD HL, HL
+            instructions[0x39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD HL, SP
+            
+            instructions[0xdd09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.BC)); // ADD IX, BC
+            instructions[0xdd19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD IX, DE
+            instructions[0xdd39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD IX, SP
+            instructions[0xdd29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.IX)); // ADD IX, IX
+            
+            instructions[0xfd09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.BC)); // ADD IY, BC
+            instructions[0xfd19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD IY, DE
+            instructions[0xfd39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD IY, SP
+            instructions[0xfd29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.IY)); // ADD IY, IY
 
+            instructions[0xed4a] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.BC), withCarry: true); // ADC HL, BC
+            instructions[0xed5a] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE), withCarry: true); // ADC HL, DE
+            instructions[0xed6a] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL), withCarry: true); // ADC HL, HL
+            instructions[0xed7a] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP), withCarry: true); // ADC HL, SP
+
+            instructions[0xed42] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.BC)); // SBC HL, BC
+            instructions[0xed52] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE)); // SBC HL, DE
+            instructions[0xed62] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL)); // SBC HL, HL
+            instructions[0xed72] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP)); // SBC HL, SP
+            
             #endregion
         }
     }
