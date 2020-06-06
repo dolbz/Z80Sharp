@@ -2,7 +2,7 @@ using Z80.AddressingModes;
 
 namespace Z80.Instructions
 {
-    internal class Add : IInstruction
+    internal class Add_8bit : IInstruction
     {
         private readonly Z80Cpu _cpu;
         private readonly IAddressMode<byte> _addressMode;
@@ -14,7 +14,7 @@ namespace Z80.Instructions
 
         public bool IsComplete => _valueReader?.IsComplete ?? false;
 
-        public Add(Z80Cpu cpu, IAddressMode<byte> addressMode, bool withCarry = false)
+        public Add_8bit(Z80Cpu cpu, IAddressMode<byte> addressMode, bool withCarry = false)
         {
             _cpu = cpu;
             _addressMode = addressMode;
