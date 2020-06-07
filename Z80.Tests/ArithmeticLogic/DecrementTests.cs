@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Z80.Tests.ArithmeticLogic
 {
-    public class DecrementsTests : CpuRunTestBase
+    public class DecrementsTests_8bit : CpuRunTestBase
     {
         [Test]
         public void DecrementRegisterTest()
@@ -119,6 +119,40 @@ namespace Z80.Tests.ArithmeticLogic
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+    }
+
+    public class DecrementsTests_16bit : CpuRunTestBase
+    {
+        [Test]
+        public void DecrementRegisterTest()
+        {
+            // Arrange
+            _ram[0] = 0x3b;
+
+            WideRegister.SP.SetValueOnProcessor(_cpu, 0x8214);
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(WideRegister.SP.GetValue(_cpu), Is.EqualTo(0x8213));
+        }
+
+        [Test]
+        public void DecrementDoesntAffectFlags()
+        {
+            // Arrange
+            _ram[0] = 0x3b;
+
+            WideRegister.SP.SetValueOnProcessor(_cpu, 0x8000);
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(WideRegister.SP.GetValue(_cpu), Is.EqualTo(0x7fff));
+            Assert.That(_cpu.Flags, Is.EqualTo((Z80Flags)0x0));
         }
     }
 }

@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Z80.Tests.ArithmeticLogic
 {
-    public class IncrementsTests : CpuRunTestBase
+    public class IncrementsTests_8bit : CpuRunTestBase
     {
         [Test]
         public void IncrementRegisterTest()
@@ -119,6 +119,40 @@ namespace Z80.Tests.ArithmeticLogic
 
             // Assert
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H));
+        }
+    }
+
+    public class IncrementsTests_16bit : CpuRunTestBase
+    {
+        [Test]
+        public void IncrementRegisterTest()
+        {
+            // Arrange
+            _ram[0] = 0x33;
+
+            WideRegister.SP.SetValueOnProcessor(_cpu, 0x8214);
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(WideRegister.SP.GetValue(_cpu), Is.EqualTo(0x8215));
+        }
+
+        [Test]
+        public void IncrementDoesntAffectFlags()
+        {
+            // Arrange
+            _ram[0] = 0x33;
+
+            WideRegister.SP.SetValueOnProcessor(_cpu, 0x7fff);
+            
+            // Act
+            RunUntil(2);
+
+            // Assert
+            Assert.That(WideRegister.SP.GetValue(_cpu), Is.EqualTo(0x8000));
+            Assert.That(_cpu.Flags, Is.EqualTo((Z80Flags)0x0));
         }
     }
 }

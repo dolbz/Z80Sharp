@@ -79,4 +79,40 @@ namespace Z80.Instructions
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, (addressedValue & 0xf) == 0);
         }
     }
+
+    public class Decrement_16bit : IInstruction
+    {
+        public string Mnemonic => "DEC";
+
+        public bool IsComplete => _remainingM1Cycles <= 0;
+
+        private readonly Z80Cpu _cpu;
+        private readonly RegAddrMode16Bit _addressMode;
+        
+        private int _remainingM1Cycles;
+
+        public Decrement_16bit(Z80Cpu cpu, RegAddrMode16Bit addressMode) 
+        {
+            _cpu = cpu;
+            _addressMode = addressMode;
+            _remainingM1Cycles = 2;
+        }
+
+        public void Clock()
+        {
+            if (--_remainingM1Cycles <= 0)
+            {
+                _addressMode.Writer.AddressedValue = (ushort)(_addressMode.Reader.AddressedValue - 1);
+            }
+        }
+
+        public void Reset()
+        {
+            _remainingM1Cycles = 2;
+        }
+
+        public void StartExecution()
+        {
+        }
+    }
 }

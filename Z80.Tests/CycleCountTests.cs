@@ -365,6 +365,20 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xed62, 15 }); // SBC HL, HL
             generated.Add(new object[] { 0xed72, 15 }); // SBC HL, SP
 
+            generated.Add(new object[] { 0x03, 6 }); // INC BC
+            generated.Add(new object[] { 0x13, 6 }); // INC DE
+            generated.Add(new object[] { 0x23, 6 }); // INC HL
+            generated.Add(new object[] { 0x33, 6 }); // INC SP
+            generated.Add(new object[] { 0xdd23, 10 }); // INC IX
+            generated.Add(new object[] { 0xfd23, 10 }); // INC IY
+
+            generated.Add(new object[] { 0x0b, 6 }); // DEC BC
+            generated.Add(new object[] { 0x1b, 6 }); // DEC DE
+            generated.Add(new object[] { 0x2b, 6 }); // DEC HL
+            generated.Add(new object[] { 0x3b, 6 }); // DEC SP
+            generated.Add(new object[] { 0xdd2b, 10 }); // DEC IX
+            generated.Add(new object[] { 0xfd2b, 10 }); // DEC IY
+
             #endregion
 
             return generated;

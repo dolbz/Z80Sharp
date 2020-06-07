@@ -3,7 +3,7 @@
 namespace Z80.Instructions
 {
 
-    public class Increment : IInstruction
+    public class Increment_8bit : IInstruction
     {
         public string Mnemonic => "INC";
 
@@ -14,7 +14,7 @@ namespace Z80.Instructions
         private IReadAddressedOperand<byte> _valueReader;
         private IWriteAddressedOperand<byte> _valueWriter;
 
-        public Increment(Z80Cpu cpu, IAddressMode<byte> addressMode) 
+        public Increment_8bit(Z80Cpu cpu, IAddressMode<byte> addressMode) 
         {
             _cpu = cpu;
             _addressMode = addressMode;
@@ -76,6 +76,42 @@ namespace Z80.Instructions
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, (result & 0xf) == 0);
+        }
+    }
+
+    public class Increment_16bit : IInstruction
+    {
+        public string Mnemonic => "INC";
+
+        public bool IsComplete => _remainingM1Cycles <= 0;
+
+        private readonly Z80Cpu _cpu;
+        private readonly RegAddrMode16Bit _addressMode;
+        
+        private int _remainingM1Cycles;
+
+        public Increment_16bit(Z80Cpu cpu, RegAddrMode16Bit addressMode) 
+        {
+            _cpu = cpu;
+            _addressMode = addressMode;
+            _remainingM1Cycles = 2;
+        }
+
+        public void Clock()
+        {
+            if (--_remainingM1Cycles <= 0)
+            {
+                _addressMode.Writer.AddressedValue = (ushort)(_addressMode.Reader.AddressedValue + 1);
+            }
+        }
+
+        public void Reset()
+        {
+            _remainingM1Cycles = 2;
+        }
+
+        public void StartExecution()
+        {
         }
     }
 }
