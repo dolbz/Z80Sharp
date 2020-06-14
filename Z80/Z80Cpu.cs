@@ -651,7 +651,7 @@ namespace Z80
             instructions[0x1c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.E)); // INC E
             instructions[0x24] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.H)); // INC H
             instructions[0x2c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.L)); // INC L
-            instructions[0x34] = new Increment_8bit(this, new RegIndirect(this, WideRegister.HL, 1)); // INC (HL)
+            instructions[0x34] = new Increment_8bit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // INC (HL)
             instructions[0xdd34] = new Increment_8bit(this, new Indexed(this, WideRegister.IX, additionalCycleOnRead: true)); // INC (IX+d)
             instructions[0xfd34] = new Increment_8bit(this, new Indexed(this, WideRegister.IY, additionalCycleOnRead: true)); // INC (IY+d)
 
@@ -662,7 +662,7 @@ namespace Z80
             instructions[0x1d] = new Decrement(this, new RegAddrMode8Bit(this, Register.E)); // DEC E
             instructions[0x25] = new Decrement(this, new RegAddrMode8Bit(this, Register.H)); // DEC H
             instructions[0x2d] = new Decrement(this, new RegAddrMode8Bit(this, Register.L)); // DEC L
-            instructions[0x35] = new Decrement(this, new RegIndirect(this, WideRegister.HL, 1)); // DEC (HL)
+            instructions[0x35] = new Decrement(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // DEC (HL)
             instructions[0xdd35] = new Decrement(this, new Indexed(this, WideRegister.IX, additionalCycleOnRead: true)); // DEC (IX+d)
             instructions[0xfd35] = new Decrement(this, new Indexed(this, WideRegister.IY, additionalCycleOnRead: true)); // DEC (IY+d)
 
@@ -718,6 +718,83 @@ namespace Z80
             instructions[0x3b] = new Decrement_16bit(this, new RegAddrMode16Bit(this, WideRegister.SP)); // DEC SP
             instructions[0xdd2b] = new Decrement_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX)); // DEC IX
             instructions[0xfd2b] = new Decrement_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY)); // DEC IY
+
+            #endregion
+
+            #region Rotates and shifts
+
+            // 8080 compatible instructions
+            instructions[0x07] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.A), circular: true, is8080Compatible: true); // RLCA
+            instructions[0x0f] = new RotateRight(this, new RegAddrMode8Bit(this, Register.A), circular: true, is8080Compatible: true); // RRCA
+            instructions[0x17] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.A), is8080Compatible: true); // RLA
+            instructions[0x1f] = new RotateRight(this, new RegAddrMode8Bit(this, Register.A), is8080Compatible: true); // RRA
+
+            //  Z80 added instructions
+            instructions[0xcb07] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.A), circular: true); // RLC A
+            instructions[0xcb00] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.B), circular: true); // RLC B
+            instructions[0xcb01] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.C), circular: true); // RLC C
+            instructions[0xcb02] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.D), circular: true); // RLC D
+            instructions[0xcb03] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.E), circular: true); // RLC E
+            instructions[0xcb04] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.H), circular: true); // RLC H
+            instructions[0xcb05] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.L), circular: true); // RLC L
+            instructions[0xcb06] = new RotateLeft(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), circular: true); // RLC (HL)
+
+            instructions[0xcb0f] = new RotateRight(this, new RegAddrMode8Bit(this, Register.A), circular: true); // RRC A
+            instructions[0xcb08] = new RotateRight(this, new RegAddrMode8Bit(this, Register.B), circular: true); // RRC B
+            instructions[0xcb09] = new RotateRight(this, new RegAddrMode8Bit(this, Register.C), circular: true); // RRC C
+            instructions[0xcb0a] = new RotateRight(this, new RegAddrMode8Bit(this, Register.D), circular: true); // RRC D
+            instructions[0xcb0b] = new RotateRight(this, new RegAddrMode8Bit(this, Register.E), circular: true); // RRC E
+            instructions[0xcb0c] = new RotateRight(this, new RegAddrMode8Bit(this, Register.H), circular: true); // RRC H
+            instructions[0xcb0d] = new RotateRight(this, new RegAddrMode8Bit(this, Register.L), circular: true); // RRC L
+            instructions[0xcb0e] = new RotateRight(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), circular: true); // RRC (HL)
+
+            instructions[0xcb17] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.A)); // RL A
+            instructions[0xcb10] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.B)); // RL B
+            instructions[0xcb11] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.C)); // RL C
+            instructions[0xcb12] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.D)); // RL D
+            instructions[0xcb13] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.E)); // RL E
+            instructions[0xcb14] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.H)); // RL H
+            instructions[0xcb15] = new RotateLeft(this, new RegAddrMode8Bit(this, Register.L)); // RL L
+            instructions[0xcb16] = new RotateLeft(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // RL (HL)
+
+            instructions[0xcb1f] = new RotateRight(this, new RegAddrMode8Bit(this, Register.A)); // RR A
+            instructions[0xcb18] = new RotateRight(this, new RegAddrMode8Bit(this, Register.B)); // RR B
+            instructions[0xcb19] = new RotateRight(this, new RegAddrMode8Bit(this, Register.C)); // RR C
+            instructions[0xcb1a] = new RotateRight(this, new RegAddrMode8Bit(this, Register.D)); // RR D
+            instructions[0xcb1b] = new RotateRight(this, new RegAddrMode8Bit(this, Register.E)); // RR E
+            instructions[0xcb1c] = new RotateRight(this, new RegAddrMode8Bit(this, Register.H)); // RR H
+            instructions[0xcb1d] = new RotateRight(this, new RegAddrMode8Bit(this, Register.L)); // RR L
+            instructions[0xcb1e] = new RotateRight(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // RR (HL)
+
+            instructions[0xcb27] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.A)); // SLA A
+            instructions[0xcb20] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.B)); // SLA B
+            instructions[0xcb21] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.C)); // SLA C
+            instructions[0xcb22] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.D)); // SLA D
+            instructions[0xcb23] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.E)); // SLA E
+            instructions[0xcb24] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.H)); // SLA H
+            instructions[0xcb25] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.L)); // SLA L
+            instructions[0xcb26] = new ShiftLeftArithmetic(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // SLA (HL)
+
+            instructions[0xcb2f] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.A)); // SRA A
+            instructions[0xcb28] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.B)); // SRA B
+            instructions[0xcb29] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.C)); // SRA C
+            instructions[0xcb2a] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.D)); // SRA D
+            instructions[0xcb2b] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.E)); // SRA E
+            instructions[0xcb2c] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.H)); // SRA H
+            instructions[0xcb2d] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.L)); // SRA L
+            instructions[0xcb2e] = new ShiftRightArithmetic(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // SRA (HL)
+
+            instructions[0xcb3f] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.A)); // SRL A
+            instructions[0xcb38] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.B)); // SRL B
+            instructions[0xcb39] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.C)); // SRL C
+            instructions[0xcb3a] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.D)); // SRL D
+            instructions[0xcb3b] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.E)); // SRL E
+            instructions[0xcb3c] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.H)); // SRL H
+            instructions[0xcb3d] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.L)); // SRL L
+            instructions[0xcb3e] = new ShiftRightLogical(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // SRL (HL)
+
+            instructions[0xddcb] = new RotateIndexed(this, WideRegister.IX); // Covers all (IX+d) rotates and shifts
+            instructions[0xfdcb] = new RotateIndexed(this, WideRegister.IY); // Covers all (IY+d) rotates and shifts
 
             #endregion
         }

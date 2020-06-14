@@ -381,6 +381,98 @@ namespace Z80.Tests
 
             #endregion
 
+            #region Rotates and Shifts
+
+            generated.Add(new object[] { 0x07, 4 }); // RLCA
+            generated.Add(new object[] { 0x0f, 4 }); // RRCA
+            generated.Add(new object[] { 0x17, 4 }); // RLA
+            generated.Add(new object[] { 0x1f, 4 }); // RRA
+
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb00 + i, 15 }); // RLC (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb00 + i, 8 }); // RLC r
+                }
+            }
+
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb08 + i, 15 }); // RRC (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb08 + i, 8 }); // RRC r
+                }
+            }
+
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb10 + i, 15 }); // RL (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb10 + i, 8 }); // RL r
+                }
+            }
+
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb18 + i, 15 }); // RR (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb18 + i, 8 }); // RR r
+                }
+            }
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb20 + i, 15 }); // SLA (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb20 + i, 8 }); // SLA r
+                }
+            }
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb28 + i, 15 }); // SRA (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb28 + i, 8 }); // SRA r
+                }
+            }
+            for(int i = 0; i < 8; i++) 
+            {
+                if (i == 6) 
+                {
+                    generated.Add(new object[] { 0xcb38 + i, 15 }); // SRL (HL)
+                } 
+                else 
+                {
+                    generated.Add(new object[] { 0xcb38 + i, 8 }); // SRL r
+                }
+            }
+
+            // generated.Add(new object[] { 0xddcb, 23 }); // RLC (IX+d) // TODO how to test these?
+
+            #endregion
+
             return generated;
         }
 

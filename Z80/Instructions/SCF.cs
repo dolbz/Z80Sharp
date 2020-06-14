@@ -1,4 +1,5 @@
 using System;
+
 namespace Z80.Instructions
 {
     public class SetCarryFlag : IInstruction

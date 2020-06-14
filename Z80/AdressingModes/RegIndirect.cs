@@ -5,29 +5,28 @@ namespace Z80.AddressingModes
     {
         private readonly Z80Cpu _cpu;
         private readonly WideRegister _register;
-        private readonly InternalCycle _internalCycle;
+        private bool _additonalCycleOnReader;
 
-        public bool IsComplete => _internalCycle.IsComplete;
+        public bool IsComplete => true;
 
-        public IReadAddressedOperand<byte> Reader => new MemoryByteReader(_cpu, _register.GetValue(_cpu));
+        public IReadAddressedOperand<byte> Reader => new MemoryByteReader(_cpu, _register.GetValue(_cpu), _additonalCycleOnReader);
 
         public IWriteAddressedOperand<byte> Writer => new MemoryByteWriter(_cpu, _register.GetValue(_cpu));
 
-        public RegIndirect(Z80Cpu cpu, WideRegister register, int additionalCycles = 0)
+        public RegIndirect(Z80Cpu cpu, WideRegister register, bool additionalCycleOnRead = false)
         {
             _cpu = cpu;
             _register = register;
-            _internalCycle = new InternalCycle(additionalCycles);
+            _additonalCycleOnReader = additionalCycleOnRead;
         }
 
         public void Clock()
         {
-            _internalCycle.Clock();
+            throw new InvalidOperationException();
         }
 
         public void Reset()
         {
-            _internalCycle.Reset();
         }
     }
 }
