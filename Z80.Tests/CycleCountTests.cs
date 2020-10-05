@@ -470,6 +470,9 @@ namespace Z80.Tests
             }
 
             // generated.Add(new object[] { 0xddcb, 23 }); // RLC (IX+d) // TODO how to test these?
+            
+            generated.Add(new object[] { 0xed6f, 18 });
+            generated.Add(new object[] { 0xed67, 18 });
 
             #endregion
 

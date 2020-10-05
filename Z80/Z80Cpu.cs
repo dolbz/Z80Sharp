@@ -796,6 +796,9 @@ namespace Z80
             instructions[0xddcb] = new RotateIndexed(this, WideRegister.IX); // Covers all (IX+d) rotates and shifts
             instructions[0xfdcb] = new RotateIndexed(this, WideRegister.IY); // Covers all (IY+d) rotates and shifts
 
+            instructions[0xed6f] = new RotateDigit(this, isLeftShift: true); // RLD (HL)
+            instructions[0xed67] = new RotateDigit(this, isLeftShift: false); // RRD (HL)
+
             #endregion
         }
     }

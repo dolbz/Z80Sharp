@@ -259,4 +259,78 @@ namespace Z80.Instructions
         {
         }
     }
+
+    public class RotateDigit : IInstruction
+    {
+        private Z80Cpu _cpu;
+        private RegIndirect _addressMode;
+        private InternalCycle _internalCycle;
+        private IWriteAddressedOperand<byte> _writer;
+        private IReadAddressedOperand<byte> _reader;
+
+        private bool _isLeftShift;
+
+        public string Mnemonic => "R" + (_isLeftShift ? "L" : "R") + "D";
+
+        public bool IsComplete => _writer != null && _writer.IsComplete;
+
+        public RotateDigit(Z80Cpu cpu, bool isLeftShift) {
+            _cpu = cpu;
+            _addressMode = new RegIndirect(_cpu, WideRegister.HL);
+            _internalCycle = new InternalCycle(4);
+            _isLeftShift = isLeftShift;
+        }
+
+        public void Clock()
+        {
+            if (!_reader.IsComplete) {
+                _reader.Clock();
+                return;
+            }
+            if (!_internalCycle.IsComplete) {
+                _internalCycle.Clock();
+                if (_internalCycle.IsComplete) {
+                    var originalAccBits = _cpu.A & 0x0f;
+                    var newAccBits = 0;
+                    var shiftedValue = 0;
+                    if (_isLeftShift) {
+                        newAccBits = (_reader.AddressedValue & 0xf0) >> 4;
+                        shiftedValue = _reader.AddressedValue << 4;
+                    } else {
+                        newAccBits = _reader.AddressedValue & 0x0f;
+                        originalAccBits = originalAccBits << 4;
+                        shiftedValue = _reader.AddressedValue >> 4;
+                    }
+                    
+                    var newPointedValue = (shiftedValue & 0xff) | originalAccBits;
+                    _writer = _addressMode.Writer;
+                    _writer.AddressedValue = (byte)newPointedValue;
+                    _cpu.A = (byte)((_cpu.A & 0xf0) | newAccBits);
+
+                    // Set the flags
+                    Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
+                    Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+
+                    Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, _cpu.A.IsEvenParity());
+                    Z80Flags.Sign_S.SetOrReset(_cpu, _cpu.A >= 0x80);
+                    Z80Flags.Zero_Z.SetOrReset(_cpu, _cpu.A == 0);
+                }
+                return;
+            }
+            if (!_writer.IsComplete) {
+                _writer.Clock();
+            }
+        }
+
+        public void Reset()
+        {
+            _reader = _addressMode.Reader;;
+            _internalCycle.Reset();
+            _writer = null;
+        }
+
+        public void StartExecution()
+        {
+        }
+    }
 }
