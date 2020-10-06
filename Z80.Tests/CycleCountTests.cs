@@ -474,6 +474,16 @@ namespace Z80.Tests
             generated.Add(new object[] { 0xed6f, 18 });
             generated.Add(new object[] { 0xed67, 18 });
 
+            for (int i = 0xcb47; i < 0xcbff; i++) {
+                if (((i & 0xf) == 0x6) || ((i & 0xf) == 0xe)) {
+                    generated.Add(new object[] { i, i < 0xcb80 ? 12 : 15 }); // 12 for BIT instructions, 15 for SET/RST
+                } else {
+                    generated.Add(new object[] { i, 8 }); // All register targeted BIT, SET, RST instructions
+                }
+            }
+
+            // TODO indexed BIT,SET,RST
+
             #endregion
 
             return generated;

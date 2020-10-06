@@ -324,7 +324,7 @@ namespace Z80.Instructions
 
         public void Reset()
         {
-            _reader = _addressMode.Reader;;
+            _reader = _addressMode.Reader;
             _internalCycle.Reset();
             _writer = null;
         }

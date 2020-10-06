@@ -799,6 +799,234 @@ namespace Z80
             instructions[0xed6f] = new RotateDigit(this, isLeftShift: true); // RLD (HL)
             instructions[0xed67] = new RotateDigit(this, isLeftShift: false); // RRD (HL)
 
+            instructions[0xcb47] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 0); // BIT 0,A
+            instructions[0xcb40] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 0); // BIT 0,B
+            instructions[0xcb41] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 0); // BIT 0,C
+            instructions[0xcb42] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 0); // BIT 0,D
+            instructions[0xcb43] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 0); // BIT 0,E
+            instructions[0xcb44] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 0); // BIT 0,H
+            instructions[0xcb45] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 0); // BIT 0,L
+            instructions[0xcb46] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 0); // BIT 0,(HL)
+
+            instructions[0xcb4f] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 1); // BIT 1,A
+            instructions[0xcb48] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 1); // BIT 1,B
+            instructions[0xcb49] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 1); // BIT 1,C
+            instructions[0xcb4a] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 1); // BIT 1,D
+            instructions[0xcb4b] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 1); // BIT 1,E
+            instructions[0xcb4c] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 1); // BIT 1,H
+            instructions[0xcb4d] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 1); // BIT 1,L
+            instructions[0xcb4e] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 1); // BIT 1,(HL)
+
+            instructions[0xcb57] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 2); // BIT 2,A
+            instructions[0xcb50] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 2); // BIT 2,B
+            instructions[0xcb51] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 2); // BIT 2,C
+            instructions[0xcb52] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 2); // BIT 2,D
+            instructions[0xcb53] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 2); // BIT 2,E
+            instructions[0xcb54] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 2); // BIT 2,H
+            instructions[0xcb55] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 2); // BIT 2,L
+            instructions[0xcb56] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 2); // BIT 2,(HL)
+
+            instructions[0xcb5f] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 3); // BIT 3,A
+            instructions[0xcb58] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 3); // BIT 3,B
+            instructions[0xcb59] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 3); // BIT 3,C
+            instructions[0xcb5a] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 3); // BIT 3,D
+            instructions[0xcb5b] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 3); // BIT 3,E
+            instructions[0xcb5c] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 3); // BIT 3,H
+            instructions[0xcb5d] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 3); // BIT 3,L
+            instructions[0xcb5e] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 3); // BIT 3,(HL)
+
+            instructions[0xcb67] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 4); // BIT 4,A
+            instructions[0xcb60] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 4); // BIT 4,B
+            instructions[0xcb61] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 4); // BIT 4,C
+            instructions[0xcb62] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 4); // BIT 4,D
+            instructions[0xcb63] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 4); // BIT 4,E
+            instructions[0xcb64] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 4); // BIT 4,H
+            instructions[0xcb65] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 4); // BIT 4,L
+            instructions[0xcb66] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 4); // BIT 4,(HL)
+
+            instructions[0xcb6f] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 5); // BIT 5,A
+            instructions[0xcb68] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 5); // BIT 5,B
+            instructions[0xcb69] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 5); // BIT 5,C
+            instructions[0xcb6a] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 5); // BIT 5,D
+            instructions[0xcb6b] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 5); // BIT 5,E
+            instructions[0xcb6c] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 5); // BIT 5,H
+            instructions[0xcb6d] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 5); // BIT 5,L
+            instructions[0xcb6e] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 5); // BIT 5,(HL)
+
+            instructions[0xcb77] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 6); // BIT 6,A
+            instructions[0xcb70] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 6); // BIT 6,B
+            instructions[0xcb71] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 6); // BIT 6,C
+            instructions[0xcb72] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 6); // BIT 6,D
+            instructions[0xcb73] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 6); // BIT 6,E
+            instructions[0xcb74] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 6); // BIT 6,H
+            instructions[0xcb75] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 6); // BIT 6,L
+            instructions[0xcb76] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 6); // BIT 6,(HL)
+
+            instructions[0xcb7f] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 7); // BIT 7,A
+            instructions[0xcb78] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 7); // BIT 7,B
+            instructions[0xcb79] = new BitTest(this, new RegAddrMode8Bit(this, Register.C), 7); // BIT 7,C
+            instructions[0xcb7a] = new BitTest(this, new RegAddrMode8Bit(this, Register.D), 7); // BIT 7,D
+            instructions[0xcb7b] = new BitTest(this, new RegAddrMode8Bit(this, Register.E), 7); // BIT 7,E
+            instructions[0xcb7c] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 7); // BIT 7,H
+            instructions[0xcb7d] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 7); // BIT 7,L
+            instructions[0xcb7e] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7); // BIT 7,(HL) 
+            
+            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
+            //instructions[0xddcb] = new BitTestIndexed(this, new Indexed(this, WideRegister.IX)); // BIT x,(IX+d)
+            //instructions[0xfdcb] = new BitTestIndexed(this, new Indexed(this, WideRegister.IY)); // BIT x,(IY+d)
+
+            instructions[0xcb87] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 0, false); // RES 0,A
+            instructions[0xcb80] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 0, false); // RES 0,B
+            instructions[0xcb81] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 0, false); // RES 0,C
+            instructions[0xcb82] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 0, false); // RES 0,D
+            instructions[0xcb83] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 0, false); // RES 0,E
+            instructions[0xcb84] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 0, false); // RES 0,H
+            instructions[0xcb85] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 0, false); // RES 0,L
+            instructions[0xcb86] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 0, false); // RES 0,(HL)
+
+            instructions[0xcb8f] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 1, false); // RES 1,A
+            instructions[0xcb88] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 1, false); // RES 1,B
+            instructions[0xcb89] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 1, false); // RES 1,C
+            instructions[0xcb8a] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 1, false); // RES 1,D
+            instructions[0xcb8b] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 1, false); // RES 1,E
+            instructions[0xcb8c] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 1, false); // RES 1,H
+            instructions[0xcb8d] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 1, false); // RES 1,L
+            instructions[0xcb8e] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 1, false); // RES 1,(HL)
+
+            instructions[0xcb97] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 2, false); // RES 2,A
+            instructions[0xcb90] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 2, false); // RES 2,B
+            instructions[0xcb91] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 2, false); // RES 2,C
+            instructions[0xcb92] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 2, false); // RES 2,D
+            instructions[0xcb93] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 2, false); // RES 2,E
+            instructions[0xcb94] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 2, false); // RES 2,H
+            instructions[0xcb95] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 2, false); // RES 2,L
+            instructions[0xcb96] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 2, false); // RES 2,(HL)
+
+            instructions[0xcb9f] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 3, false); // RES 3,A
+            instructions[0xcb98] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 3, false); // RES 3,B
+            instructions[0xcb99] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 3, false); // RES 3,C
+            instructions[0xcb9a] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 3, false); // RES 3,D
+            instructions[0xcb9b] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 3, false); // RES 3,E
+            instructions[0xcb9c] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 3, false); // RES 3,H
+            instructions[0xcb9d] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 3, false); // RES 3,L
+            instructions[0xcb9e] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 3, false); // RES 3,(HL)
+
+            instructions[0xcba7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 4, false); // RES 4,A
+            instructions[0xcba0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 4, false); // RES 4,B
+            instructions[0xcba1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 4, false); // RES 4,C
+            instructions[0xcba2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 4, false); // RES 4,D
+            instructions[0xcba3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 4, false); // RES 4,E
+            instructions[0xcba4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 4, false); // RES 4,H
+            instructions[0xcba5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 4, false); // RES 4,L
+            instructions[0xcba6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 4, false); // RES 4,(HL)
+
+            instructions[0xcbaf] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 5, false); // RES 5,A
+            instructions[0xcba8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 5, false); // RES 5,B
+            instructions[0xcba9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 5, false); // RES 5,C
+            instructions[0xcbaa] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 5, false); // RES 5,D
+            instructions[0xcbab] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 5, false); // RES 5,E
+            instructions[0xcbac] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 5, false); // RES 5,H
+            instructions[0xcbad] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 5, false); // RES 5,L
+            instructions[0xcbae] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 5, false); // RES 5,(HL)
+
+            instructions[0xcbb7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 6, false); // RES 6,A
+            instructions[0xcbb0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 6, false); // RES 6,B
+            instructions[0xcbb1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 6, false); // RES 6,C
+            instructions[0xcbb2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 6, false); // RES 6,D
+            instructions[0xcbb3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 6, false); // RES 6,E
+            instructions[0xcbb4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 6, false); // RES 6,H
+            instructions[0xcbb5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 6, false); // RES 6,L
+            instructions[0xcbb6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 6, false); // RES 6,(HL)
+
+            instructions[0xcbbf] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 7, false); // RES 7,A
+            instructions[0xcbb8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 7, false); // RES 7,B
+            instructions[0xcbb9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 7, false); // RES 7,C
+            instructions[0xcbba] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 7, false); // RES 7,D
+            instructions[0xcbbb] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 7, false); // RES 7,E
+            instructions[0xcbbc] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 7, false); // RES 7,H
+            instructions[0xcbbd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 7, false); // RES 7,L
+            instructions[0xcbbe] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7, false); // RES 7,(HL)
+
+            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
+            //instructions[0xddcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IX)); // RES x,(IX+d)
+            //instructions[0xfdcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IY)); // RES x,(IY+d)
+
+            instructions[0xcbc7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 0, true); // SET 0,A
+            instructions[0xcbc0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 0, true); // SET 0,B
+            instructions[0xcbc1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 0, true); // SET 0,C
+            instructions[0xcbc2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 0, true); // SET 0,D
+            instructions[0xcbc3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 0, true); // SET 0,E
+            instructions[0xcbc4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 0, true); // SET 0,H
+            instructions[0xcbc5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 0, true); // SET 0,L
+            instructions[0xcbc6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 0, true); // SET 0,(HL)
+
+            instructions[0xcbcf] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 1, true); // SET 1,A
+            instructions[0xcbc8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 1, true); // SET 1,B
+            instructions[0xcbc9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 1, true); // SET 1,C
+            instructions[0xcbca] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 1, true); // SET 1,D
+            instructions[0xcbcb] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 1, true); // SET 1,E
+            instructions[0xcbcc] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 1, true); // SET 1,H
+            instructions[0xcbcd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 1, true); // SET 1,L
+            instructions[0xcbce] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 1, true); // SET 1,(HL)
+
+            instructions[0xcbd7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 2, true); // SET 2,A
+            instructions[0xcbd0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 2, true); // SET 2,B
+            instructions[0xcbd1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 2, true); // SET 2,C
+            instructions[0xcbd2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 2, true); // SET 2,D
+            instructions[0xcbd3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 2, true); // SET 2,E
+            instructions[0xcbd4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 2, true); // SET 2,H
+            instructions[0xcbd5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 2, true); // SET 2,L
+            instructions[0xcbd6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 2, true); // SET 2,(HL)
+
+            instructions[0xcbdf] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 3, true); // SET 3,A
+            instructions[0xcbd8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 3, true); // SET 3,B
+            instructions[0xcbd9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 3, true); // SET 3,C
+            instructions[0xcbda] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 3, true); // SET 3,D
+            instructions[0xcbdb] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 3, true); // SET 3,E
+            instructions[0xcbdc] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 3, true); // SET 3,H
+            instructions[0xcbdd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 3, true); // SET 3,L
+            instructions[0xcbde] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 3, true); // SET 3,(HL)
+
+            instructions[0xcbe7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 4, true); // SET 4,A
+            instructions[0xcbe0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 4, true); // SET 4,B
+            instructions[0xcbe1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 4, true); // SET 4,C
+            instructions[0xcbe2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 4, true); // SET 4,D
+            instructions[0xcbe3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 4, true); // SET 4,E
+            instructions[0xcbe4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 4, true); // SET 4,H
+            instructions[0xcbe5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 4, true); // SET 4,L
+            instructions[0xcbe6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 4, true); // RES 4,(HL)
+
+            instructions[0xcbef] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 5, true); // SET 5,A
+            instructions[0xcbe8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 5, true); // SET 5,B
+            instructions[0xcbe9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 5, true); // SET 5,C
+            instructions[0xcbea] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 5, true); // SET 5,D
+            instructions[0xcbeb] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 5, true); // SET 5,E
+            instructions[0xcbec] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 5, true); // SET 5,H
+            instructions[0xcbed] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 5, true); // SET 5,L
+            instructions[0xcbee] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 5, true); // SET 5,(HL)
+
+            instructions[0xcbf7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 6, true); // SET 6,A
+            instructions[0xcbf0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 6, true); // SET 6,B
+            instructions[0xcbf1] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 6, true); // SET 6,C
+            instructions[0xcbf2] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 6, true); // SET 6,D
+            instructions[0xcbf3] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 6, true); // SET 6,E
+            instructions[0xcbf4] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 6, true); // SET 6,H
+            instructions[0xcbf5] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 6, true); // SET 6,L
+            instructions[0xcbf6] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 6, true); // SET 6,(HL)
+
+            instructions[0xcbff] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 7, true); // SET 7,A
+            instructions[0xcbf8] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 7, true); // SET 7,B
+            instructions[0xcbf9] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.C), 7, true); // SET 7,C
+            instructions[0xcbfa] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.D), 7, true); // SET 7,D
+            instructions[0xcbfb] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.E), 7, true); // SET 7,E
+            instructions[0xcbfc] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.H), 7, true); // SET 7,H
+            instructions[0xcbfd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 7, true); // SET 7,L
+            instructions[0xcbfe] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7, true); // SET 7,(HL)
+
+            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
+            //instructions[0xddcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IX)); // SET x,(IX+d)
+            //instructions[0xfdcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IY)); // SET x,(IY+d)
+
             #endregion
         }
     }
