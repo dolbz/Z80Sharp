@@ -32,5 +32,23 @@ namespace Z80.Tests.BitManipulation
             // Assert
             Assert.That(_ram[0x70fc], Is.EqualTo(0b10011111));
         }
+
+        [Test]
+        public void BitResetIndexed() {
+            // Arrange
+            _ram[0] = 0xdd;
+            _ram[1] = 0xcb; // RST 4,(IX+d)
+            _ram[2] = 3;
+            _ram[3] = 0xa6;
+            _ram[0x41c3] = 0b11011111;
+
+            WideRegister.IX.SetValueOnProcessor(_cpu, 0x41c0);
+
+            // Act
+            RunUntil(6);
+
+            // Assert
+            Assert.That(_ram[0x41c3], Is.EqualTo(0b11001111));
+        }
     }
 }

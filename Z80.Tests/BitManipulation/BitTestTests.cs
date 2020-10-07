@@ -60,5 +60,49 @@ namespace Z80.Tests.BitManipulation
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.True); // Flag is set
             Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.False); // Flag is reset
         }
+
+        [Test]
+        public void BitTestIndexed_BitIsSet() {
+            // Arrange
+            _ram[0] = 0xfd;
+            _ram[1] = 0xcb; // BIT 7,(IY+d)
+            _ram[2] = 1;
+            _ram[3] = 0x7e;
+            _ram[0x41c6] = 0b11010001;
+
+            WideRegister.IY.SetValueOnProcessor(_cpu, 0x41c5);
+            _cpu.Flags = Z80Flags.AddSubtract_N;
+
+            // Act
+            RunUntil(6);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z), Is.False);
+            
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.True); // Flag is set
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.False); // Flag is reset
+        }
+
+        [Test]
+        public void BitTestIndexed_BitIsNotSet() {
+            // Arrange
+            _ram[0] = 0xfd;
+            _ram[1] = 0xcb; // BIT 4,(IY+d)
+            _ram[2] = 2;
+            _ram[3] = 0x66;
+            _ram[0x41c7] = 0b1000001;
+
+            WideRegister.IY.SetValueOnProcessor(_cpu, 0x41c5);
+            _cpu.Flags = Z80Flags.AddSubtract_N;
+
+            // Act
+            RunUntil(6);
+
+            // Assert
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.Zero_Z), Is.True);
+            
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.HalfCarry_H), Is.True); // Flag is set
+            Assert.That(_cpu.Flags.HasFlag(Z80Flags.AddSubtract_N), Is.False); // Flag is reset
+        }
     }
 }

@@ -793,11 +793,9 @@ namespace Z80
             instructions[0xcb3d] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.L)); // SRL L
             instructions[0xcb3e] = new ShiftRightLogical(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // SRL (HL)
 
-            instructions[0xddcb] = new RotateIndexed(this, WideRegister.IX); // Covers all (IX+d) rotates and shifts
-            instructions[0xfdcb] = new RotateIndexed(this, WideRegister.IY); // Covers all (IY+d) rotates and shifts
-
             instructions[0xed6f] = new RotateDigit(this, isLeftShift: true); // RLD (HL)
             instructions[0xed67] = new RotateDigit(this, isLeftShift: false); // RRD (HL)
+
 
             instructions[0xcb47] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 0); // BIT 0,A
             instructions[0xcb40] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 0); // BIT 0,B
@@ -870,10 +868,7 @@ namespace Z80
             instructions[0xcb7c] = new BitTest(this, new RegAddrMode8Bit(this, Register.H), 7); // BIT 7,H
             instructions[0xcb7d] = new BitTest(this, new RegAddrMode8Bit(this, Register.L), 7); // BIT 7,L
             instructions[0xcb7e] = new BitTest(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7); // BIT 7,(HL) 
-            
-            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
-            //instructions[0xddcb] = new BitTestIndexed(this, new Indexed(this, WideRegister.IX)); // BIT x,(IX+d)
-            //instructions[0xfdcb] = new BitTestIndexed(this, new Indexed(this, WideRegister.IY)); // BIT x,(IY+d)
+
 
             instructions[0xcb87] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 0, false); // RES 0,A
             instructions[0xcb80] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 0, false); // RES 0,B
@@ -947,9 +942,6 @@ namespace Z80
             instructions[0xcbbd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 7, false); // RES 7,L
             instructions[0xcbbe] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7, false); // RES 7,(HL)
 
-            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
-            //instructions[0xddcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IX)); // RES x,(IX+d)
-            //instructions[0xfdcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IY)); // RES x,(IY+d)
 
             instructions[0xcbc7] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.A), 0, true); // SET 0,A
             instructions[0xcbc0] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.B), 0, true); // SET 0,B
@@ -1023,9 +1015,8 @@ namespace Z80
             instructions[0xcbfd] = new SetOrResetBit(this, new RegAddrMode8Bit(this, Register.L), 7, true); // SET 7,L
             instructions[0xcbfe] = new SetOrResetBit(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true), 7, true); // SET 7,(HL)
 
-            // TODO these instructions use the same prefx as RotateIndexed so need a more generic handler
-            //instructions[0xddcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IX)); // SET x,(IX+d)
-            //instructions[0xfdcb] = new SetOrResetBitIndexed(this, new Indexed(this, WideRegister.IY)); // SET x,(IY+d)
+            instructions[0xddcb] = new IndexedInstructionLookup(this, WideRegister.IX); // Covers all (IX+d) rotates, shifts and bit operations
+            instructions[0xfdcb] = new IndexedInstructionLookup(this, WideRegister.IY); // Covers all (IY+d) rotates, shifts and bit operations
 
             #endregion
         }
