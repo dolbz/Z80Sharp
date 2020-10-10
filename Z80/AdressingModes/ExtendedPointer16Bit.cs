@@ -3,7 +3,7 @@ namespace Z80.AddressingModes
     public struct ExtendedPointer16Bit : IAddressMode<ushort>
     {
         private readonly Z80Cpu _cpu;
-        private readonly ExtendedReadOperand _extendedOperand;
+        private readonly MemoryShortReader _extendedOperand;
 
         public bool IsComplete => _extendedOperand.IsComplete;
 
@@ -14,7 +14,7 @@ namespace Z80.AddressingModes
         public ExtendedPointer16Bit(Z80Cpu cpu)
         {
             _cpu = cpu;
-            _extendedOperand = new ExtendedReadOperand(cpu);
+            _extendedOperand = new MemoryShortReader(cpu);
         }
 
         public void Clock()

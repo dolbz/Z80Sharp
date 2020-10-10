@@ -247,7 +247,7 @@ namespace Z80
         public int TotalTCycles { get; private set; } = 0;
 
         private M1Cycle _fetchCycle;
-        private IInstruction _currentInstruction;
+        internal IInstruction _currentInstruction;
         public void Clock()
         {
             if (!_fetchCycle.IsComplete)
@@ -256,7 +256,7 @@ namespace Z80
             }
             if (_fetchCycle.IsComplete && _currentInstruction == null)
             {
-                Console.WriteLine("Fetch cycle complete");
+                //Console.WriteLine("Fetch cycle complete");
 
                 var instruction = instructions[Opcode];
 
@@ -318,6 +318,8 @@ namespace Z80
             Opcode = 0;
             _currentInstruction = null;
             _fetchCycle.Reset();
+            TotalTCycles = 0;
+            Flags = 0;
         }
 
         public void Initialize()
@@ -465,16 +467,16 @@ namespace Z80
 
             #region 16 bit LD instructions
 
-            instructions[0x01] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedReadOperand(this)); // LD BC, nn
-            instructions[0x11] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.DE), new ExtendedReadOperand(this)); // LD DE, nn
-            instructions[0x21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedReadOperand(this)); // LD HL, nn
+            instructions[0x01] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.BC), new ExtendedAddressMode(this)); // LD BC, nn
+            instructions[0x11] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.DE), new ExtendedAddressMode(this)); // LD DE, nn
+            instructions[0x21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedAddressMode(this)); // LD HL, nn
             instructions[0x22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.HL)); // LD (nn), HL
             instructions[0x2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new ExtendedPointer16Bit(this)); // LD HL, (nn)
-            instructions[0x31] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedReadOperand(this)); // LD SP, nn
+            instructions[0x31] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedAddressMode(this)); // LD SP, nn
 
             instructions[0xf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.HL), additionalM1TCycles: 2); // LD SP, HL
 
-            instructions[0xdd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedReadOperand(this)); // LD IX, nn
+            instructions[0xdd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedAddressMode(this)); // LD IX, nn
             instructions[0xdd22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.IX)); // LD (nn), IX
             instructions[0xdd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new ExtendedPointer16Bit(this)); // LD IX, (nn)
             instructions[0xddf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.IX), additionalM1TCycles: 2); // LD SP, IX
@@ -486,7 +488,7 @@ namespace Z80
             instructions[0xed73] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.SP)); // LD (nn), SP
             instructions[0xed7b] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new ExtendedPointer16Bit(this)); // LD SP, (nn)
 
-            instructions[0xfd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedReadOperand(this)); // LD IY, nn
+            instructions[0xfd21] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedAddressMode(this)); // LD IY, nn
             instructions[0xfd22] = new LD_16Bit(this, new ExtendedPointer16Bit(this), new RegAddrMode16Bit(this, WideRegister.IY)); // LD (nn), IY
             instructions[0xfd2a] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new ExtendedPointer16Bit(this)); // LD IY, (nn)
             instructions[0xfdf9] = new LD_16Bit(this, new RegAddrMode16Bit(this, WideRegister.SP), new RegAddrMode16Bit(this, WideRegister.IY), additionalM1TCycles: 2); // LD SP, IY
@@ -796,6 +798,9 @@ namespace Z80
             instructions[0xed6f] = new RotateDigit(this, isLeftShift: true); // RLD (HL)
             instructions[0xed67] = new RotateDigit(this, isLeftShift: false); // RRD (HL)
 
+            #endregion
+
+            #region Bit manipulation
 
             instructions[0xcb47] = new BitTest(this, new RegAddrMode8Bit(this, Register.A), 0); // BIT 0,A
             instructions[0xcb40] = new BitTest(this, new RegAddrMode8Bit(this, Register.B), 0); // BIT 0,B
@@ -1017,6 +1022,30 @@ namespace Z80
 
             instructions[0xddcb] = new IndexedInstructionLookup(this, WideRegister.IX); // Covers all (IX+d) rotates, shifts and bit operations
             instructions[0xfdcb] = new IndexedInstructionLookup(this, WideRegister.IY); // Covers all (IY+d) rotates, shifts and bit operations
+            
+            #endregion
+
+            #region Jump, Call, Return
+
+            instructions[0xc3] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.Unconditional); // JP nn
+            instructions[0xda] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.Carry); // JP C,nn
+            instructions[0xd2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.NonCarry); // JP NC,nn
+            instructions[0xca] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.Zero); // JP Z,nn
+            instructions[0xc2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.NonZero); // JP NZ,nn
+            instructions[0xea] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.ParityEven); // JP PE,nn
+            instructions[0xe2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.ParityOdd); // JP PO,nn
+            instructions[0xfa] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignNeg); // JP M,nn
+            instructions[0xf2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignPos); // JP P,nn
+            
+            instructions[0x18] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Unconditional, true); // JR e
+            instructions[0x38] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Carry, true); // JR C,e
+            instructions[0x30] = new Jump(this, new RelativeAddressMode(this), JumpCondition.NonCarry, true); // JR NC,e
+            instructions[0x28] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Zero, true); // JR Z,e
+            instructions[0x20] = new Jump(this, new RelativeAddressMode(this), JumpCondition.NonZero, true); // JR NZ,e
+
+            instructions[0xe9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.HL), JumpCondition.Unconditional); // JP (HL)
+            instructions[0xdde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IX)
+            instructions[0xfde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IY)
 
             #endregion
         }

@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 
 namespace Z80.Tests
@@ -15,7 +16,7 @@ namespace Z80.Tests
 
         protected void RunUntil(int pc)
         {
-            while (_cpu.PC < pc)
+            while (_cpu.PC != pc || (!_cpu._currentInstruction?.IsComplete ?? false))
             {
                 if (_cpu.MREQ && _cpu.RD)
                 {
@@ -27,6 +28,9 @@ namespace Z80.Tests
                     _ram[_cpu.Address] = _cpu.Data;
                 }
                 _cpu.Clock();
+                if (_cpu.TotalTCycles > 1000) {
+                    throw new InvalidOperationException("Unexpected long runtime during unit test");
+                }
             }
         }
     }
