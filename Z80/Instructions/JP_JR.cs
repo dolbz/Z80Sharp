@@ -15,6 +15,36 @@ namespace Z80.Instructions {
         RegBNotZero = 9
     }
 
+    public static class JumpConditionExtensions {
+        public static bool ShouldJump(this JumpCondition jumpCondition, Z80Cpu cpu) {
+            var flags = cpu.Flags;
+
+            switch(jumpCondition) {
+                case JumpCondition.Unconditional:
+                    return true;
+                case JumpCondition.Carry:
+                    return flags.HasFlag(Z80Flags.Carry_C);
+                case JumpCondition.NonCarry:
+                    return !flags.HasFlag(Z80Flags.Carry_C);
+                case JumpCondition.Zero:
+                    return flags.HasFlag(Z80Flags.Zero_Z);
+                case JumpCondition.NonZero:
+                    return !flags.HasFlag(Z80Flags.Zero_Z);
+                case JumpCondition.ParityEven:
+                    return flags.HasFlag(Z80Flags.ParityOverflow_PV);
+                case JumpCondition.ParityOdd:
+                    return !flags.HasFlag(Z80Flags.ParityOverflow_PV);
+                case JumpCondition.SignNeg:
+                    return flags.HasFlag(Z80Flags.Sign_S);
+                case JumpCondition.SignPos:
+                    return !flags.HasFlag(Z80Flags.Sign_S);
+                case JumpCondition.RegBNotZero:
+                    return --cpu.B != 0;
+            }
+            throw new InvalidOperationException("Invalid condition specified for jump");
+        }
+    }
+
     public class Jump : IInstruction
     {
         private Z80Cpu _cpu;
@@ -86,42 +116,14 @@ namespace Z80.Instructions {
         }
 
         private void JumpIfRequired() {
-            if (_reader.IsComplete && !_requiresConditionalInternalCycle && ShouldJump()) {
+            if (_reader.IsComplete && !_requiresConditionalInternalCycle && _condition.ShouldJump(_cpu)) {
                 _cpu.PC = _reader.AddressedValue;
                 IsComplete = true;
-            } else if (_reader.IsComplete && _requiresConditionalInternalCycle && !ShouldJump()) {
+            } else if (_reader.IsComplete && _requiresConditionalInternalCycle && !_condition.ShouldJump(_cpu)) {
                 IsComplete = true;
             } else if (_reader.IsComplete && !_requiresConditionalInternalCycle) {
                 IsComplete = true;
             }
-        }
-
-        private bool ShouldJump() {
-            var flags = _cpu.Flags;
-
-            switch(_condition) {
-                case JumpCondition.Unconditional:
-                    return true;
-                case JumpCondition.Carry:
-                    return flags.HasFlag(Z80Flags.Carry_C);
-                case JumpCondition.NonCarry:
-                    return !flags.HasFlag(Z80Flags.Carry_C);
-                case JumpCondition.Zero:
-                    return flags.HasFlag(Z80Flags.Zero_Z);
-                case JumpCondition.NonZero:
-                    return !flags.HasFlag(Z80Flags.Zero_Z);
-                case JumpCondition.ParityEven:
-                    return flags.HasFlag(Z80Flags.ParityOverflow_PV);
-                case JumpCondition.ParityOdd:
-                    return !flags.HasFlag(Z80Flags.ParityOverflow_PV);
-                case JumpCondition.SignNeg:
-                    return flags.HasFlag(Z80Flags.Sign_S);
-                case JumpCondition.SignPos:
-                    return !flags.HasFlag(Z80Flags.Sign_S);
-                case JumpCondition.RegBNotZero:
-                    return --_cpu.B != 0;
-            }
-            throw new InvalidOperationException("Invalid condition specified for jump");
         }
     }
 }

@@ -55,7 +55,8 @@ namespace Z80
         HL_,
         SP,
         IX,
-        IY
+        IY,
+        PC
     }
 
     public static class RegisterExtension
@@ -149,6 +150,8 @@ namespace Z80
                     return cpu.IX;
                 case WideRegister.IY:
                     return cpu.IY;
+                case WideRegister.PC:
+                    return cpu.PC;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }
@@ -194,6 +197,9 @@ namespace Z80
                     break;
                 case WideRegister.HL_:
                     cpu.HL_ = value;
+                    break;
+                case WideRegister.PC:
+                    cpu.PC = value;
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
@@ -1049,6 +1055,15 @@ namespace Z80
 
             instructions[0x10] = new Jump(this, new RelativeAddressMode(this), JumpCondition.RegBNotZero, true, additionalM1TCycles: 1); // DJNZ, e 
 
+            instructions[0xcd] = new CALL(this, JumpCondition.Unconditional); // CALL nn
+            instructions[0xdc] = new CALL(this, JumpCondition.Carry); // CALL C,nn
+            instructions[0xd4] = new CALL(this, JumpCondition.NonCarry); // CALL NC,nn
+            instructions[0xcc] = new CALL(this, JumpCondition.Zero); // CALL Z,nn
+            instructions[0xc4] = new CALL(this, JumpCondition.NonZero); // CALL NZ,nn
+            instructions[0xec] = new CALL(this, JumpCondition.ParityEven); // CALL PE,nn
+            instructions[0xe4] = new CALL(this, JumpCondition.ParityOdd); // CALL PO,nn
+            instructions[0xfc] = new CALL(this, JumpCondition.SignNeg); // CALL M,nn
+            instructions[0xf4] = new CALL(this, JumpCondition.SignPos); // CALL P,nn
             #endregion
         }
     }

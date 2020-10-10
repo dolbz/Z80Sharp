@@ -484,6 +484,9 @@ namespace Z80.Tests
 
             // TODO indexed BIT,SET,RST
 
+            // Jump and call instructions have cycle count tests in with their other unit tests as the cycle
+            // count varies depending on the outcome
+
             #endregion
 
             return generated;

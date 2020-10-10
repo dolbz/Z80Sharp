@@ -4,9 +4,8 @@ namespace Z80.Instructions
 {
     internal class PUSH : LD_Generic<ushort>
     {
-        public PUSH(Z80Cpu cpu, WideRegister register) : base(cpu, new RegIndirectWide(cpu, WideRegister.SP, true), new RegAddrMode16Bit(cpu, register), additionalM1TCycles: 1)
+        public PUSH(Z80Cpu cpu, WideRegister register, int additionalM1TCycles = 1) : base(cpu, new RegIndirectWide(cpu, WideRegister.SP, true), new RegAddrMode16Bit(cpu, register), additionalM1TCycles: additionalM1TCycles)
         {
-
         }
 
         public override void Clock()
