@@ -22,43 +22,48 @@ namespace Z80.Instructions {
         private JumpCondition _condition;
         private IReadAddressedOperand<ushort> _reader;
         private readonly InternalCycle _internalCycle;
-
-
+        private readonly int _additionalM1TCycles;
+        private int _remainingM1Cycles;
         private bool _requiresConditionalInternalCycle;
 
         public string Mnemonic => _addressMode is RelativeAddressMode ? "JR" : "JP";
 
         public bool IsComplete { get; private set; }
 
-        public Jump(Z80Cpu cpu, IAddressMode<ushort> addressMode, JumpCondition condition, bool requiresConditionalInternalCycle = false) {
+        public Jump(Z80Cpu cpu, IAddressMode<ushort> addressMode, JumpCondition condition, bool requiresConditionalInternalCycle = false, int additionalM1TCycles = 0) {
             _cpu = cpu;
             _addressMode = addressMode;
             _condition = condition;
             _requiresConditionalInternalCycle = requiresConditionalInternalCycle;
             _internalCycle = new InternalCycle(5);
+            _additionalM1TCycles = additionalM1TCycles;
+            _remainingM1Cycles = additionalM1TCycles;
         }
 
         public void Clock()
         {
-            if (!_addressMode.IsComplete) {
-                _addressMode.Clock();
-                if (_addressMode.IsComplete) {
-                    _reader = _addressMode.Reader;
-                    JumpIfRequired();
+            if (_remainingM1Cycles-- <= 0)
+            {
+                if (!_addressMode.IsComplete) {
+                    _addressMode.Clock();
+                    if (_addressMode.IsComplete) {
+                        _reader = _addressMode.Reader;
+                        JumpIfRequired();
+                    }
+                    return;
                 }
-                return;
-            }
-            if (!_reader.IsComplete) {
-                _reader.Clock();
-                JumpIfRequired();
-                return;
-            }
+                if (!_reader.IsComplete) {
+                    _reader.Clock();
+                    JumpIfRequired();
+                    return;
+                }
 
-            if (!_internalCycle.IsComplete) {
-                _internalCycle.Clock();
-                if (_internalCycle.IsComplete) {
-                    _cpu.PC = _reader.AddressedValue;
-                    IsComplete = true;
+                if (!_internalCycle.IsComplete) {
+                    _internalCycle.Clock();
+                    if (_internalCycle.IsComplete) {
+                        _cpu.PC = _reader.AddressedValue;
+                        IsComplete = true;
+                    }
                 }
             }
         }
@@ -69,6 +74,7 @@ namespace Z80.Instructions {
             _reader = null;
             _internalCycle.Reset();
             IsComplete = false;
+            _remainingM1Cycles = _additionalM1TCycles;
         }
 
         public void StartExecution()
@@ -113,7 +119,7 @@ namespace Z80.Instructions {
                 case JumpCondition.SignPos:
                     return !flags.HasFlag(Z80Flags.Sign_S);
                 case JumpCondition.RegBNotZero:
-                    return _cpu.B != 0; // TODO does this affect the flags regiser as we're checking a new value for zero?
+                    return --_cpu.B != 0;
             }
             throw new InvalidOperationException("Invalid condition specified for jump");
         }

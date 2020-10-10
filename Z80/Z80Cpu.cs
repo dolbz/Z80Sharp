@@ -1037,7 +1037,7 @@ namespace Z80
             instructions[0xfa] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignNeg); // JP M,nn
             instructions[0xf2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignPos); // JP P,nn
             
-            instructions[0x18] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Unconditional, true); // JR e
+            instructions[0x18] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Unconditional, true); // JR, e
             instructions[0x38] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Carry, true); // JR C,e
             instructions[0x30] = new Jump(this, new RelativeAddressMode(this), JumpCondition.NonCarry, true); // JR NC,e
             instructions[0x28] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Zero, true); // JR Z,e
@@ -1046,6 +1046,8 @@ namespace Z80
             instructions[0xe9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.HL), JumpCondition.Unconditional); // JP (HL)
             instructions[0xdde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IX)
             instructions[0xfde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IY)
+
+            instructions[0x10] = new Jump(this, new RelativeAddressMode(this), JumpCondition.RegBNotZero, true, additionalM1TCycles: 1); // DJNZ, e 
 
             #endregion
         }

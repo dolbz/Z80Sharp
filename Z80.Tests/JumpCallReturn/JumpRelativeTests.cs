@@ -172,5 +172,40 @@ namespace Z80.Tests.JumpCallReturn {
             Assert.That(_cpu.PC, Is.EqualTo(482));
             Assert.That(_cpu.TotalTCycles, Is.EqualTo(7));
         }
+
+        [Test]
+        public void DecrementBJumpIfNotZero_ShouldNotJump() {
+            // Arrange
+            _ram[480] = 0x10; // DJNZ, e
+            _ram[481] = 3; // 3 as offset-2 is whats assembled in the binary
+
+            _cpu.B = 1;
+            _cpu.PC = 480;
+
+            // Act
+            RunUntil(482);
+
+            // Assert
+            Assert.That(_cpu.PC, Is.EqualTo(482));
+            Assert.That(_cpu.TotalTCycles, Is.EqualTo(8));
+        }
+
+        [Test]
+        public void DecrementBJumpIfNotZero_ShouldJump() {
+            // Arrange
+            _ram[480] = 0x10; // DJNZ, e
+            _ram[481] = 3; // 3 as offset-2 is whats assembled in the binary
+
+            _cpu.B = 5;
+            _cpu.PC = 480;
+
+            // Act
+            RunUntil(485);
+
+            // Assert
+            Assert.That(_cpu.PC, Is.EqualTo(485));
+            Assert.That(_cpu.B, Is.EqualTo(4));
+            Assert.That(_cpu.TotalTCycles, Is.EqualTo(13));
+        }
     }
 }
