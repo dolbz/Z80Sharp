@@ -22,9 +22,11 @@ namespace Z80
         public void Clock() {
             switch (RemainingTCycles) {
                 case 4:
+                    _cpu.RFRSH = false;
                     _cpu.Address = _cpu.PC++;
                     _cpu.RD = true;
                     _cpu.MREQ = true;
+                    _cpu.M1 = true;
                     break;
                 case 3:
                     break;
@@ -32,9 +34,10 @@ namespace Z80
                     _cpu.Opcode |= _cpu.Data;
                     _cpu.RD = false;
                     _cpu.MREQ = false;
+                    _cpu.M1 = false;
+                    _cpu.RFRSH = true;
                     break;
                 default:
-                    // Case 2 and 1 no behaviour needed if RFRSH isn't implemented
                     break;
             }
             

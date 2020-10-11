@@ -16,7 +16,7 @@ namespace Z80.Tests
 
         protected void RunUntil(int pc)
         {
-            while (_cpu.PC != pc || (!_cpu._currentInstruction?.IsComplete ?? false))
+            while (_cpu.PC != pc || !_cpu.NewInstruction)
             {
                 if (_cpu.MREQ && _cpu.RD)
                 {

@@ -250,20 +250,25 @@ namespace Z80
 
         public bool WR;
 
+        public bool M1;
+
+        public bool RFRSH;
+
+        internal bool NewInstruction;
+
         public int TotalTCycles { get; private set; } = 0;
 
-        private M1Cycle _fetchCycle;
+        internal M1Cycle _fetchCycle;
         internal IInstruction _currentInstruction;
         public void Clock()
         {
+            NewInstruction = false;
             if (!_fetchCycle.IsComplete)
             {
                 _fetchCycle.Clock();
             }
             if (_fetchCycle.IsComplete && _currentInstruction == null)
             {
-                //Console.WriteLine("Fetch cycle complete");
-
                 var instruction = instructions[Opcode];
 
                 if (instruction != null)
@@ -273,6 +278,7 @@ namespace Z80
                     _currentInstruction.StartExecution();
                     if (_currentInstruction.IsComplete)
                     {
+                        NewInstruction = true;
                         Opcode = 0x0;
                         _currentInstruction = null;
                         _fetchCycle.Reset();
@@ -292,10 +298,12 @@ namespace Z80
             }
             else if (_currentInstruction != null)
             {
+                RFRSH = false; // TODO this isn't correct for instructions that extended the M1 cycle
                 _currentInstruction.Clock();
 
                 if (_currentInstruction.IsComplete)
                 {
+                    NewInstruction = true;
                     Opcode = 0x0;
                     _currentInstruction = null;
                     _fetchCycle.Reset();
@@ -321,11 +329,14 @@ namespace Z80
             MREQ = false;
             WR = false;
             RD = false;
+            M1 = false;
+            RFRSH = false;
             Opcode = 0;
             _currentInstruction = null;
             _fetchCycle.Reset();
             TotalTCycles = 0;
             Flags = 0;
+            NewInstruction = true;
         }
 
         public void Initialize()
@@ -1064,6 +1075,17 @@ namespace Z80
             instructions[0xe4] = new CALL(this, JumpCondition.ParityOdd); // CALL PO,nn
             instructions[0xfc] = new CALL(this, JumpCondition.SignNeg); // CALL M,nn
             instructions[0xf4] = new CALL(this, JumpCondition.SignPos); // CALL P,nn
+
+            instructions[0xc9] = new RET(this, JumpCondition.Unconditional); // RET
+            instructions[0xd8] = new RET(this, JumpCondition.Carry); // RET C
+            instructions[0xd0] = new RET(this, JumpCondition.NonCarry); // RET NC
+            instructions[0xc8] = new RET(this, JumpCondition.Zero); // RET Z
+            instructions[0xc0] = new RET(this, JumpCondition.NonZero); // RET NZ
+            instructions[0xe8] = new RET(this, JumpCondition.ParityEven); // RET PE
+            instructions[0xe0] = new RET(this, JumpCondition.ParityOdd); // RET PO
+            instructions[0xf8] = new RET(this, JumpCondition.SignNeg); // RET M
+            instructions[0xf0] = new RET(this, JumpCondition.SignPos); // RET P
+
             #endregion
         }
     }

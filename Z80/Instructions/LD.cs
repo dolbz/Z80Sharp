@@ -4,8 +4,8 @@ namespace Z80.Instructions
 {
     internal abstract class LD_Generic<T> : IInstruction
     {
-        public bool IsComplete => _remainingM1Cycles <= 0 && (_sourceReader?.IsComplete ?? false) && (_destinationWriter?.IsComplete ?? false);
-        public string Mnemonic { get; }
+        public virtual bool IsComplete => _remainingM1Cycles <= 0 && (_sourceReader?.IsComplete ?? false) && (_destinationWriter?.IsComplete ?? false);
+        public virtual string Mnemonic => "LD";
 
         protected Z80Cpu _cpu;
         private readonly IAddressMode<T> _destinationAddressMode;
@@ -20,7 +20,6 @@ namespace Z80.Instructions
         public LD_Generic(Z80Cpu cpu, IAddressMode<T> destination, IAddressMode<T> source, int additionalM1TCycles)
         {
             _cpu = cpu;
-            Mnemonic = "LD"; // TODO make this overridable so PUSH can change the mnemonic
             _additionalM1TCycles = additionalM1TCycles;
             _remainingM1Cycles = additionalM1TCycles;
             _destinationAddressMode = destination;
@@ -44,7 +43,7 @@ namespace Z80.Instructions
             }
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             _sourceAddressMode.Reset();
             _destinationAddressMode.Reset();
