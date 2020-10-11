@@ -1,8 +1,8 @@
-using System.Reflection;
 using NUnit.Framework;
 
-namespace Z80.Tests.JumpCallReturn {
-        public class CallTests : CpuRunTestBase {
+namespace Z80.Tests.JumpCallReturn
+{
+    public class CallTests : CpuRunTestBase {
         
         [Test]
         public void CallUnconditional() {

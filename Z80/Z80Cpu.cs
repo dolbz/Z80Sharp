@@ -1066,15 +1066,15 @@ namespace Z80
 
             instructions[0x10] = new Jump(this, new RelativeAddressMode(this), JumpCondition.RegBNotZero, true, additionalM1TCycles: 1); // DJNZ, e 
 
-            instructions[0xcd] = new CALL(this, JumpCondition.Unconditional); // CALL nn
-            instructions[0xdc] = new CALL(this, JumpCondition.Carry); // CALL C,nn
-            instructions[0xd4] = new CALL(this, JumpCondition.NonCarry); // CALL NC,nn
-            instructions[0xcc] = new CALL(this, JumpCondition.Zero); // CALL Z,nn
-            instructions[0xc4] = new CALL(this, JumpCondition.NonZero); // CALL NZ,nn
-            instructions[0xec] = new CALL(this, JumpCondition.ParityEven); // CALL PE,nn
-            instructions[0xe4] = new CALL(this, JumpCondition.ParityOdd); // CALL PO,nn
-            instructions[0xfc] = new CALL(this, JumpCondition.SignNeg); // CALL M,nn
-            instructions[0xf4] = new CALL(this, JumpCondition.SignPos); // CALL P,nn
+            instructions[0xcd] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.Unconditional); // CALL nn
+            instructions[0xdc] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.Carry); // CALL C,nn
+            instructions[0xd4] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.NonCarry); // CALL NC,nn
+            instructions[0xcc] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.Zero); // CALL Z,nn
+            instructions[0xc4] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.NonZero); // CALL NZ,nn
+            instructions[0xec] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.ParityEven); // CALL PE,nn
+            instructions[0xe4] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.ParityOdd); // CALL PO,nn
+            instructions[0xfc] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.SignNeg); // CALL M,nn
+            instructions[0xf4] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.SignPos); // CALL P,nn
 
             instructions[0xc9] = new RET(this, JumpCondition.Unconditional); // RET
             instructions[0xd8] = new RET(this, JumpCondition.Carry); // RET C
@@ -1085,6 +1085,17 @@ namespace Z80
             instructions[0xe0] = new RET(this, JumpCondition.ParityOdd); // RET PO
             instructions[0xf8] = new RET(this, JumpCondition.SignNeg); // RET M
             instructions[0xf0] = new RET(this, JumpCondition.SignPos); // RET P
+
+            // TODO RETI, RETN
+
+            instructions[0xc7] = new RST(this, 0x0); // RST 0 
+            instructions[0xcf] = new RST(this, 0x8); // RST 8
+            instructions[0xd7] = new RST(this, 0x10); // RST 16
+            instructions[0xdf] = new RST(this, 0x18); // RST 24
+            instructions[0xe7] = new RST(this, 0x20); // RST 32
+            instructions[0xef] = new RST(this, 0x28); // RST 40
+            instructions[0xf7] = new RST(this, 0x30); // RST 48
+            instructions[0xff] = new RST(this, 0x38); // RST 56
 
             #endregion
         }
