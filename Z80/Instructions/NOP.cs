@@ -2,7 +2,6 @@ namespace Z80.Instructions
 {
     internal class NOP : IInstruction
     {
-
         public string Mnemonic => "NOP";
 
         public bool IsComplete => true;

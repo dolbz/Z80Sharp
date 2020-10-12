@@ -23,7 +23,7 @@ namespace Z80
             switch (RemainingTCycles) {
                 case 4:
                     _cpu.RFRSH = false;
-                    _cpu.Address = _cpu.PC++;
+                    _cpu.Address = _cpu.HALT ? _cpu.PC : _cpu.PC++;
                     _cpu.RD = true;
                     _cpu.MREQ = true;
                     _cpu.M1 = true;

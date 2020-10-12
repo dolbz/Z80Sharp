@@ -6,7 +6,6 @@ using Z80.AddressingModes;
 
 namespace Z80
 {
-
     [Flags]
     public enum Z80Flags : byte
     {
@@ -254,7 +253,13 @@ namespace Z80
 
         public bool RFRSH;
 
+        public bool HALT { get; internal set; }
+        
+        internal bool IFF1;
+        internal bool IFF2;
+
         internal bool NewInstruction;
+        internal int InterruptMode = 0;
 
         public int TotalTCycles { get; private set; } = 0;
 
@@ -267,7 +272,7 @@ namespace Z80
             {
                 _fetchCycle.Clock();
             }
-            if (_fetchCycle.IsComplete && _currentInstruction == null)
+            if (_fetchCycle.IsComplete && _currentInstruction == null && !HALT)
             {
                 var instruction = instructions[Opcode];
 
@@ -323,7 +328,6 @@ namespace Z80
             PC = 0x0;
             I = 0x0;
             R = 0x0;
-            // TODO steps 1 and 4
 
             Initialize();
             MREQ = false;
@@ -334,16 +338,17 @@ namespace Z80
             Opcode = 0;
             _currentInstruction = null;
             _fetchCycle.Reset();
-            TotalTCycles = 0;
             Flags = 0;
+            InterruptMode = 0;
+            HALT = false;
+            IFF1 = false;
+            TotalTCycles = 0;
             NewInstruction = true;
         }
 
         public void Initialize()
         {
             _fetchCycle = new M1Cycle(this);
-
-            instructions[0x0] = new NOP();
 
             #region 8 bit LD instructions
 
@@ -1096,6 +1101,17 @@ namespace Z80
             instructions[0xef] = new RST(this, 0x28); // RST 40
             instructions[0xf7] = new RST(this, 0x30); // RST 48
             instructions[0xff] = new RST(this, 0x38); // RST 56
+
+            #endregion
+
+            #region Misc CPU control
+            instructions[0x0] = new NOP(); // NOP
+            instructions[0x76] = new HALT(this); // HALT
+            instructions[0xf3] = new DI(this); // DI
+            instructions[0xfb] = new EI(this); // EI
+            instructions[0xed46] = new IM(this, 0); // IM0
+            instructions[0xed56] = new IM(this, 1); // IM1
+            instructions[0xed5e] = new IM(this, 2); // IM2
 
             #endregion
         }
