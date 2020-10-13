@@ -25,6 +25,50 @@ namespace Z80.Tests.ReturnCallReturn {
         }
 
         [Test]
+        public void ReturnFromInterrupt() {
+            // Arrange
+            _ram[0x331d] = 0xed; // RETI
+            _ram[0x331e] = 0x4d;
+            _ram[0xff2d] = 0xed;
+            _ram[0xff2e] = 0x49;
+
+            _cpu.PC = 0x331d;
+            _cpu.SP = 0xff2d;
+
+            // Act
+            RunUntil(0x49ed);
+
+            // Assert
+            Assert.That(_cpu.PC, Is.EqualTo(0x49ed));
+            Assert.That(_cpu.SP, Is.EqualTo(0xff2f));
+            Assert.That(_cpu.TotalTCycles, Is.EqualTo(14));
+        }
+
+        [Test]
+        public void ReturnFromNonMaskableInterrupt() {
+            // Arrange
+            _ram[0x331d] = 0xed; // RETN
+            _ram[0x331e] = 0x45;
+            _ram[0xff2d] = 0xed;
+            _ram[0xff2e] = 0x49;
+
+            _cpu.PC = 0x331d;
+            _cpu.SP = 0xff2d;
+
+            _cpu.IFF1 = false;
+            _cpu.IFF2 = true;
+
+            // Act
+            RunUntil(0x49ed);
+
+            // Assert
+            Assert.That(_cpu.PC, Is.EqualTo(0x49ed));
+            Assert.That(_cpu.SP, Is.EqualTo(0xff2f));
+            Assert.That(_cpu.TotalTCycles, Is.EqualTo(14));
+            Assert.That(_cpu.IFF1, Is.True);
+        }
+
+        [Test]
         public void ReturnIfCarry_ShouldReturn() {
             // Arrange
             _ram[0x331d] = 0xd8; // RET C

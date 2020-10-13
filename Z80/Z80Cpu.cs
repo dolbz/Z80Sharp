@@ -1091,7 +1091,8 @@ namespace Z80
             instructions[0xf8] = new RET(this, JumpCondition.SignNeg); // RET M
             instructions[0xf0] = new RET(this, JumpCondition.SignPos); // RET P
 
-            // TODO RETI, RETN
+            instructions[0xed4d] = new RETI(this); // RETI
+            instructions[0xed45] = new RETN(this); // RETN
 
             instructions[0xc7] = new RST(this, 0x0); // RST 0 
             instructions[0xcf] = new RST(this, 0x8); // RST 8
@@ -1105,6 +1106,7 @@ namespace Z80
             #endregion
 
             #region Misc CPU control
+            
             instructions[0x0] = new NOP(); // NOP
             instructions[0x76] = new HALT(this); // HALT
             instructions[0xf3] = new DI(this); // DI
