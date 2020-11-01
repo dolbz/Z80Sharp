@@ -3,7 +3,7 @@ namespace Z80.Instructions {
         public RETI(Z80Cpu cpu) : base(cpu, JumpCondition.Unconditional) {
 
         }
-
+        
         public override string Mnemonic => "RETI";
     }
 }

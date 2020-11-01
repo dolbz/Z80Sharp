@@ -23,7 +23,7 @@ namespace Z80
             switch (RemainingTCycles) {
                 case 4:
                     _cpu.RFRSH = false;
-                    _cpu.Address = _cpu.HALT ? _cpu.PC : _cpu.PC++;
+                    _cpu.Address = _cpu.PC;
                     _cpu.RD = true;
                     _cpu.MREQ = true;
                     _cpu.M1 = true;
@@ -37,6 +37,8 @@ namespace Z80
                     _cpu.M1 = false;
                     _cpu.RFRSH = true;
                     break;
+                case 1:
+                    // TODO Sample for busreq and interrupts
                 default:
                     break;
             }
@@ -134,7 +136,7 @@ namespace Z80
         public void Clock() {
             switch (RemainingTCycles) {
                 case 3:
-                    _cpu.Address = Address ?? _cpu.PC++;
+                    _cpu.Address = Address ?? _cpu.PostIncrementPC();
                     _cpu.RD = true;
                     _cpu.MREQ = true;
                     break;

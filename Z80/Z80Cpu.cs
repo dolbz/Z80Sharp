@@ -1,211 +1,10 @@
-﻿using System.Threading;
-using System.Diagnostics;
-using System;
+﻿using System;
 using Z80.Instructions;
 using Z80.AddressingModes;
+using Z80.Instructions.InterruptHandlers;
 
 namespace Z80
 {
-    [Flags]
-    public enum Z80Flags : byte
-    {
-        Sign_S = 128,
-        Zero_Z = 64,
-        HalfCarry_H = 16,
-        ParityOverflow_PV = 4,
-        AddSubtract_N = 2,
-        Carry_C = 1
-    }
-
-    public static class Z80FlagsExtensions {
-        public static void SetOrReset(this Z80Flags flag, Z80Cpu cpu, bool value) {
-            if (value) {
-                cpu.Flags |= flag;
-            } else {
-                cpu.Flags &= ~flag;
-            }
-        }
-    }
-
-    public enum Register
-    {
-        A,
-        Flags,
-        B,
-        C,
-        D,
-        E,
-        H,
-        L,
-        I,
-        R
-    }
-
-    public enum WideRegister
-    {
-        None = 0,
-        AF,
-        AF_,
-        BC,
-        BC_,
-        DE,
-        DE_,
-        HL,
-        HL_,
-        SP,
-        IX,
-        IY,
-        PC
-    }
-
-    public static class RegisterExtension
-    {
-        public static void SetValueOnProcessor(this Register register, Z80Cpu cpu, byte value)
-        {
-            switch (register)
-            {
-                case Register.A:
-                    cpu.A = value;
-                    break;
-                case Register.B:
-                    cpu.B = value;
-                    break;
-                case Register.C:
-                    cpu.C = value;
-                    break;
-                case Register.D:
-                    cpu.D = value;
-                    break;
-                case Register.E:
-                    cpu.E = value;
-                    break;
-                case Register.H:
-                    cpu.H = value;
-                    break;
-                case Register.I:
-                    cpu.I = value;
-                    break;
-                case Register.L:
-                    cpu.L = value;
-                    break;
-                case Register.R:
-                    cpu.R = value;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {register}");
-            }
-        }
-
-        public static byte GetValue(this Register register, Z80Cpu cpu)
-        {
-            switch (register)
-            {
-                case Register.A:
-                    return cpu.A;
-                case Register.B:
-                    return cpu.B;
-                case Register.C:
-                    return cpu.C;
-                case Register.D:
-                    return cpu.D;
-                case Register.E:
-                    return cpu.E;
-                case Register.H:
-                    return cpu.H;
-                case Register.I:
-                    return cpu.I;
-                case Register.L:
-                    return cpu.L;
-                case Register.R:
-                    return cpu.R;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {register}");
-            }
-        }
-
-        public static ushort GetValue(this WideRegister register, Z80Cpu cpu)
-        {
-            switch (register)
-            {
-                case WideRegister.AF:
-                    return (ushort)(cpu.A << 8 | (byte)cpu.Flags);
-                case WideRegister.BC:
-                    return (ushort)(cpu.B << 8 | cpu.C);
-                case WideRegister.DE:
-                    return (ushort)(cpu.D << 8 | cpu.E);
-                case WideRegister.HL:
-                    return (ushort)(cpu.H << 8 | cpu.L);
-                case WideRegister.AF_:
-                    return cpu.AF_;
-                case WideRegister.BC_:
-                    return cpu.BC_;
-                case WideRegister.DE_:
-                    return cpu.DE_;
-                case WideRegister.HL_:
-                    return cpu.HL_;
-                case WideRegister.SP:
-                    return cpu.SP;
-                case WideRegister.IX:
-                    return cpu.IX;
-                case WideRegister.IY:
-                    return cpu.IY;
-                case WideRegister.PC:
-                    return cpu.PC;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {register}");
-            }
-        }
-
-        public static void SetValueOnProcessor(this WideRegister register, Z80Cpu cpu, ushort value)
-        {
-            switch (register)
-            {
-                case WideRegister.AF:
-                    cpu.A = (byte)((value & 0xff00) >> 8);
-                    cpu.Flags = (Z80Flags)(value & 0xff);
-                    break;
-                case WideRegister.BC:
-                    cpu.B = (byte)((value & 0xff00) >> 8);
-                    cpu.C = (byte)(value & 0xff);
-                    break;
-                case WideRegister.DE:
-                    cpu.D = (byte)((value & 0xff00) >> 8);
-                    cpu.E = (byte)(value & 0xff);
-                    break;
-                case WideRegister.HL:
-                    cpu.H = (byte)((value & 0xff00) >> 8);
-                    cpu.L = (byte)(value & 0xff);
-                    break;
-                case WideRegister.SP:
-                    cpu.SP = value;
-                    break;
-                case WideRegister.IX:
-                    cpu.IX = value;
-                    break;
-                case WideRegister.IY:
-                    cpu.IY = value;
-                    break;
-                case WideRegister.AF_:
-                    cpu.AF_ = value;
-                    break;
-                case WideRegister.BC_:
-                    cpu.BC_ = value;
-                    break;
-                case WideRegister.DE_:
-                    cpu.DE_ = value;
-                    break;
-                case WideRegister.HL_:
-                    cpu.HL_ = value;
-                    break;
-                case WideRegister.PC:
-                    cpu.PC = value;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Invalid register value: {register}");
-            }
-        }
-    }
-
     public class Z80Cpu
     {
         internal IInstruction[] instructions = new IInstruction[65536];
@@ -234,6 +33,7 @@ namespace Z80
         public ushort IX;
         public ushort IY;
         public ushort SP;
+
         public ushort PC;
 
         # endregion
@@ -254,7 +54,16 @@ namespace Z80
         public bool RFRSH;
 
         public bool HALT { get; internal set; }
+        public bool NMI { 
+            set {
+                if (value) {
+                    PendingNMI = true;
+                }
+            } 
+        }
         
+        internal bool PendingNMI { get; set; }
+        internal bool PendingINT {get;set;}
         internal bool IFF1;
         internal bool IFF2;
 
@@ -265,6 +74,13 @@ namespace Z80
 
         internal M1Cycle _fetchCycle;
         internal IInstruction _currentInstruction;
+
+        internal ushort PostIncrementPC() {
+            if (!HALT || PendingNMI || PendingINT) {
+                    return PC++;
+            }
+            return PC;
+        }
         public void Clock()
         {
             NewInstruction = false;
@@ -272,49 +88,76 @@ namespace Z80
             {
                 _fetchCycle.Clock();
             }
-            if (_fetchCycle.IsComplete && _currentInstruction == null && !HALT)
+            if (_fetchCycle.IsComplete && _currentInstruction == null)
             {
-                var instruction = instructions[Opcode];
+                // Check for BUSRQ
 
-                if (instruction != null)
-                {
-                    _currentInstruction = instruction;
-                    _currentInstruction.Reset();
-                    _currentInstruction.StartExecution();
-                    if (_currentInstruction.IsComplete)
+                IInstruction instruction = null;
+                
+                PostIncrementPC();
+
+                if (!HALT) {
+                    instruction = instructions[Opcode];
+                }
+
+                if (!HALT || PendingNMI) {
+                    if (instruction != null)
                     {
-                        NewInstruction = true;
-                        Opcode = 0x0;
-                        _currentInstruction = null;
+                        HALT = false; // Break out of the halt mode as we must have been interrupted
+                        PendingNMI = false;
+                        _currentInstruction = instruction;
+                        _currentInstruction.Reset();
+                        _currentInstruction.StartExecution();
+                        SetupForNextInstructionIfRequired();
+                    }
+                    else if (Opcode <= 0xFF)
+                    {
+                        Opcode <<= 8;
                         _fetchCycle.Reset();
                     }
-                }
-                else if (Opcode <= 0xFF)
-                {
-                    Opcode <<= 8;
-                    _fetchCycle.Reset();
-                }
-                else
-                {
-                    Console.WriteLine($"Unknown instruction {Opcode:X4}");
-                    Opcode = 0x0;
-                    _fetchCycle.Reset();
+                    else
+                    {
+                        Console.WriteLine($"Unknown instruction {Opcode:X4}");
+                        Opcode = 0x0;
+                        _fetchCycle.Reset();
+                    }
                 }
             }
             else if (_currentInstruction != null)
             {
                 RFRSH = false; // TODO this isn't correct for instructions that extended the M1 cycle
                 _currentInstruction.Clock();
-
-                if (_currentInstruction.IsComplete)
-                {
-                    NewInstruction = true;
-                    Opcode = 0x0;
-                    _currentInstruction = null;
-                    _fetchCycle.Reset();
-                }
+                SetupForNextInstructionIfRequired();
             }
             TotalTCycles++;
+        }
+
+        private void SetupForNextInstructionIfRequired() {
+            if (_currentInstruction.IsComplete)
+            {
+                if (PendingNMI) {
+                    _currentInstruction = new NMIHandler(this);
+                } else if (PendingINT) {
+                    switch (InterruptMode) {
+                        case 0:
+                            _currentInstruction = new Mode0Handler();
+                        break;
+                        case 1:
+                            _currentInstruction = new Mode1Handler(this);
+                        break;
+                        case 2:
+                            _currentInstruction = new Mode2Handler();
+                        break;
+                        default:
+                            throw new InvalidOperationException("Invalid interrupt mode set on CPU");
+                    }
+                }
+
+                NewInstruction = true;
+                Opcode = 0x0;
+                _currentInstruction = null;
+                _fetchCycle.Reset();
+            }
         }
 
         public void Reset()
@@ -1106,7 +949,7 @@ namespace Z80
             #endregion
 
             #region Misc CPU control
-            
+
             instructions[0x0] = new NOP(); // NOP
             instructions[0x76] = new HALT(this); // HALT
             instructions[0xf3] = new DI(this); // DI
@@ -1117,5 +960,11 @@ namespace Z80
 
             #endregion
         }
+    
+        // private IInstruction ResolveInterruptPriority() {
+        //     if (PendingBusRq) {
+
+        //     } else if ()
+        // }
     }
 }

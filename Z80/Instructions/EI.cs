@@ -23,6 +23,7 @@ namespace Z80.Instructions {
         {
             _cpu.IFF1 = true;
             _cpu.IFF2 = true;
+            // TODO somehow these shouldn't enable interrupts until after the next instruction is complete
         }
     }
 }
