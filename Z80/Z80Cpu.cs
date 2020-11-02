@@ -74,6 +74,7 @@ namespace Z80
 
         internal M1Cycle _fetchCycle;
         internal IInstruction _currentInstruction;
+        internal bool PendingEI;
 
         internal ushort PostIncrementPC() {
             if (!HALT || PendingNMI || PendingINT) {
@@ -135,6 +136,11 @@ namespace Z80
         private void SetupForNextInstructionIfRequired() {
             if (_currentInstruction.IsComplete)
             {
+                if (PendingEI && !(_currentInstruction is EI)) {
+                    IFF1 = true;
+                    IFF2 = true;
+                    PendingEI = false;
+                }
                 if (PendingNMI) {
                     _currentInstruction = new NMIHandler(this);
                 } else if (PendingINT) {
@@ -151,12 +157,12 @@ namespace Z80
                         default:
                             throw new InvalidOperationException("Invalid interrupt mode set on CPU");
                     }
+                } else {
+                    NewInstruction = true;
+                    Opcode = 0x0;
+                    _currentInstruction = null;
+                    _fetchCycle.Reset();
                 }
-
-                NewInstruction = true;
-                Opcode = 0x0;
-                _currentInstruction = null;
-                _fetchCycle.Reset();
             }
         }
 

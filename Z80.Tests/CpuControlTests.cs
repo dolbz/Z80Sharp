@@ -15,8 +15,16 @@ namespace Z80.Tests {
             RunUntil(1);
             
             // Assert
+            Assert.That(_cpu.IFF1, Is.False);
+            Assert.That(_cpu.IFF2, Is.False);
+
+            // Act 2
+            RunUntil(2);
+
+            // Assert 2 - EI behaviour occurs after the instruction following EI
             Assert.That(_cpu.IFF1, Is.True);
             Assert.That(_cpu.IFF2, Is.True);
+
         }
 
         [Test]

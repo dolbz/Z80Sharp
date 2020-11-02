@@ -21,9 +21,7 @@ namespace Z80.Instructions {
 
         public void StartExecution()
         {
-            _cpu.IFF1 = true;
-            _cpu.IFF2 = true;
-            // TODO somehow these shouldn't enable interrupts until after the next instruction is complete
+            _cpu.PendingEI = true;
         }
     }
 }
