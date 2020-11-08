@@ -31,7 +31,6 @@ namespace Z80.Instructions
             // Read from HL pointed address
             if (!_readCycle.IsComplete)
             {
-                Console.WriteLine("Read cycle");
                 _readCycle.Clock();
                 if (_readCycle.IsComplete)
                 {
@@ -41,7 +40,6 @@ namespace Z80.Instructions
             }
             if (!_writeCycle.IsComplete)
             {
-                Console.WriteLine("Write cycle");
                 _writeCycle.Clock();
                 return;
             }
