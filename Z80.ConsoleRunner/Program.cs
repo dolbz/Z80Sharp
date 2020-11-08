@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.IO;
 using System.Diagnostics;
 using System;
 using System.Threading;
@@ -22,6 +24,16 @@ namespace Z80.ConsoleRunner
         private static bool CpuRunning = false;
 
         public static Action running = MainApp;
+
+        private static ListView programListingListView;
+        private static Label clockSpeedValueLabel;
+
+        private static Stopwatch stopwatch = Stopwatch.StartNew();
+        private static CycleCountObservation lastCycleObservation = new CycleCountObservation();
+        public struct CycleCountObservation {
+            public double ElapsedMilliseconds { get; set; }
+            public long Count { get; set; }
+        }
         static void Main(string[] args)
         {
             cpu = new Z80.Z80Cpu();
@@ -55,15 +67,6 @@ namespace Z80.ConsoleRunner
 
         static void MainApp()
         {            
-            // int lastInstructionCount = 0;
-            // while(true) {
-            //     Thread.Sleep(10000);
-            //     int currentInstructionCount = cpu.TotalTCycles;
-            //     var calculatedMhz = (currentInstructionCount - lastInstructionCount) / 10_000_000.0;
-            //     Console.WriteLine($"Running at {calculatedMhz}MHz");
-            //     lastInstructionCount = currentInstructionCount;
-            // }
-
             var top = Application.Top;
             var tframe = top.Frame;
 
@@ -79,11 +82,10 @@ namespace Z80.ConsoleRunner
                 Width = Dim.Percent(50),
                 Height = Dim.Fill()
             };
-            var programListingListView = new ListView() {
+            programListingListView = new ListView() {
                 Width = Dim.Fill(),
                 Height = Dim.Fill()
             };
-            programListingListView.SetSource(GenerateProgramListing());
             programListingFrame.Add(programListingListView);
             
             var cpuStatusFrame = new FrameView("CPU Status") {
@@ -92,10 +94,20 @@ namespace Z80.ConsoleRunner
                 Width = Dim.Percent(50),
                 Height = Dim.Percent(50)
             };
-            cpuStatusFrame.Add(new Label("Clock Speed") {
+            var clockSpeedLabel = new Label("Clock Speed: ") {
                 X = 2,
                 Y = 2
-            });
+            };
+            cpuStatusFrame.Add(clockSpeedLabel);
+
+            clockSpeedValueLabel = new Label("Manually Stepped") 
+            {
+                X = Pos.Right(clockSpeedLabel),
+                Y = 2,
+                Width = Dim.Fill()
+            };
+            cpuStatusFrame.Add(clockSpeedValueLabel);
+
             cpuStatusFrame.Add(new Label("Address") {
                 X = 2,
                 Y = 4
@@ -126,7 +138,7 @@ namespace Z80.ConsoleRunner
                         Application.Run(dialog);
                         var chosenFilePath = dialog.FilePath;
                         LoadBinaryIntoRam(0x100, chosenFilePath.ToString());
-                        programListingListView.SetSource(GenerateProgramListing());
+                        UpdateCpuUi();
                     }),
                     new MenuItem ("_Quit", "", () => { 
                         running = null; 
@@ -148,44 +160,44 @@ namespace Z80.ConsoleRunner
                     CpuRunning = false;
                 }),
                 new StatusItem(Key.F5, "~F5~ Run/Pause", () => {
-                    ToggleRunPaused(programListingListView);
+                    ToggleRunPaused();
                 }),
                 new StatusItem(Key.F10, "~F10~ Step", () => {
                     uiSignal.Set();
                     instructionSignal.WaitOne();  
-                    programListingListView.SetSource(GenerateProgramListing());
+                    UpdateCpuUi();
                 })
             });
 
             top.Add(win, menu, statusBar);
 
 
-            Application.Run ();
-            if (runLoopIdle != null) {
-                Application.MainLoop.RemoveIdle(runLoopIdle);
+            UpdateCpuUi();
+            Application.Run();
+            if (runningProgramTimer != null) {
+                Application.MainLoop.RemoveTimeout(runningProgramTimer);
             }
             uiSignal.Set();
         }
 
-        static Func<bool> runLoopIdle;
+        static object runningProgramTimer;
 
-        static void ToggleRunPaused(ListView programListingListView) {
-            if (runLoopIdle != null) {
-                Application.MainLoop.RemoveIdle(runLoopIdle);
-                runLoopIdle = null;
+        static void ToggleRunPaused() {
+            if (runningProgramTimer != null) {
+                Application.MainLoop.RemoveTimeout(runningProgramTimer);
+                runningProgramTimer = null;
                 //uiSignal.Reset();
                 //instructionSignal.WaitOne();
-                programListingListView.SetSource(GenerateProgramListing());
                 manuallyStepped = true;
+                instructionSignal.WaitOne();
+                UpdateCpuUi();
             } else {
                 manuallyStepped = false;
                 uiSignal.Set();
-                runLoopIdle = Application.MainLoop.AddIdle(() => {
+                runningProgramTimer = Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(50), (loop) => {
                     if (!Application.MainLoop.EventsPending()) {
                         if (CpuRunning) {
-                            //instructionSignal.WaitOne();
-                            programListingListView.SetSource(GenerateProgramListing());
-                            //uiSignal.Set();
+                            UpdateCpuUi();
                         } else {
                             uiSignal.Set();
                         }
@@ -233,8 +245,11 @@ namespace Z80.ConsoleRunner
             instructionSignal.Set();
         }
         
-        static List<string> GenerateProgramListing() {
+        static void UpdateCpuUi() {
             var listing = new List<string>();
+            long tCycleCount = 0;
+
+            CycleCountObservation currentObservation;
 
             lock(cpuState) {
                 var pc = cpu.PC;
@@ -243,9 +258,26 @@ namespace Z80.ConsoleRunner
                         listing.Add($" 0x{i:x4}:    0x{ram[i]:x2}    {InstructionDescriptionFor(i)}");
                     }
                 }
+                tCycleCount = cpu.TotalTCycles;
+                currentObservation = new CycleCountObservation {
+                    ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds,
+                    Count = cpu.TotalTCycles
+                };
             }
 
-            return listing;
+            var timeDelta = currentObservation.ElapsedMilliseconds-lastCycleObservation.ElapsedMilliseconds;
+            var cycleCountDelta = currentObservation.Count - lastCycleObservation.Count;
+
+            var frequency = (cycleCountDelta/timeDelta)/1_000; // Time delta is already ms so divide by 1,000 instead of 1,000,000 to get MHz
+
+            lastCycleObservation = currentObservation;
+            programListingListView.SetSource(listing);
+
+            if (manuallyStepped) {
+                clockSpeedValueLabel.Text = $"Manually Stepped";
+            } else {
+                clockSpeedValueLabel.Text = $"{frequency:0.00}MHz";
+            }
         }
 
         static string InstructionDescriptionFor(int addr) {

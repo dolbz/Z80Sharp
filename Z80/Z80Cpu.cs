@@ -70,7 +70,7 @@ namespace Z80
         internal bool NewInstruction;
         internal int InterruptMode = 0;
 
-        public int TotalTCycles { get; private set; } = 0;
+        public long TotalTCycles { get; private set; } = 0;
 
         internal M1Cycle _fetchCycle;
         internal IInstruction _currentInstruction;
