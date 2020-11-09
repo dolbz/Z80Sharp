@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using Terminal.Gui;
 using System.Collections.Generic;
+using Attribute = Terminal.Gui.Attribute;
 
 namespace Z80.ConsoleRunner
 {
@@ -27,6 +28,25 @@ namespace Z80.ConsoleRunner
 
         private static ListView programListingListView;
         private static Label clockSpeedValueLabel;
+        private static Label accumulatorValueLabel;
+        private static Label signFlagLabel;
+        private static Label zeroFlagLabel;
+        private static Label undocumentedFlag1Label;
+        private static Label halfCarryFlagLabel;
+        private static Label undocumentedFlag2Label;
+        private static Label parityOverflowFlagLabel;
+        private static Label negativeFlagLabel;
+        private static Label carryFlagLabel;
+        private static Label bRegValueLabel;
+        private static Label cRegValueLabel;
+        private static Label dRegValueLabel;
+        private static Label eRegValueLabel;
+        private static Label hRegValueLabel;
+        private static Label lRegValueLabel;
+        private static Label ixRegValueLabel;
+        private static Label iyRegValueLabel;
+        private static Label spRegValueLabel;
+        private static Label pcRegValueLabel;
 
         private static Stopwatch stopwatch = Stopwatch.StartNew();
         private static CycleCountObservation lastCycleObservation = new CycleCountObservation();
@@ -44,7 +64,7 @@ namespace Z80.ConsoleRunner
             
             // Setup instructions for CPM version of  ZEXDOC/ZEXALL found at https://retrocomputing.stackexchange.com/questions/9361/test-emulated-8080-cpu-without-an-os
 
-            //ram[0x0005] = 0xc9; // 0xc9 = RET
+            ram[0x0005] = 0xc9; // 0xc9 = RET
         
             Console.WriteLine("Setting PC to 0x100");
             cpu.PC = 0x100;
@@ -124,6 +144,203 @@ namespace Z80.ConsoleRunner
                 Height = Dim.Fill()
             };
 
+            var accumulatorLabel = new Label("Acc: ") {
+                X = 2,
+                Y = 1
+            };
+            registersFrame.Add(accumulatorLabel);
+
+            accumulatorValueLabel = new Label("0x00") {
+                X = Pos.Right(accumulatorLabel),
+                Y = 1,
+                Width = 6
+            };
+            registersFrame.Add(accumulatorValueLabel);
+
+            var flagsLabel = new Label("Flags: ")
+            {
+                X = Pos.Right(accumulatorValueLabel),
+                Y = 1
+            };
+            registersFrame.Add(flagsLabel);
+
+            signFlagLabel = new Label("S ") {
+                X = Pos.Right(flagsLabel),
+                Y = 1
+            };
+            registersFrame.Add(signFlagLabel);
+
+            zeroFlagLabel = new Label("Z ") {
+                X = Pos.Right(signFlagLabel),
+                Y = 1
+            };
+            registersFrame.Add(zeroFlagLabel);
+
+            undocumentedFlag1Label = new Label("X ") {
+                X = Pos.Right(zeroFlagLabel),
+                Y = 1
+            };
+            registersFrame.Add(undocumentedFlag1Label);
+
+            halfCarryFlagLabel = new Label("H ") {
+                X = Pos.Right(undocumentedFlag1Label),
+                Y = 1
+            };
+            registersFrame.Add(halfCarryFlagLabel);
+
+            undocumentedFlag2Label = new Label("X ") {
+                X = Pos.Right(halfCarryFlagLabel),
+                Y = 1
+            };
+            registersFrame.Add(undocumentedFlag2Label);
+
+            parityOverflowFlagLabel = new Label("P/V ") {
+                X = Pos.Right(undocumentedFlag2Label),
+                Y = 1
+            };
+            registersFrame.Add(parityOverflowFlagLabel);
+
+            negativeFlagLabel = new Label("N ") {
+                X = Pos.Right(parityOverflowFlagLabel),
+                Y = 1
+            };
+            registersFrame.Add(negativeFlagLabel);
+
+            carryFlagLabel = new Label("C") {
+                X = Pos.Right(negativeFlagLabel),
+                Y = 1
+            };
+            registersFrame.Add(carryFlagLabel);
+
+            var bRegLabel = new Label("B: ") {
+                X = 2,
+                Y = 3
+            };
+            registersFrame.Add(bRegLabel);
+
+            bRegValueLabel = new Label("0x00") {
+                X = Pos.Right(bRegLabel),
+                Y = 3,
+                Width = 6
+            };
+            registersFrame.Add(bRegValueLabel);
+
+            var cRegLabel = new Label("C: ") {
+                X = Pos.Right(bRegValueLabel),
+                Y = 3
+            };
+            registersFrame.Add(cRegLabel);
+
+            cRegValueLabel = new Label("0x00") {
+                X = Pos.Right(cRegLabel),
+                Y = 3
+            };
+            registersFrame.Add(cRegValueLabel);
+
+
+            var dRegLabel = new Label("D: ") {
+                X = 2,
+                Y = 5
+            };
+            registersFrame.Add(dRegLabel);
+
+            dRegValueLabel = new Label("0x00") {
+                X = Pos.Right(dRegLabel),
+                Y = 5,
+                Width = 6
+            };
+            registersFrame.Add(dRegValueLabel);
+
+            var eRegLabel = new Label("E: ") {
+                X = Pos.Right(dRegValueLabel),
+                Y = 5
+            };
+            registersFrame.Add(eRegLabel);
+
+            eRegValueLabel = new Label("0x00") {
+                X = Pos.Right(eRegLabel),
+                Y = 5
+            };
+            registersFrame.Add(eRegValueLabel);
+
+
+            var hRegLabel = new Label("H: ") {
+                X = 2,
+                Y = 7
+            };
+            registersFrame.Add(hRegLabel);
+
+            hRegValueLabel = new Label("0x00") {
+                X = Pos.Right(hRegLabel),
+                Y = 7,
+                Width = 6
+            };
+            registersFrame.Add(hRegValueLabel);
+
+            var lRegLabel = new Label("L: ") {
+                X = Pos.Right(hRegValueLabel),
+                Y = 7
+            };
+            registersFrame.Add(lRegLabel);
+
+            lRegValueLabel = new Label("0x00") {
+                X = Pos.Right(lRegLabel),
+                Y = 7
+            };
+            registersFrame.Add(lRegValueLabel);
+
+
+            var ixRegLabel = new Label("IX: ") {
+                X = 2,
+                Y = 9
+            };
+            registersFrame.Add(ixRegLabel);
+
+            ixRegValueLabel = new Label("0x0000") {
+                X = Pos.Right(ixRegLabel),
+                Y = 9
+            };
+            registersFrame.Add(ixRegValueLabel);
+
+
+            var iyRegLabel = new Label("IY: ") {
+                X = 2,
+                Y = 11
+            };
+            registersFrame.Add(iyRegLabel);
+
+            iyRegValueLabel = new Label("0x0000") {
+                X = Pos.Right(iyRegLabel),
+                Y = 11
+            };
+            registersFrame.Add(iyRegValueLabel);
+
+
+            var spRegLabel = new Label("SP: ") {
+                X = 2,
+                Y = 13
+            };
+            registersFrame.Add(spRegLabel);
+
+            spRegValueLabel = new Label("0x0000") {
+                X = Pos.Right(spRegLabel),
+                Y = 13
+            };
+            registersFrame.Add(spRegValueLabel);
+
+            var pcRegLabel = new Label("PC: ") {
+                X = 2,
+                Y = 15
+            };
+            registersFrame.Add(pcRegLabel);
+
+            pcRegValueLabel = new Label("0x0000") {
+                X = Pos.Right(pcRegLabel),
+                Y = 15
+            };
+            registersFrame.Add(pcRegValueLabel);
+            
+
             win.Add(programListingFrame);
             win.Add(cpuStatusFrame);	
             win.Add(registersFrame);
@@ -186,8 +403,6 @@ namespace Z80.ConsoleRunner
             if (runningProgramTimer != null) {
                 Application.MainLoop.RemoveTimeout(runningProgramTimer);
                 runningProgramTimer = null;
-                //uiSignal.Reset();
-                //instructionSignal.WaitOne();
                 manuallyStepped = true;
                 instructionSignal.WaitOne();
                 UpdateCpuUi();
@@ -248,7 +463,7 @@ namespace Z80.ConsoleRunner
         static void UpdateCpuUi() {
             var listing = new List<string>();
             long tCycleCount = 0;
-
+            Z80Flags currentFlags;
             CycleCountObservation currentObservation;
 
             lock(cpuState) {
@@ -263,6 +478,24 @@ namespace Z80.ConsoleRunner
                     ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds,
                     Count = cpu.TotalTCycles
                 };
+
+                currentFlags = cpu.Flags;
+                
+                accumulatorValueLabel.Text = $"0x{cpu.A:x2}";
+
+                bRegValueLabel.Text = $"0x{cpu.B:x2}";
+                cRegValueLabel.Text = $"0x{cpu.C:x2}";
+
+                dRegValueLabel.Text = $"0x{cpu.D:x2}";
+                eRegValueLabel.Text = $"0x{cpu.E:x2}";
+
+                hRegValueLabel.Text = $"0x{cpu.H:x2}";
+                lRegValueLabel.Text = $"0x{cpu.L:x2}";
+
+                ixRegValueLabel.Text = $"0x{cpu.IX:x4}";
+                iyRegValueLabel.Text = $"0x{cpu.IY:x4}";
+                spRegValueLabel.Text = $"0x{cpu.SP:x4}";
+                pcRegValueLabel.Text = $"0x{cpu.PC:x4}";
             }
 
             var timeDelta = currentObservation.ElapsedMilliseconds-lastCycleObservation.ElapsedMilliseconds;
@@ -278,6 +511,38 @@ namespace Z80.ConsoleRunner
             } else {
                 clockSpeedValueLabel.Text = $"{frequency:0.00}MHz";
             }
+
+            // Flags
+            var flagSetColorScheme = new ColorScheme() {
+                Normal = Attribute.Make(Color.BrightRed, Color.Blue),
+            };
+
+            var defaultColorScheme = accumulatorValueLabel.ColorScheme; // HACK
+            signFlagLabel.ColorScheme = defaultColorScheme;
+            zeroFlagLabel.ColorScheme = defaultColorScheme;
+            halfCarryFlagLabel.ColorScheme = defaultColorScheme;
+            parityOverflowFlagLabel.ColorScheme = defaultColorScheme;
+            negativeFlagLabel.ColorScheme = defaultColorScheme;
+            carryFlagLabel.ColorScheme = defaultColorScheme;
+
+            if (currentFlags.HasFlag(Z80Flags.Sign_S)) {
+                signFlagLabel.ColorScheme = flagSetColorScheme;
+            }
+            if (currentFlags.HasFlag(Z80Flags.Zero_Z)) {
+                zeroFlagLabel.ColorScheme = flagSetColorScheme;
+            }
+            if (currentFlags.HasFlag(Z80Flags.HalfCarry_H)) {
+                halfCarryFlagLabel.ColorScheme = flagSetColorScheme;
+            }
+            if (currentFlags.HasFlag(Z80Flags.ParityOverflow_PV)) {
+                parityOverflowFlagLabel.ColorScheme = flagSetColorScheme;
+            }
+            if (currentFlags.HasFlag(Z80Flags.AddSubtract_N)) {
+                negativeFlagLabel.ColorScheme = flagSetColorScheme;
+            }
+            if (currentFlags.HasFlag(Z80Flags.Carry_C)) {
+                carryFlagLabel.ColorScheme = flagSetColorScheme;
+            }
         }
 
         static string InstructionDescriptionFor(int addr) {
@@ -287,8 +552,8 @@ namespace Z80.ConsoleRunner
                 opcode = opcode << 8 | ram[addr + 1];
             }
 
-            var instruction = cpu.instructions[ram[addr]];
-            return instruction?.Mnemonic ?? "";
+            var instruction = cpu.instructions[opcode];
+            return instruction?.Mnemonic ?? ""; // TODO return indication to skip next x addr if it's a multi byte instruction
         }
 
         public static void EditRam() {
