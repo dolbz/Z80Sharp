@@ -145,7 +145,7 @@ namespace Z80.Instructions
 
             if (_withCarry) {
                 // Instructions with carry affect the Sign and Zero flags
-                Z80Flags.Zero_Z.SetOrReset(_cpu, result == 0);
+                Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xffff) == 0);
                 Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x8000) == 0x8000);
                 Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 0x7fff);
             }
