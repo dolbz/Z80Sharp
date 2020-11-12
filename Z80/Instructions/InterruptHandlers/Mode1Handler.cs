@@ -10,7 +10,7 @@ namespace Z80.Instructions.InterruptHandlers {
 
         public Mode1Handler(Z80Cpu cpu) {
             _pcPush = new PUSH(cpu, WideRegister.PC);
-            _restartInstruction = new RST(cpu, 0x66);
+            _restartInstruction = new RST(cpu, 0x38);
         }
 
         public void Clock()

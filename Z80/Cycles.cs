@@ -8,44 +8,60 @@ namespace Z80
     public class M1Cycle : IMachineCycle {
         private readonly Z80Cpu _cpu;
 
-        public bool IsComplete => RemainingTCycles == 0;
-        private int RemainingTCycles { get; set; } = 4;
+        public bool IsComplete => _tCycle == 5;
+        private int _tCycle = 1;
+
+        private int _interruptWaitCyclesRemaining = 0;
 
         public M1Cycle(Z80Cpu cpu) {
             _cpu = cpu;
         }
 
         public void Reset() {
-            RemainingTCycles = 4;
+            _tCycle = 1;
+            if (_cpu.PendingINT) {
+                _interruptWaitCyclesRemaining = 2;
+            } else {
+                _interruptWaitCyclesRemaining = 0;
+            }
         }
 
         public void Clock() {
-            switch (RemainingTCycles) {
-                case 4:
+            switch (_tCycle) {
+                case 1:
                     _cpu.RFRSH = false;
                     _cpu.Address = _cpu.PC;
                     _cpu.RD = true;
                     _cpu.MREQ = true;
                     _cpu.M1 = true;
                     break;
-                case 3:
-                    break;
                 case 2:
-                    _cpu.Opcode |= _cpu.Data;
-                    _cpu.RD = false;
-                    _cpu.MREQ = false;
-                    _cpu.M1 = false;
-                    _cpu.RFRSH = true;
                     break;
-                case 1:
-                    // TODO Sample for busreq and interrupts
+                case 3:
+                    if (_interruptWaitCyclesRemaining-- > 0)
+                    {
+                        _cpu.IORQ = true;
+                    } 
+                    else 
+                    {
+                        _cpu.IORQ = false;
+                        _cpu.Opcode |= _cpu.Data;
+                        _cpu.RD = false;
+                        _cpu.MREQ = false;
+                        _cpu.M1 = false;
+                        _cpu.RFRSH = true;
+                    }
+                    break;
+                case 4:
                 default:
                     break;
             }
             
+            if (_interruptWaitCyclesRemaining <= 0) {
             //if (!_cpu.WAIT) {
-            RemainingTCycles--;
+                _tCycle++;
             //}
+            }
         }
     }
 
@@ -151,6 +167,88 @@ namespace Z80
 
             //if (!_cpu.WAIT) {
             RemainingTCycles--;
+            //}
+        }
+    }
+
+    public class InputCycle : IMachineCycle {
+        private readonly Z80Cpu _cpu;
+        private int _tCycle = 1;
+
+        public bool IsComplete => _tCycle == 5;
+        public byte LatchedData { get; private set; }
+        public ushort Address { get; set; }
+
+        public InputCycle(Z80Cpu cpu) {
+            _cpu = cpu;
+        }
+
+        public void Reset() {
+            _tCycle = 1;
+        }
+
+        public void Clock() {
+            switch (_tCycle) {
+                case 1:
+                    _cpu.Address = Address;
+                    break;
+                case 2:
+                    _cpu.IORQ = true;
+                    _cpu.RD = true;
+                    break;
+                case 3:
+                    // Automatically inserted wait. Do nothing
+                    break;
+                case 4:
+                    LatchedData = _cpu.Data;
+                    _cpu.RD = false;
+                    _cpu.IORQ = false;
+                    break;
+            }
+
+            //if (!_cpu.WAIT) {
+            _tCycle++;
+            //}
+        }
+    }
+
+        public class OutputCycle : IMachineCycle {
+        private readonly Z80Cpu _cpu;
+        private int _tCycle = 1;
+
+        public bool IsComplete => _tCycle == 5;
+        public byte DataToOutput { get; set; }
+        public ushort Address { get; set; }
+
+        public OutputCycle(Z80Cpu cpu) {
+            _cpu = cpu;
+        }
+
+        public void Reset() {
+            _tCycle = 1;
+        }
+
+        public void Clock() {
+            switch (_tCycle) {
+                case 1:
+                    _cpu.Address = Address;
+                    _cpu.Data = DataToOutput;
+                    break;
+                case 2:
+                    _cpu.IORQ = true;
+                    _cpu.WR = true;
+                    break;
+                case 3:
+                    // Automatically inserted wait. Do nothing
+                    break;
+                case 4:
+                    _cpu.WR = false;
+                    _cpu.IORQ = false;
+                    break;
+            }
+
+            //if (!_cpu.WAIT) {
+            _tCycle++;
             //}
         }
     }

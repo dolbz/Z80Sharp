@@ -1,3 +1,4 @@
+using System.CodeDom.Compiler;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -486,6 +487,14 @@ namespace Z80.Tests
 
             // Jump and call instructions have cycle count tests in with their other unit tests as the cycle
             // count varies depending on the outcome
+
+            generated.Add(new object[] { 0xdb, 11 }); // IN A, (n)
+
+            for (int i = 0xed40; i <= 0xed78; i += 8) {
+                if (i != 0xed70) {
+                    generated.Add(new object[] { i, 12 }); // IN r (C) for all registers
+                }
+            }
 
             #endregion
 

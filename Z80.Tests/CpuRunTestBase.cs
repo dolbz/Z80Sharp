@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using NUnit.Framework;
 
@@ -7,17 +8,27 @@ namespace Z80.Tests
         protected Z80Cpu _cpu = new Z80Cpu();
         protected byte[] _ram;
 
+        private Dictionary<ushort, byte> _dataDictionary = new Dictionary<ushort, byte>();
+
         [SetUp]
         public void Setup()
         {
             _cpu.Reset();
             _ram = new byte[ushort.MaxValue + 1]; // +1 to account for zeroeth element
+            _dataDictionary.Clear();
+        }
+
+        protected void AddDataAtIoAddress(ushort address, byte data) {
+            _dataDictionary.Add(address, data);
         }
 
         protected void RunUntil(int pc)
         {
             while (_cpu.PC != pc || !_cpu.NewInstruction)
             {
+                if (_cpu.IORQ && _cpu.RD) {
+                    _cpu.Data = _dataDictionary[_cpu.Address];
+                }
                 if (_cpu.MREQ && _cpu.RD)
                 {
                     var data = _ram[_cpu.Address];

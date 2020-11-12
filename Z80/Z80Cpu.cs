@@ -61,6 +61,8 @@ namespace Z80
                 }
             } 
         }
+
+        public bool INT;
         
         internal bool PendingNMI { get; set; }
         internal bool PendingINT {get;set;}
@@ -95,7 +97,7 @@ namespace Z80
 
                 IInstruction instruction = null;
                 
-                PostIncrementPC();
+                PostIncrementPC(); // TODO must stop increment if pending interrupt
 
                 if (!HALT) {
                     instruction = instructions[Opcode];
@@ -136,6 +138,8 @@ namespace Z80
         private void SetupForNextInstructionIfRequired() {
             if (_currentInstruction.IsComplete)
             {
+                PendingINT = INT; // This is at the end the last clock cycle rather than at the start...proably not a big deal
+
                 if (PendingEI && !(_currentInstruction is EI)) {
                     IFF1 = true;
                     IFF2 = true;
@@ -158,11 +162,12 @@ namespace Z80
                             throw new InvalidOperationException("Invalid interrupt mode set on CPU");
                     }
                 } else {
-                    NewInstruction = true;
                     Opcode = 0x0;
                     _currentInstruction = null;
-                    _fetchCycle.Reset();
                 }
+
+                NewInstruction = true;
+                _fetchCycle.Reset();
             }
         }
 
@@ -951,6 +956,23 @@ namespace Z80
             instructions[0xef] = new RST(this, 0x28); // RST 40
             instructions[0xf7] = new RST(this, 0x30); // RST 48
             instructions[0xff] = new RST(this, 0x38); // RST 56
+
+            #endregion
+
+            #region Input 
+
+            // TODO load input into flags register is semi documented here... should we implement?
+            instructions[0xdb] = new IN(this, Register.A, new ImmediateOperand(this).Reader, Register.A); // IN A,(n)
+            instructions[0xed40] = new IN(this, Register.B, new RegAddrMode8Bit(this, Register.C), Register.B); // IN B (C)
+            instructions[0xed48] = new IN(this, Register.C, new RegAddrMode8Bit(this, Register.C), Register.B); // IN C (C)
+            instructions[0xed50] = new IN(this, Register.D, new RegAddrMode8Bit(this, Register.C), Register.B); // IN D (C)
+            instructions[0xed58] = new IN(this, Register.E, new RegAddrMode8Bit(this, Register.C), Register.B); // IN E (C)
+            instructions[0xed60] = new IN(this, Register.H, new RegAddrMode8Bit(this, Register.C), Register.B); // IN H (C)
+            instructions[0xed68] = new IN(this, Register.L, new RegAddrMode8Bit(this, Register.C), Register.B); // IN L (C)
+            instructions[0xed78] = new IN(this, Register.A, new RegAddrMode8Bit(this, Register.C), Register.B); // IN A (C)
+            #endregion
+
+            #region Output 
 
             #endregion
 
