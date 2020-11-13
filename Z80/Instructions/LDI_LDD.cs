@@ -51,7 +51,8 @@ namespace Z80.Instructions
             }
 
             if (bcValue != 1 && _repeats && --_additionalRepeatCycles > 0)
-            { // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
+            { 
+                // Prefix decrement here so we use the last addtional cycle to actually carry out the instruction
                 return;
             }
 

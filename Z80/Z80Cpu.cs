@@ -970,6 +970,12 @@ namespace Z80
             instructions[0xed60] = new IN(this, Register.H, new RegAddrMode8Bit(this, Register.C), Register.B); // IN H (C)
             instructions[0xed68] = new IN(this, Register.L, new RegAddrMode8Bit(this, Register.C), Register.B); // IN L (C)
             instructions[0xed78] = new IN(this, Register.A, new RegAddrMode8Bit(this, Register.C), Register.B); // IN A (C)
+
+            instructions[0xeda2] = new INxx(this, true, false); // INI
+            instructions[0xedaa] = new INxx(this, false, false); // IND
+
+            instructions[0xedb2] = new INxx(this, true, true); // INIR
+            instructions[0xedba] = new INxx(this, false, true); // INDR
             #endregion
 
             #region Output 

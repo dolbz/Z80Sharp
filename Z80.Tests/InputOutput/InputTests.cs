@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 
-namespace Z80.Tests
+namespace Z80.Tests.InputOutput
 {
     public class InputTests : CpuRunTestBase {
 
