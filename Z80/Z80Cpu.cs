@@ -980,6 +980,15 @@ namespace Z80
 
             #region Output 
 
+            instructions[0xd3] = new OUT(this, new ImmediateOperand(this).Reader, Register.A, Register.A); // OUT (n),A
+            instructions[0xed41] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.B, Register.B); // OUT (C), B
+            instructions[0xed49] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.C, Register.B); // OUT (C), C
+            instructions[0xed51] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.D, Register.B); // OUT (C), D
+            instructions[0xed59] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.E, Register.B); // OUT (C), E
+            instructions[0xed61] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.H, Register.B); // OUT (C), H
+            instructions[0xed69] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.L, Register.B); // OUT (C), L
+            instructions[0xed79] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.A, Register.B); // OUT (C), A           
+
             #endregion
 
             #region Misc CPU control

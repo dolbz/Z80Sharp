@@ -22,12 +22,23 @@ namespace Z80.Tests
             _dataDictionary.Add(address, data);
         }
 
+        protected byte DataAtIoAddress(ushort address) {
+            return _dataDictionary[address];
+        }
+
         protected void RunUntil(int pc)
         {
             while (_cpu.PC != pc || !_cpu.NewInstruction)
             {
                 if (_cpu.IORQ && _cpu.RD) {
                     _cpu.Data = _dataDictionary[_cpu.Address];
+                }
+                if (_cpu.IORQ && _cpu.WR) {
+                    if (_dataDictionary.ContainsKey(_cpu.Address)) {
+                        _dataDictionary[_cpu.Address] = _cpu.Data;
+                    } else {
+                        _dataDictionary.Add(_cpu.Address, _cpu.Data);
+                    }
                 }
                 if (_cpu.MREQ && _cpu.RD)
                 {

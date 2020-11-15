@@ -501,6 +501,14 @@ namespace Z80.Tests
 
             // INIR and INDR tested separately as they have varying cycle counts
 
+            generated.Add(new object[] { 0xd3, 11 }); // OUT (n),A
+
+            for (int i = 0xed41; i <= 0xed79; i += 8) {
+                if (i != 0xed71) {
+                    generated.Add(new object[] { i, 12 }); // OUT (C),r for all registers
+                }
+            }
+
             #endregion
 
             return generated;
