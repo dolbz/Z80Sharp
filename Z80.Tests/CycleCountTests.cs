@@ -509,6 +509,11 @@ namespace Z80.Tests
                 }
             }
 
+            generated.Add(new object[] { 0xeda3, 16 }); // OUTI
+            generated.Add(new object[] { 0xedab, 16 }); // OUTD            
+
+            // INIR and INDR tested separately as they have varying cycle counts
+
             #endregion
 
             return generated;
@@ -516,7 +521,9 @@ namespace Z80.Tests
 
         [TestCase(0xedb2)]
         [TestCase(0xedba)]
-        public void InputAndIncOrDecRepeatCycleCount(int opcode) {
+        [TestCase(0xedb3)]
+        [TestCase(0xedbb)]
+        public void InputOutputAndIncOrDecRepeatCycleCount(int opcode) {
             Register.B.SetValueOnProcessor(_cpu, 2);
 
             CycleCounts(opcode, 21);

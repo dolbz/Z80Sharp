@@ -989,6 +989,12 @@ namespace Z80
             instructions[0xed69] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.L, Register.B); // OUT (C), L
             instructions[0xed79] = new OUT(this, new RegAddrMode8Bit(this, Register.C), Register.A, Register.B); // OUT (C), A           
 
+            instructions[0xeda3] = new OUTxx(this, true, false); // OUTI
+            instructions[0xedab] = new OUTxx(this, false, false); // OUTD
+
+            instructions[0xedb3] = new OUTxx(this, true, true); // OUTIR
+            instructions[0xedbb] = new OUTxx(this, false, true); // OUTDR
+
             #endregion
 
             #region Misc CPU control
