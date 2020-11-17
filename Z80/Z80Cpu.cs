@@ -69,7 +69,7 @@ namespace Z80
         internal bool IFF1;
         internal bool IFF2;
 
-        internal bool NewInstruction;
+        public bool NewInstruction;
         internal int InterruptMode = 0;
 
         public long TotalTCycles { get; private set; } = 0;

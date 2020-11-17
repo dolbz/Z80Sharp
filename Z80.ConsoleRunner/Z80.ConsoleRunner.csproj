@@ -9,11 +9,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="zexdoc.com">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>  
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Terminal.Gui" Version="0.90.3" />
   </ItemGroup>
 
