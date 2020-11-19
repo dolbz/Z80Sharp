@@ -9,8 +9,7 @@ namespace Z80.Instructions {
         private IAddressMode<ushort> _addressMode;
         private JumpCondition _jumpCondition;
         private InternalCycle _internalCycle;
-        public string Mnemonic => "CALL";
-        
+        public virtual string Mnemonic => "CALL";  
 
         public bool IsComplete { get; private set; } = false;
 

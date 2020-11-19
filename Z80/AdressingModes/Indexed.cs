@@ -31,6 +31,8 @@ namespace Z80.AddressingModes
             }
         }
 
+        public string Description => "(" + (_register == WideRegister.IX ? "IX" : "IY") + "+d)";
+
         private ushort GetIndexedAddress() {
             return (ushort)((_register == WideRegister.IX ? _cpu.IX : _cpu.IY) + (sbyte)_offsetReadCycle.LatchedData);
         }

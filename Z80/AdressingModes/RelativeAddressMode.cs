@@ -12,6 +12,8 @@ namespace Z80.AddressingModes {
 
         public bool IsComplete => _offsetReader.IsComplete;
 
+        public string Description => "PC+e";
+
         public RelativeAddressMode(Z80Cpu cpu) {
             _cpu = cpu;
             _offsetReader = new MemoryByteReader(cpu);

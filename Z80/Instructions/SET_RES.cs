@@ -13,7 +13,7 @@ namespace Z80.Instructions
         private IReadAddressedOperand<byte> _reader;
         private IWriteAddressedOperand<byte> _writer;
 
-        public string Mnemonic => "RES";
+        public string Mnemonic => $"RES {_addressMode.Description},{_bitNumber}";
 
         public bool IsComplete => _writer != null && _writer.IsComplete;
 

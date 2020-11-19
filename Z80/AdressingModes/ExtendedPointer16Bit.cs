@@ -11,6 +11,8 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<ushort> Writer => new MemoryShortWriter(_cpu, _extendedOperand.AddressedValue, false);
 
+        public string Description => "(nn)";
+
         public ExtendedPointer16Bit(Z80Cpu cpu)
         {
             _cpu = cpu;

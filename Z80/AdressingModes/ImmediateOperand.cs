@@ -12,6 +12,8 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<byte> Writer => throw new InvalidOperationException("Cannot write with the immediate addressing mode");
 
+        public string Description => "n";
+
         public ImmediateOperand(Z80Cpu cpu)
         {
             _cpu = cpu;

@@ -18,6 +18,8 @@ namespace Z80.AddressingModes
 
         public bool IsComplete => true;
 
+        public string Description => "nn";
+
         public void Clock()
         {
         }

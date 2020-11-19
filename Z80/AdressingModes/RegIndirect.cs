@@ -13,6 +13,8 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<byte> Writer => new MemoryByteWriter(_cpu, _register.GetValue(_cpu));
 
+        public string Description => $"({_register.ToString()})";
+
         public RegIndirect(Z80Cpu cpu, WideRegister register, bool additionalCycleOnRead = false)
         {
             _cpu = cpu;

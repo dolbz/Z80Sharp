@@ -14,6 +14,8 @@ namespace Z80.AddressingModes {
 
         public ushort AddressedValue => _addressedValue;
 
+        public string Description => $"{AddressedValue}";
+
         public void Clock()
         {
         }

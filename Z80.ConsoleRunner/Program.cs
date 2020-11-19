@@ -1,12 +1,12 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.IO;
+﻿using System.IO;
 using System.Diagnostics;
 using System;
 using System.Threading;
 using Terminal.Gui;
 using System.Collections.Generic;
 using Attribute = Terminal.Gui.Attribute;
+using Z80.Instructions;
+using System.Linq;
 
 namespace Z80.ConsoleRunner
 {
@@ -23,11 +23,17 @@ namespace Z80.ConsoleRunner
         private static Z80.Z80Cpu cpu;
 
         private static bool CpuRunning = false;
+        private static bool breakPointHit = false;
+        private static List<(int, string)> executedInstructions = new List<(int, string)>();
 
         public static Action running = MainApp;
 
         private static ListView programListingListView;
+        private static ListView stackListView;
+        private static ListView recentlyExecutedListView;
         private static Label clockSpeedValueLabel;
+        private static Label addressValueLabel;
+        private static Label dataValueLabel;
         private static Label accumulatorValueLabel;
         private static Label signFlagLabel;
         private static Label zeroFlagLabel;
@@ -64,17 +70,16 @@ namespace Z80.ConsoleRunner
             
             // Setup instructions for CPM version of  ZEXDOC/ZEXALL found at https://retrocomputing.stackexchange.com/questions/9361/test-emulated-8080-cpu-without-an-os
 
-            ram[0x0005] = 0xc9; // 0xc9 = RET
+            //ram[0x0005] = 0xc9; // 0xc9 = RET
         
-            Console.WriteLine("Setting PC to 0x100");
-            cpu.PC = 0x100;
+            //Console.WriteLine("Setting PC to 0x100");
+            //cpu.PC = 0x100;
 
             Console.WriteLine($"Firing up the CPU. Test run started at: {DateTime.Now}\n");
 
             ThreadStart work = RunCPU;
             Thread thread = new Thread(work);
             thread.Start();
-
 
             Console.OutputEncoding = System.Text.Encoding.Default;
 
@@ -128,19 +133,112 @@ namespace Z80.ConsoleRunner
             };
             cpuStatusFrame.Add(clockSpeedValueLabel);
 
-            cpuStatusFrame.Add(new Label("Address") {
+            var addressLabel = new Label("Address ") {
                 X = 2,
                 Y = 4
-            });
-            cpuStatusFrame.Add(new Label("Data") {
+            };
+            cpuStatusFrame.Add(addressLabel);
+
+            addressValueLabel = new Label("0x0000") {
+                X = Pos.Right(addressLabel),
+                Y = 4
+            };
+            cpuStatusFrame.Add(addressValueLabel);
+
+            var dataLabel = new Label("Data ") {
                 X = 2,
                 Y = 6
+            };
+            cpuStatusFrame.Add(dataLabel);
+
+            dataValueLabel = new Label("0x00") {
+                X = Pos.Right(dataLabel),
+                Y = 6
+            };
+            cpuStatusFrame.Add(dataValueLabel);
+
+            var registersFrame = BuildRegistersFrame();
+
+            var stackFrame = new FrameView("Stack") {
+                X = Pos.Right(registersFrame),
+                Y = Pos.Percent(50),
+                Width = Dim.Percent(25),
+                Height = Dim.Fill()
+            };
+            stackListView = new ListView() {
+                Width = Dim.Fill(),
+                Height = Dim.Percent(50)
+            };
+            stackFrame.Add(stackListView);
+
+            recentlyExecutedListView = new ListView() {
+                Y = Pos.Bottom(stackListView),
+                Width = Dim.Fill(),
+                Height = Dim.Percent(50),
+            };
+            stackFrame.Add(recentlyExecutedListView);
+            
+            win.Add(programListingFrame);
+            win.Add(cpuStatusFrame);	
+            win.Add(registersFrame);
+            win.Add(stackFrame);
+
+            var menu = new MenuBar (new MenuBarItem [] {
+                new MenuBarItem ("_File", new MenuItem [] {
+                    new MenuItem ("_Load file", "", () => {
+                        var dialog = new OpenDialog("Load file", "Loads the chosen file into the address space") {
+                            CanChooseDirectories = false,
+                            AllowsMultipleSelection = false
+                        };
+                        Application.Run(dialog);
+                        var chosenFilePath = dialog.FilePath;
+                        LoadBinaryIntoRam(0, chosenFilePath.ToString());
+                        UpdateCpuUi();
+                    }),
+                    new MenuItem ("_Quit", "", () => { 
+                        running = null; 
+                        top.Running = false; 
+                        CpuRunning = false; })
+                }),
+                new MenuBarItem ("_Actions", new MenuItem [] {
+                    new MenuItem ("_Reset CPU", "", () => {
+                        cpu.Reset();
+                    }),
+                })
             });
 
-            var registersFrame = new FrameView("Registers") {
+            var statusBar = new StatusBar (new StatusItem [] {
+                new StatusItem(Key.F1, "~F1~ Help", null),// () => Help()),
+                new StatusItem(Key.F2, "~F2~ Edit RAM", () => { 
+                    running = EditRam; 
+                    Application.RequestStop ();
+                    CpuRunning = false;
+                }),
+                new StatusItem(Key.F5, "~F5~ Run/Pause", () => {
+                    ToggleRunPaused();
+                }),
+                new StatusItem(Key.F10, "~F10~ Step", () => {
+                    uiSignal.Set();
+                    instructionSignal.WaitOne();  
+                    UpdateCpuUi();
+                })
+            });
+
+            top.Add(win, menu, statusBar);
+
+            UpdateCpuUi();
+            Application.Run();
+            if (runningProgramTimer != null) {
+                Application.MainLoop.RemoveTimeout(runningProgramTimer);
+            }
+            uiSignal.Set();
+        }
+
+        static FrameView BuildRegistersFrame() {
+             var registersFrame = new FrameView("Registers") {
                 X = Pos.Percent(50),
                 Y = Pos.Percent(50),
-                Width = Dim.Percent(50),
+                Width = Dim.Percent(25),
                 Height = Dim.Fill()
             };
 
@@ -339,62 +437,7 @@ namespace Z80.ConsoleRunner
                 Y = 15
             };
             registersFrame.Add(pcRegValueLabel);
-            
-
-            win.Add(programListingFrame);
-            win.Add(cpuStatusFrame);	
-            win.Add(registersFrame);
-
-            var menu = new MenuBar (new MenuBarItem [] {
-                new MenuBarItem ("_File", new MenuItem [] {
-                    new MenuItem ("_Load file", "", () => {
-                        var dialog = new OpenDialog("Load file", "Loads the chosen file into the address space") {
-                            CanChooseDirectories = false,
-                            AllowsMultipleSelection = false
-                        };
-                        Application.Run(dialog);
-                        var chosenFilePath = dialog.FilePath;
-                        LoadBinaryIntoRam(0x100, chosenFilePath.ToString());
-                        UpdateCpuUi();
-                    }),
-                    new MenuItem ("_Quit", "", () => { 
-                        running = null; 
-                        top.Running = false; 
-                        CpuRunning = false; })
-                }),
-                new MenuBarItem ("_Edit", new MenuItem [] {
-                    new MenuItem ("_Copy", "", null),
-                    new MenuItem ("C_ut", "", null),
-                    new MenuItem ("_Paste", "", null)
-                })
-            });
-
-            var statusBar = new StatusBar (new StatusItem [] {
-                new StatusItem(Key.F1, "~F1~ Help", null),// () => Help()),
-                new StatusItem(Key.F2, "~F2~ Edit RAM", () => { 
-                    running = EditRam; 
-                    Application.RequestStop ();
-                    CpuRunning = false;
-                }),
-                new StatusItem(Key.F5, "~F5~ Run/Pause", () => {
-                    ToggleRunPaused();
-                }),
-                new StatusItem(Key.F10, "~F10~ Step", () => {
-                    uiSignal.Set();
-                    instructionSignal.WaitOne();  
-                    UpdateCpuUi();
-                })
-            });
-
-            top.Add(win, menu, statusBar);
-
-
-            UpdateCpuUi();
-            Application.Run();
-            if (runningProgramTimer != null) {
-                Application.MainLoop.RemoveTimeout(runningProgramTimer);
-            }
-            uiSignal.Set();
+            return registersFrame;
         }
 
         static object runningProgramTimer;
@@ -417,6 +460,11 @@ namespace Z80.ConsoleRunner
                             uiSignal.Set();
                         }
                     }
+                    if (breakPointHit) {
+                        Application.MainLoop.RemoveTimeout(runningProgramTimer);
+                        breakPointHit = false;
+                        manuallyStepped = true;
+                    }
                     return true; 
                 });
             }
@@ -424,60 +472,91 @@ namespace Z80.ConsoleRunner
 
         private static void RunCPU() {
             CpuRunning = true;
+            var lastSp = cpu.SP;
             while (CpuRunning) {
-                if (manuallyStepped) {
+                if (manuallyStepped || breakPointHit) {
                     instructionSignal.Set();
                     uiSignal.WaitOne(); // Wait until the UI has signalled CPU execution can continue
                 }
+                
                 lock(cpuState) {
                     do {
                         cpu.Clock();
                         if (cpu.MREQ && cpu.RD) {
                             var data = ram[cpu.Address];
-                            //Console.WriteLine($"Reading data: {data:X2} from address: {cpu.Address:X4}");
                             cpu.Data = data;
                         }
                         if (cpu.MREQ && cpu.WR) {
-                            //Console.WriteLine($"Setting data at address: {cpu.Address:X4} to {cpu.Data:X2}");
                             ram[cpu.Address] = cpu.Data;
                         }
-                        if (cpu.PC == 0x0005 && cpu.NewInstruction) {
-                            if (cpu.C == 9) {
-                                var address = WideRegister.DE.GetValue(cpu);
-                                char chr;
-                                while ((chr = (char)ram[address++]) != '$') {
-                                    Console.Write(chr);
-                                }
-                            } else if (cpu.C == 2) {
-                                Console.Write((char)cpu.E);
-                            } else {
-                                //Console.WriteLine("Unexpected C value during print");
-                            }
-                        }
-                    } while(!cpu.NewInstruction);
+                        // if (cpu.PC == 0x0005 && cpu.NewInstruction) {
+                        //     if (cpu.C == 9) {
+                        //         var address = WideRegister.DE.GetValue(cpu);
+                        //         char chr;
+                        //         while ((chr = (char)ram[address++]) != '$') {
+                        //             Console.Write(chr);
+                        //         }
+                        //     } else if (cpu.C == 2) {
+                        //         Console.Write((char)cpu.E);
+                        //     } else {
+                        //         //Console.WriteLine("Unexpected C value during print");
+                        //     }
+                        // }
+                    } while(!cpu.NewInstruction && !breakPointHit);
+
+                    var nextInstruction = InstructionFor(cpu.PC);
+                    executedInstructions.Add((cpu.PC, nextInstruction.instruction?.Mnemonic ?? ""));
                 }
             }
             instructionSignal.Set();
         }
         
+        static string BuildInstructionDescription(IInstruction instruction) {
+            var description = string.Empty;
+
+            if (instruction != null) {
+                description = instruction.Mnemonic;
+            }
+
+            return description;
+        }
+
         static void UpdateCpuUi() {
             var listing = new List<string>();
             long tCycleCount = 0;
             Z80Flags currentFlags;
             CycleCountObservation currentObservation;
+            var stackValues = new List<string>();
+            var skipNextDisasm = false;
+            List<string> instructionsForUi;
 
             lock(cpuState) {
                 var pc = cpu.PC;
-                for (int i = pc; i < pc + 50; i++) {
-                    if (i < 0x10000) {
-                        listing.Add($" 0x{i:x4}:    0x{ram[i]:x2}    {InstructionDescriptionFor(i)}");
+                var startPc = (ushort)(pc-20);
+                for (ushort i = 0; i < 50; i++) {
+                    var currentPc = (ushort)(startPc+i);
+                    var description = "";
+
+                    if (skipNextDisasm) {
+                        skipNextDisasm = false;
+                    } else {
+                        var instruction = InstructionFor(currentPc);
+                        if (instruction.byteCount == 2) {
+                            skipNextDisasm = true;
+                        }
+                        description = instruction.instruction?.Mnemonic ?? "";
                     }
+
+                    listing.Add($" 0x{currentPc:x4}:    0x{ram[currentPc]:x2}    {description}");
                 }
                 tCycleCount = cpu.TotalTCycles;
                 currentObservation = new CycleCountObservation {
                     ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds,
                     Count = cpu.TotalTCycles
                 };
+
+                addressValueLabel.Text = $"0x{cpu.Address:x4}";
+                dataValueLabel.Text = $"0x{cpu.Data:x2}";
 
                 currentFlags = cpu.Flags;
                 
@@ -496,7 +575,22 @@ namespace Z80.ConsoleRunner
                 iyRegValueLabel.Text = $"0x{cpu.IY:x4}";
                 spRegValueLabel.Text = $"0x{cpu.SP:x4}";
                 pcRegValueLabel.Text = $"0x{cpu.PC:x4}";
+                
+                for (int i = 0; i < 10; i++) {
+                    stackValues.Add($"0x{cpu.SP+i:x4} 0x{ram[cpu.SP+i]:x2}");
+                }
+                
+                instructionsForUi = executedInstructions
+                    .AsEnumerable()
+                    .Reverse()
+                    .Take(20)
+                    .Select(x => $"{x.Item1:x4}: {x.Item2}")
+                    .ToList();
             }
+
+            stackListView.SetSource(stackValues);
+
+            recentlyExecutedListView.SetSource(instructionsForUi);
 
             var timeDelta = currentObservation.ElapsedMilliseconds-lastCycleObservation.ElapsedMilliseconds;
             var cycleCountDelta = currentObservation.Count - lastCycleObservation.Count;
@@ -505,6 +599,7 @@ namespace Z80.ConsoleRunner
 
             lastCycleObservation = currentObservation;
             programListingListView.SetSource(listing);
+            programListingListView.SelectedItem = 20;
 
             if (manuallyStepped) {
                 clockSpeedValueLabel.Text = $"Manually Stepped";
@@ -545,15 +640,16 @@ namespace Z80.ConsoleRunner
             }
         }
 
-        static string InstructionDescriptionFor(int addr) {
+        static (IInstruction instruction, int byteCount) InstructionFor(int addr) {
             int opcode = ram[addr];
+            var byteCount = 1;
             if (opcode == 0xcb || opcode == 0xdd || opcode == 0xed || opcode == 0xfd) {
                 // Pickup next byte as this is a prefixed instruction
                 opcode = opcode << 8 | ram[addr + 1];
+                byteCount = 2;
             }
 
-            var instruction = cpu.instructions[opcode];
-            return instruction?.Mnemonic ?? ""; // TODO return indication to skip next x addr if it's a multi byte instruction
+            return (cpu.instructions[opcode], byteCount);
         }
 
         public static void EditRam() {

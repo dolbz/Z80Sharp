@@ -13,6 +13,7 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<ushort> Writer => new MemoryShortWriter(_cpu, _register.GetValue(_cpu), _decreasingAddress);
 
+        public string Description => $"({_register.ToString()})";
 
         public RegIndirectWide(Z80Cpu cpu, WideRegister register, bool decreasingAddress)
         {

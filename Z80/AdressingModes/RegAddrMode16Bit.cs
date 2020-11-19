@@ -20,6 +20,8 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<ushort> Writer => this;
 
+        public string Description => $"{_register.ToString()}";
+
         public RegAddrMode16Bit(Z80Cpu processor, WideRegister register)
         {
             _processor = processor;
