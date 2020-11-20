@@ -16,7 +16,7 @@ namespace Z80.Instructions {
             _instructionTypeReader = new MemoryByteReader(cpu);
         }
 
-        public string Mnemonic => _underlyingInstruction.Mnemonic;
+        public string Mnemonic => "TODO"; //_underlyingInstruction.Mnemonic;
 
         public bool IsComplete => _underlyingInstruction?.IsComplete ?? false;
 

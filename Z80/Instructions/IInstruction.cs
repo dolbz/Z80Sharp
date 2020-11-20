@@ -1,6 +1,6 @@
 namespace Z80.Instructions
 {
-    internal interface IInstruction : IClockable
+    public interface IInstruction : IClockable
     {
         string Mnemonic { get; }
 

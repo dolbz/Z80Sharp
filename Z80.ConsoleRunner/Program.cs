@@ -15,8 +15,6 @@ namespace Z80.ConsoleRunner
         private static AutoResetEvent uiSignal = new AutoResetEvent(false);
         private static AutoResetEvent instructionSignal = new AutoResetEvent(false);
 
-        private readonly static object cpuState = new object();
-
         private static bool manuallyStepped = true;
 
         private static byte[] ram = new byte[64*1024];
@@ -479,7 +477,7 @@ namespace Z80.ConsoleRunner
                     uiSignal.WaitOne(); // Wait until the UI has signalled CPU execution can continue
                 }
                 
-                lock(cpuState) {
+                lock(cpu.CpuStateLock) {
                     do {
                         cpu.Clock();
                         if (cpu.MREQ && cpu.RD) {
@@ -530,10 +528,10 @@ namespace Z80.ConsoleRunner
             var skipNextDisasm = false;
             List<string> instructionsForUi;
 
-            lock(cpuState) {
+            lock(cpu.CpuStateLock) {
                 var pc = cpu.PC;
                 var startPc = (ushort)(pc-20);
-                for (ushort i = 0; i < 50; i++) {
+                for (int i = 0; i < 50; i++) {
                     var currentPc = (ushort)(startPc+i);
                     var description = "";
 

@@ -7,7 +7,9 @@ namespace Z80
 {
     public class Z80Cpu
     {
-        internal IInstruction[] instructions = new IInstruction[65536];
+        public readonly object CpuStateLock = new object();
+
+        public IInstruction[] instructions = new IInstruction[65536];
         internal ushort Opcode;
 
         #region General Purpose Registers
@@ -198,6 +200,11 @@ namespace Z80
             IFF1 = false;
             TotalTCycles = 0;
             NewInstruction = true;
+        }
+
+
+        public Z80CpuSnapshot GetStateSnapshot() {
+            return Z80CpuSnapshot.FromCpu(this);
         }
 
         public void Initialize()
