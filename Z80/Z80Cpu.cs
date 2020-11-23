@@ -140,7 +140,10 @@ namespace Z80
         private void SetupForNextInstructionIfRequired() {
             if (_currentInstruction.IsComplete)
             {
-                PendingINT = INT; // This is at the end the last clock cycle rather than at the start...proably not a big deal
+                if (IFF1 && INT) {
+                    PendingINT = true; // This is at the end the last clock cycle rather than at the start...proably not a big deal
+                    IFF1 = false;
+                }
 
                 if (PendingEI && !(_currentInstruction is EI)) {
                     IFF1 = true;
@@ -150,6 +153,7 @@ namespace Z80
                 if (PendingNMI) {
                     _currentInstruction = new NMIHandler(this);
                 } else if (PendingINT) {
+                    PendingINT = false;
                     switch (InterruptMode) {
                         case 0:
                             _currentInstruction = new Mode0Handler();
