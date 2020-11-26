@@ -1,7 +1,7 @@
 using System;
 namespace Z80
 {
-    public interface IMachineCycle : IClockable 
+    public interface IMachineCycle
     {
     }
 
@@ -11,18 +11,18 @@ namespace Z80
         public bool IsComplete => _tCycle == 5;
         private int _tCycle = 1;
 
-        private int _interruptWaitCyclesRemaining = 0;
+        private int _interruptWaitCyclesRemaining = -1;
 
         public M1Cycle(Z80Cpu cpu) {
             _cpu = cpu;
         }
 
-        public void Reset() {
+        public void Reset(bool forInterruptAcknowledge = false) {
             _tCycle = 1;
-            if (_cpu.PendingINT) {
+            if (forInterruptAcknowledge) {
                 _interruptWaitCyclesRemaining = 2;
             } else {
-                _interruptWaitCyclesRemaining = 0;
+                _interruptWaitCyclesRemaining = -1;
             }
         }
 
@@ -57,7 +57,7 @@ namespace Z80
                     break;
             }
             
-            if (_interruptWaitCyclesRemaining <= 0) {
+            if (_tCycle != 3 || _interruptWaitCyclesRemaining < 0) {
             //if (!_cpu.WAIT) {
                 _tCycle++;
             //}

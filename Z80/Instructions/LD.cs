@@ -8,7 +8,7 @@ namespace Z80.Instructions
         public virtual string Mnemonic => $"LD {_destinationAddressMode.Description},{_sourceAddressMode.Description}";
 
         protected Z80Cpu _cpu;
-        private readonly IAddressMode<T> _destinationAddressMode;
+        protected readonly IAddressMode<T> _destinationAddressMode;
         private readonly IAddressMode<T> _sourceAddressMode;
 
         private IReadAddressedOperand<T> _sourceReader;

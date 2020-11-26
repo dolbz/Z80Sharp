@@ -41,13 +41,21 @@ namespace Z80
         # endregion
 
         public ushort Address;
-        public byte Data;
+        public byte Data 
+        {
+            get;
+            set;
+        }
 
         public bool MREQ;
 
         public bool IORQ;
 
-        public bool RD;
+        public bool RD 
+        {
+            get;
+            set;
+        }
 
         public bool WR;
 
@@ -92,43 +100,47 @@ namespace Z80
             if (!_fetchCycle.IsComplete)
             {
                 _fetchCycle.Clock();
-            }
-            if (_fetchCycle.IsComplete && _currentInstruction == null)
-            {
-                // Check for BUSRQ
-
-                IInstruction instruction = null;
-                
-                PostIncrementPC(); // TODO must stop increment if pending interrupt
-
-                if (!HALT) {
-                    instruction = instructions[Opcode];
+                if (_fetchCycle.IsComplete && _currentInstruction != null) {
+                    // This happens during interrupt where we still need the M1 cycle but the actual instruction is already lined up
+                    _currentInstruction.StartExecution();
                 }
+                else if (_fetchCycle.IsComplete && _currentInstruction == null)
+                {
+                    // Check for BUSRQ
 
-                if (!HALT || PendingNMI) {
-                    if (instruction != null)
-                    {
-                        HALT = false; // Break out of the halt mode as we must have been interrupted
-                        PendingNMI = false;
-                        _currentInstruction = instruction;
-                        _currentInstruction.Reset();
-                        _currentInstruction.StartExecution();
-                        SetupForNextInstructionIfRequired();
+                    IInstruction instruction = null;
+                    
+                    PostIncrementPC(); // TODO must stop increment if pending interrupt
+
+                    if (!HALT) {
+                        instruction = instructions[Opcode];
                     }
-                    else if (Opcode <= 0xFF)
-                    {
-                        Opcode <<= 8;
-                        _fetchCycle.Reset();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Unknown instruction {Opcode:X4}");
-                        Opcode = 0x0;
-                        _fetchCycle.Reset();
+
+                    if (!HALT || PendingNMI) {
+                        if (instruction != null)
+                        {
+                            HALT = false; // Break out of the halt mode as we must have been interrupted
+                            PendingNMI = false;
+                            _currentInstruction = instruction;
+                            _currentInstruction.Reset();
+                            _currentInstruction.StartExecution();
+                            SetupForNextInstructionIfRequired();
+                        }
+                        else if (Opcode <= 0xFF)
+                        {
+                            Opcode <<= 8;
+                            _fetchCycle.Reset();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Unknown instruction {Opcode:X4}");
+                            Opcode = 0x0;
+                            _fetchCycle.Reset();
+                        }
                     }
                 }
             }
-            else if (_currentInstruction != null)
+            else if (_fetchCycle.IsComplete && _currentInstruction != null)
             {
                 RFRSH = false; // TODO this isn't correct for instructions that extended the M1 cycle
                 _currentInstruction.Clock();
@@ -150,10 +162,14 @@ namespace Z80
                     IFF2 = true;
                     PendingEI = false;
                 }
+
+                var intAck = false;
+
                 if (PendingNMI) {
                     _currentInstruction = new NMIHandler(this);
                 } else if (PendingINT) {
                     PendingINT = false;
+                    intAck = true;
                     switch (InterruptMode) {
                         case 0:
                             _currentInstruction = new Mode0Handler();
@@ -173,7 +189,7 @@ namespace Z80
                 }
 
                 NewInstruction = true;
-                _fetchCycle.Reset();
+                _fetchCycle.Reset(intAck);
             }
         }
 
@@ -1020,11 +1036,5 @@ namespace Z80
 
             #endregion
         }
-    
-        // private IInstruction ResolveInterruptPriority() {
-        //     if (PendingBusRq) {
-
-        //     } else if ()
-        // }
     }
 }

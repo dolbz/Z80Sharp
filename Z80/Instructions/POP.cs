@@ -4,7 +4,7 @@ namespace Z80.Instructions
 {
     internal class POP : LD_Generic<ushort>
     {
-        public override string Mnemonic => "POP";
+        public override string Mnemonic => $"POP {_destinationAddressMode.Description}";
         public POP(Z80Cpu cpu, WideRegister register) : base(cpu, new RegAddrMode16Bit(cpu, register), new RegIndirectWide(cpu, WideRegister.SP, false), additionalM1TCycles: 0)
         {
         }

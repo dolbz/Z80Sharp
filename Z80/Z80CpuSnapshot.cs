@@ -18,9 +18,9 @@ namespace Z80 {
         public readonly byte R;
         public readonly ushort IX;
         public readonly ushort IY;
-        public readonly ushort SP;
+        public ushort SP { get; private set; }
 
-        public readonly ushort PC;
+        public ushort PC { get; private set; }
 
         public readonly ushort Address;
         public readonly byte Data;
@@ -40,8 +40,9 @@ namespace Z80 {
         internal static Z80CpuSnapshot FromCpu(Z80Cpu cpu) {
             lock (cpu.CpuStateLock) {
                 return new Z80CpuSnapshot {
-                    A = cpu.A
-                    // TODO all the other fields
+                    A = cpu.A,
+                    PC = cpu.PC,
+                    SP = cpu.SP
                 };
             }
         }
