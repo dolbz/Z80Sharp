@@ -64,6 +64,8 @@ namespace Z80
         public bool RFRSH;
 
         public bool HALT { get; internal set; }
+
+        public bool WAIT;
         public bool NMI { 
             set {
                 if (value) {

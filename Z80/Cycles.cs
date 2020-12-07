@@ -27,6 +27,7 @@ namespace Z80
         }
 
         public void Clock() {
+            var waitThisCycle = false;
             switch (_tCycle) {
                 case 1:
                     _cpu.RFRSH = false;
@@ -36,6 +37,7 @@ namespace Z80
                     _cpu.M1 = true;
                     break;
                 case 2:
+                    waitThisCycle = _cpu.WAIT;
                     break;
                 case 3:
                     if (_interruptWaitCyclesRemaining-- > 0)
@@ -57,10 +59,8 @@ namespace Z80
                     break;
             }
             
-            if (_tCycle != 3 || _interruptWaitCyclesRemaining < 0) {
-            //if (!_cpu.WAIT) {
+            if (!waitThisCycle && (_tCycle != 3 || _interruptWaitCyclesRemaining < 0)) {
                 _tCycle++;
-            //}
             }
         }
     }
@@ -110,6 +110,7 @@ namespace Z80
         }
 
         public void Clock() {
+            var waitThisCycle = false;
             switch (RemainingTCycles) {
                 case 3:
                     _cpu.Address = Address;
@@ -118,6 +119,7 @@ namespace Z80
                     break;
                 case 2:
                     _cpu.WR = true;
+                    waitThisCycle = _cpu.WAIT;
                     break;
                 case 1:
                     _cpu.WR = false;
@@ -125,9 +127,9 @@ namespace Z80
                     break;
             }
 
-            //if (!_cpu.WAIT) {
-            RemainingTCycles--;
-            //}
+            if (!waitThisCycle) {
+                RemainingTCycles--;
+            }
         }
     }
 
@@ -150,6 +152,7 @@ namespace Z80
         }
 
         public void Clock() {
+            var waitThisCycle = false;
             switch (RemainingTCycles) {
                 case 3:
                     _cpu.Address = Address ?? _cpu.PostIncrementPC();
@@ -157,6 +160,7 @@ namespace Z80
                     _cpu.MREQ = true;
                     break;
                 case 2:
+                    waitThisCycle = _cpu.WAIT;
                     break;
                 case 1:
                     LatchedData = _cpu.Data;
@@ -165,9 +169,9 @@ namespace Z80
                     break;
             }
 
-            //if (!_cpu.WAIT) {
-            RemainingTCycles--;
-            //}
+            if (!waitThisCycle) {
+                RemainingTCycles--;
+            }
         }
     }
 
@@ -188,6 +192,8 @@ namespace Z80
         }
 
         public void Clock() {
+            var waitThisCycle = false;
+
             switch (_tCycle) {
                 case 1:
                     _cpu.Address = Address;
@@ -197,7 +203,8 @@ namespace Z80
                     _cpu.RD = true;
                     break;
                 case 3:
-                    // Automatically inserted wait. Do nothing
+                    // Automatically inserted wait
+                    waitThisCycle = _cpu.WAIT;
                     break;
                 case 4:
                     LatchedData = _cpu.Data;
@@ -206,9 +213,9 @@ namespace Z80
                     break;
             }
 
-            //if (!_cpu.WAIT) {
-            _tCycle++;
-            //}
+            if (!waitThisCycle) {
+                _tCycle++;
+            }
         }
     }
 
@@ -229,6 +236,8 @@ namespace Z80
         }
 
         public void Clock() {
+            var waitThisCycle = false;
+
             switch (_tCycle) {
                 case 1:
                     _cpu.Address = Address;
@@ -239,7 +248,8 @@ namespace Z80
                     _cpu.WR = true;
                     break;
                 case 3:
-                    // Automatically inserted wait. Do nothing
+                    // Automatically inserted wait.
+                    waitThisCycle = _cpu.WAIT;
                     break;
                 case 4:
                     _cpu.WR = false;
@@ -247,9 +257,9 @@ namespace Z80
                     break;
             }
 
-            //if (!_cpu.WAIT) {
-            _tCycle++;
-            //}
+            if (!waitThisCycle) {
+                _tCycle++;
+            }
         }
     }
 }
