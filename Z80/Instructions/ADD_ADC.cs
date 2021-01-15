@@ -10,7 +10,7 @@ namespace Z80.Instructions
 
         private IReadAddressedOperand<byte> _valueReader;
 
-        public string Mnemonic => _withCarry ? "ADC" : "ADD";
+        public string Mnemonic => $"{(_withCarry ? "ADC" : "ADD")} A, {_addressMode.Description}";
 
         public bool IsComplete => _valueReader?.IsComplete ?? false;
 
@@ -90,7 +90,7 @@ namespace Z80.Instructions
         private readonly bool _withCarry;
         private InternalCycle _internalCycle;
 
-        public string Mnemonic => _withCarry ? "ADC" : "ADD";
+        public string Mnemonic => $"{(_withCarry ? "ADC" : "ADD")} {_destinationAddressMode.Description}, {_sourceAddressMode.Description}";
 
         public bool IsComplete => _internalCycle.IsComplete;
 

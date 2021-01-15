@@ -56,11 +56,11 @@ namespace Z80.Instructions {
         private int _remainingM1Cycles;
         private bool _requiresConditionalInternalCycle;
 
-        public string Mnemonic => _addressMode is RelativeAddressMode ? "JR" : "JP";
+        public string Mnemonic { get; private set; }
 
         public bool IsComplete { get; private set; }
 
-        public Jump(Z80Cpu cpu, IAddressMode<ushort> addressMode, JumpCondition condition, bool requiresConditionalInternalCycle = false, int additionalM1TCycles = 0) {
+        public Jump(Z80Cpu cpu, IAddressMode<ushort> addressMode, JumpCondition condition, bool requiresConditionalInternalCycle = false, int additionalM1TCycles = 0, string mnemomic = "JP") {
             _cpu = cpu;
             _addressMode = addressMode;
             _condition = condition;
@@ -68,6 +68,7 @@ namespace Z80.Instructions {
             _internalCycle = new InternalCycle(5);
             _additionalM1TCycles = additionalM1TCycles;
             _remainingM1Cycles = additionalM1TCycles;
+            Mnemonic = mnemomic;
         }
 
         public void Clock()

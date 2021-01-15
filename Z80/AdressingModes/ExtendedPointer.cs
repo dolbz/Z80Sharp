@@ -11,7 +11,7 @@ namespace Z80.AddressingModes
 
         public IWriteAddressedOperand<byte> Writer => new MemoryByteWriter(_cpu, _extendedOperand.AddressedValue);
 
-        public string Description => "(n)";
+        public string Description => "(nn)";
 
         public ExtendedPointer(Z80Cpu cpu)
         {

@@ -2,7 +2,7 @@ using Z80.AddressingModes;
 
 namespace Z80.Instructions
 {
-    internal abstract class LD_Generic<T> : IInstruction
+    public abstract class LD_Generic<T> : IInstruction
     {
         public virtual bool IsComplete => _remainingM1Cycles <= 0 && (_sourceReader?.IsComplete ?? false) && (_destinationWriter?.IsComplete ?? false);
         public virtual string Mnemonic => $"LD {_destinationAddressMode.Description},{_sourceAddressMode.Description}";

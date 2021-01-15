@@ -5,7 +5,7 @@ namespace Z80.Instructions
 
     public class Increment_8bit : IInstruction
     {
-        public string Mnemonic => "INC";
+        public string Mnemonic => $"INC {_addressMode.Description}";
 
         public bool IsComplete => _valueWriter != null && _valueWriter.IsComplete;
 

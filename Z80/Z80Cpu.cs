@@ -112,7 +112,7 @@ namespace Z80
 
                     IInstruction instruction = null;
                     
-                    PostIncrementPC(); // TODO must stop increment if pending interrupt
+                    PostIncrementPC();
 
                     if (!HALT) {
                         instruction = instructions[Opcode];
@@ -952,7 +952,7 @@ namespace Z80
             instructions[0xdde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IX)
             instructions[0xfde9] = new Jump(this, new RegAddrMode16Bit(this, WideRegister.IX), JumpCondition.Unconditional); // JP (IY)
 
-            instructions[0x10] = new Jump(this, new RelativeAddressMode(this), JumpCondition.RegBNotZero, true, additionalM1TCycles: 1); // DJNZ, e 
+            instructions[0x10] = new Jump(this, new RelativeAddressMode(this), JumpCondition.RegBNotZero, true, additionalM1TCycles: 1, mnemomic: "DJNZ, e"); // DJNZ, e 
 
             instructions[0xcd] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.Unconditional); // CALL nn
             instructions[0xdc] = new CALL(this, new ExtendedAddressMode(this), JumpCondition.Carry); // CALL C,nn

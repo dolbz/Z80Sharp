@@ -5,7 +5,7 @@ namespace Z80.Instructions
 
     public class Decrement : IInstruction
     {
-        public string Mnemonic => "DEC";
+        public string Mnemonic => $"DEC {_addressMode.Description}";
 
         public bool IsComplete => _valueWriter != null && _valueWriter.IsComplete;
 
@@ -82,7 +82,7 @@ namespace Z80.Instructions
 
     public class Decrement_16bit : IInstruction
     {
-        public string Mnemonic => "DEC";
+        public string Mnemonic => $"DEC {_addressMode.Description}";
 
         public bool IsComplete => _remainingM1Cycles <= 0;
 
