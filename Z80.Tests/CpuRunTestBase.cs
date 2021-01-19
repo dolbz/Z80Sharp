@@ -30,10 +30,10 @@ namespace Z80.Tests
         {
             while (_cpu.PC != pc || !_cpu.NewInstruction)
             {
-                if (_cpu.IORQ && _cpu.RD) {
+                if (_cpu.IORQ && _cpu.RD && !_cpu.INT) {
                     _cpu.Data = _dataDictionary[_cpu.Address];
                 }
-                if (_cpu.IORQ && _cpu.WR) {
+                if (_cpu.IORQ && _cpu.WR && !_cpu.INT) {
                     if (_dataDictionary.ContainsKey(_cpu.Address)) {
                         _dataDictionary[_cpu.Address] = _cpu.Data;
                     } else {

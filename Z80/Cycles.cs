@@ -55,6 +55,9 @@ namespace Z80
                     }
                     break;
                 case 4:
+                    _cpu.R++;
+                    _cpu.R &= 0x7f;
+                    break;
                 default:
                     break;
             }

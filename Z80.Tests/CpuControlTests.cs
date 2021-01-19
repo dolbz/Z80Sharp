@@ -8,23 +8,22 @@ namespace Z80.Tests {
             // Arrange
             _ram[0] = 0xfb; // EI
 
+            _cpu.INT = true;
             _cpu.IFF1 = false;
             _cpu.IFF2 = false;
+            _cpu.InterruptMode = 1;
+
+            _ram[1] = 0x3e; // LD A,&c4
+            _ram[2] = 0xc4;
+            _ram[3] = 0x3e; // LD A,&ff
+            _ram[4] = 0xff;
 
             // Act
-            RunUntil(1);
-            
+            RunUntil(0x38);
+
             // Assert
-            Assert.That(_cpu.IFF1, Is.False);
-            Assert.That(_cpu.IFF2, Is.False);
-
-            // Act 2
-            RunUntil(2);
-
-            // Assert 2 - EI behaviour occurs after the instruction following EI
-            Assert.That(_cpu.IFF1, Is.True);
-            Assert.That(_cpu.IFF2, Is.True);
-
+            Assert.That(_cpu.A, Is.EqualTo(0xc4)); // Confirms that LD A,&c4 has run and not the subsequent LD instruction
+            Assert.That(_cpu.TotalTCycles, Is.EqualTo(24)); // Confirm we've jumped to 0x38 rather than run sequentially to it somehow
         }
 
         [Test]

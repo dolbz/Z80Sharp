@@ -159,7 +159,7 @@ namespace Z80
                     IFF1 = false;
                 }
 
-                if (PendingEI && !(_currentInstruction is EI)) {
+                if (PendingEI) {
                     IFF1 = true;
                     IFF2 = true;
                     PendingEI = false;
