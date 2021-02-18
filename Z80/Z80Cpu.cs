@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Threading;
+using System;
 using Z80.Instructions;
 using Z80.AddressingModes;
 using Z80.Instructions.InterruptHandlers;
@@ -41,7 +42,7 @@ namespace Z80
         # endregion
 
         public ushort Address;
-        public byte Data 
+        public byte Data
         {
             get;
             set;
@@ -51,7 +52,7 @@ namespace Z80
 
         public bool IORQ;
 
-        public bool RD 
+        public bool RD
         {
             get;
             set;
@@ -66,18 +67,21 @@ namespace Z80
         public bool HALT { get; internal set; }
 
         public bool WAIT;
-        public bool NMI { 
-            set {
-                if (value) {
+        public bool NMI
+        {
+            set
+            {
+                if (value)
+                {
                     PendingNMI = true;
                 }
-            } 
+            }
         }
 
         public bool INT;
-        
+
         internal bool PendingNMI { get; set; }
-        internal bool PendingINT {get;set;}
+        internal bool PendingINT { get; set; }
         internal bool IFF1;
         internal bool IFF2;
 
@@ -90,9 +94,15 @@ namespace Z80
         internal IInstruction _currentInstruction;
         internal bool PendingEI;
 
-        internal ushort PostIncrementPC() {
-            if (!HALT || PendingNMI || PendingINT) {
-                    return PC++;
+        internal ushort PostIncrementPC()
+        {
+            if (!HALT || PendingNMI || PendingINT)
+            {
+                return PC++;
+            }
+            else
+            {
+                Console.WriteLine("Halted");
             }
             return PC;
         }
@@ -102,23 +112,26 @@ namespace Z80
             if (!_fetchCycle.IsComplete)
             {
                 _fetchCycle.Clock();
-                if (_fetchCycle.IsComplete && _currentInstruction != null) {
+                if (_fetchCycle.IsComplete && _currentInstruction != null)
+                {
                     // This happens during interrupt where we still need the M1 cycle but the actual instruction is already lined up
                     _currentInstruction.StartExecution();
                 }
                 else if (_fetchCycle.IsComplete && _currentInstruction == null)
                 {
-                    // Check for BUSRQ
+                    // TODO Check for BUSRQ
 
                     IInstruction instruction = null;
-                    
+
                     PostIncrementPC();
 
-                    if (!HALT) {
+                    if (!HALT)
+                    {
                         instruction = instructions[Opcode];
                     }
 
-                    if (!HALT || PendingNMI) {
+                    if (!HALT || PendingNMI)
+                    {
                         if (instruction != null)
                         {
                             HALT = false; // Break out of the halt mode as we must have been interrupted
@@ -151,15 +164,18 @@ namespace Z80
             TotalTCycles++;
         }
 
-        private void SetupForNextInstructionIfRequired() {
+        private void SetupForNextInstructionIfRequired()
+        {
             if (_currentInstruction.IsComplete)
             {
-                if (IFF1 && INT) {
+                if (IFF1 && INT)
+                {
                     PendingINT = true; // This is at the end the last clock cycle rather than at the start...proably not a big deal
                     IFF1 = false;
                 }
 
-                if (PendingEI) {
+                if (PendingEI)
+                {
                     IFF1 = true;
                     IFF2 = true;
                     PendingEI = false;
@@ -167,25 +183,31 @@ namespace Z80
 
                 var intAck = false;
 
-                if (PendingNMI) {
+                if (PendingNMI)
+                {
                     _currentInstruction = new NMIHandler(this);
-                } else if (PendingINT) {
+                }
+                else if (PendingINT)
+                {
                     PendingINT = false;
                     intAck = true;
-                    switch (InterruptMode) {
+                    switch (InterruptMode)
+                    {
                         case 0:
                             _currentInstruction = new Mode0Handler();
-                        break;
+                            break;
                         case 1:
                             _currentInstruction = new Mode1Handler(this);
-                        break;
+                            break;
                         case 2:
                             _currentInstruction = new Mode2Handler();
-                        break;
+                            break;
                         default:
                             throw new InvalidOperationException("Invalid interrupt mode set on CPU");
                     }
-                } else {
+                }
+                else
+                {
                     Opcode = 0x0;
                     _currentInstruction = null;
                 }
@@ -225,7 +247,8 @@ namespace Z80
         }
 
 
-        public Z80CpuSnapshot GetStateSnapshot() {
+        public Z80CpuSnapshot GetStateSnapshot()
+        {
             return Z80CpuSnapshot.FromCpu(this);
         }
 
@@ -445,7 +468,7 @@ namespace Z80
             #endregion
 
             #region Block search instructions
-            
+
             instructions[0xeda1] = new CompareAndXcrement(this, true); // CPI
             instructions[0xedb1] = new CompareAndXcrement(this, true, withRepeat: true); // CPIR
             instructions[0xeda9] = new CompareAndXcrement(this, false); // CPD
@@ -591,12 +614,12 @@ namespace Z80
             instructions[0x19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD HL, DE
             instructions[0x29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL)); // ADD HL, HL
             instructions[0x39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD HL, SP
-            
+
             instructions[0xdd09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.BC)); // ADD IX, BC
             instructions[0xdd19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD IX, DE
             instructions[0xdd39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD IX, SP
             instructions[0xdd29] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IX), new RegAddrMode16Bit(this, WideRegister.IX)); // ADD IX, IX
-            
+
             instructions[0xfd09] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.BC)); // ADD IY, BC
             instructions[0xfd19] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.DE)); // ADD IY, DE
             instructions[0xfd39] = new Add_16bit(this, new RegAddrMode16Bit(this, WideRegister.IY), new RegAddrMode16Bit(this, WideRegister.SP)); // ADD IY, SP
@@ -611,7 +634,7 @@ namespace Z80
             instructions[0xed52] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.DE)); // SBC HL, DE
             instructions[0xed62] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.HL)); // SBC HL, HL
             instructions[0xed72] = new SubtractWithCarry_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL), new RegAddrMode16Bit(this, WideRegister.SP)); // SBC HL, SP
-            
+
             instructions[0x03] = new Increment_16bit(this, new RegAddrMode16Bit(this, WideRegister.BC)); // INC BC
             instructions[0x13] = new Increment_16bit(this, new RegAddrMode16Bit(this, WideRegister.DE)); // INC DE
             instructions[0x23] = new Increment_16bit(this, new RegAddrMode16Bit(this, WideRegister.HL)); // INC HL
@@ -671,7 +694,7 @@ namespace Z80
             instructions[0xcb1b] = new RotateRight(this, new RegAddrMode8Bit(this, Register.E)); // RR E
             instructions[0xcb1c] = new RotateRight(this, new RegAddrMode8Bit(this, Register.H)); // RR H
             instructions[0xcb1d] = new RotateRight(this, new RegAddrMode8Bit(this, Register.L)); // RR L
-            instructions[0xcb1e] = new RotateRight(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // RR (HL)
+            instructions[0xcb1e] = new RotateRight(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // RR (HL)
 
             instructions[0xcb27] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.A)); // SLA A
             instructions[0xcb20] = new ShiftLeftArithmetic(this, new RegAddrMode8Bit(this, Register.B)); // SLA B
@@ -689,7 +712,7 @@ namespace Z80
             instructions[0xcb2b] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.E)); // SRA E
             instructions[0xcb2c] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.H)); // SRA H
             instructions[0xcb2d] = new ShiftRightArithmetic(this, new RegAddrMode8Bit(this, Register.L)); // SRA L
-            instructions[0xcb2e] = new ShiftRightArithmetic(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // SRA (HL)
+            instructions[0xcb2e] = new ShiftRightArithmetic(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // SRA (HL)
 
             instructions[0xcb3f] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.A)); // SRL A
             instructions[0xcb38] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.B)); // SRL B
@@ -698,7 +721,7 @@ namespace Z80
             instructions[0xcb3b] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.E)); // SRL E
             instructions[0xcb3c] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.H)); // SRL H
             instructions[0xcb3d] = new ShiftRightLogical(this, new RegAddrMode8Bit(this, Register.L)); // SRL L
-            instructions[0xcb3e] = new ShiftRightLogical(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead : true)); // SRL (HL)
+            instructions[0xcb3e] = new ShiftRightLogical(this, new RegIndirect(this, WideRegister.HL, additionalCycleOnRead: true)); // SRL (HL)
 
             instructions[0xed6f] = new RotateDigit(this, isLeftShift: true); // RLD (HL)
             instructions[0xed67] = new RotateDigit(this, isLeftShift: false); // RRD (HL)
@@ -927,7 +950,7 @@ namespace Z80
 
             instructions[0xddcb] = new IndexedInstructionLookup(this, WideRegister.IX); // Covers all (IX+d) rotates, shifts and bit operations
             instructions[0xfdcb] = new IndexedInstructionLookup(this, WideRegister.IY); // Covers all (IY+d) rotates, shifts and bit operations
-            
+
             #endregion
 
             #region Jump, Call, Return
@@ -941,7 +964,7 @@ namespace Z80
             instructions[0xe2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.ParityOdd); // JP PO,nn
             instructions[0xfa] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignNeg); // JP M,nn
             instructions[0xf2] = new Jump(this, new ExtendedAddressMode(this), JumpCondition.SignPos); // JP P,nn
-            
+
             instructions[0x18] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Unconditional, true); // JR, e
             instructions[0x38] = new Jump(this, new RelativeAddressMode(this), JumpCondition.Carry, true); // JR C,e
             instructions[0x30] = new Jump(this, new RelativeAddressMode(this), JumpCondition.NonCarry, true); // JR NC,e

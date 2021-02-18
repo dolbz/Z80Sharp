@@ -162,6 +162,7 @@ namespace Z80
 
         public void Clock() {
             var waitThisCycle = false;
+            
             switch (RemainingTCycles) {
                 case 3:
                     _cpu.Address = Address ?? _cpu.PostIncrementPC();
