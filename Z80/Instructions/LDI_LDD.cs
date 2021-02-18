@@ -78,7 +78,7 @@ namespace Z80.Instructions
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
 
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, bcValue == 0);
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, bcValue != 0);
             if (_repeats && bcValue != 0)
             {
                 _cpu.PC -= 2;

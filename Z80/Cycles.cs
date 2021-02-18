@@ -55,8 +55,14 @@ namespace Z80
                     }
                     break;
                 case 4:
-                    _cpu.R++;
-                    _cpu.R &= 0x7f;
+                    // R only increments bits 0-7
+                    // If bit 8 has been set via LD R, A it should be preserved 
+                    // indefinitely. The following code increments the value and
+                    // ensures bit 8 is unchanged afterwards.
+                    var workingR = _cpu.R;
+                    workingR++;
+                    workingR &= 0x7f; // Wipe changes to bit 8
+                    _cpu.R = (byte)(workingR | (_cpu.R & 0x80)); // OR with current R value bit 8 only
                     break;
                 default:
                     break;

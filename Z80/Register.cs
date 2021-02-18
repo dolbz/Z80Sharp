@@ -13,7 +13,13 @@ namespace Z80
         H,
         L,
         I,
-        R
+        R,
+        
+        // Used by undocumented instructions that act on the high and low bytes of IX and IY
+        IXh,
+        IXl,
+        IYh,
+        IYl
     }
 
     public enum WideRegister
@@ -66,6 +72,18 @@ namespace Z80
                 case Register.R:
                     cpu.R = value;
                     break;
+                case Register.IXh:
+                    cpu.IX = (ushort)((cpu.IX & 0xff) | (value << 8));
+                    break;
+                case Register.IXl:
+                    cpu.IX = (ushort)((cpu.IX & 0xff00) | value);
+                    break;
+                case Register.IYh:
+                    cpu.IY = (ushort)((cpu.IY & 0xff) | (value << 8));
+                    break;
+                case Register.IYl:
+                    cpu.IY = (ushort)((cpu.IY & 0xff00) | value);
+                    break;
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }
@@ -93,6 +111,14 @@ namespace Z80
                     return cpu.L;
                 case Register.R:
                     return cpu.R;
+                case Register.IXh:
+                    return (byte)(cpu.IX >> 8);
+                case Register.IXl:
+                    return (byte)(cpu.IX & 0xff);
+                case Register.IYh:
+                    return (byte)(cpu.IY >> 8);
+                case Register.IYl:
+                    return (byte)(cpu.IY & 0xff);
                 default:
                     throw new InvalidOperationException($"Invalid register value: {register}");
             }

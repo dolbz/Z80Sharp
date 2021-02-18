@@ -1,3 +1,4 @@
+using System;
 using Z80.AddressingModes;
 
 namespace Z80.Instructions
@@ -15,15 +16,17 @@ namespace Z80.Instructions
         private IWriteAddressedOperand<T> _destinationWriter;
 
         private readonly int _additionalM1TCycles;
+        private readonly bool _setsFlags;
         private int _remainingM1Cycles;
 
-        public LD_Generic(Z80Cpu cpu, IAddressMode<T> destination, IAddressMode<T> source, int additionalM1TCycles)
+        public LD_Generic(Z80Cpu cpu, IAddressMode<T> destination, IAddressMode<T> source, int additionalM1TCycles, bool setsFlags = false)
         {
             _cpu = cpu;
             _additionalM1TCycles = additionalM1TCycles;
             _remainingM1Cycles = additionalM1TCycles;
             _destinationAddressMode = destination;
             _sourceAddressMode = source;
+            _setsFlags = setsFlags;
         }
 
         public virtual void StartExecution()
@@ -40,6 +43,13 @@ namespace Z80.Instructions
             if ((_sourceReader?.IsComplete ?? false) && (_destinationAddressMode?.IsComplete ?? false))
             {
                 _destinationWriter.AddressedValue = _sourceAddressMode.Reader.AddressedValue;
+                if (_setsFlags) {
+                    Z80Flags.Zero_Z.SetOrReset(_cpu, _cpu.A == 0);
+                    Z80Flags.Sign_S.SetOrReset(_cpu, (_cpu.A & 0x8000) == 0x8000);
+                    Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, _cpu.IFF2);
+                    Z80Flags.HalfCarry_H.SetOrReset(_cpu, false);
+                    Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
+                }
             }
         }
 
@@ -99,8 +109,8 @@ namespace Z80.Instructions
 
     internal class LD_8Bit : LD_Generic<byte>
     {
-        public LD_8Bit(Z80Cpu cpu, IAddressMode<byte> destination, IAddressMode<byte> source, int additionalM1TCycles = 0)
-            : base(cpu, destination, source, additionalM1TCycles)
+        public LD_8Bit(Z80Cpu cpu, IAddressMode<byte> destination, IAddressMode<byte> source, int additionalM1TCycles = 0, bool setsFlags = false)
+            : base(cpu, destination, source, additionalM1TCycles, setsFlags)
         {
         }
     }
