@@ -94,18 +94,6 @@ namespace Z80
         internal IInstruction _currentInstruction;
         internal bool PendingEI;
 
-        internal ushort PostIncrementPC()
-        {
-            if (!HALT || PendingNMI || PendingINT)
-            {
-                return PC++;
-            }
-            else
-            {
-                Console.WriteLine("Halted");
-            }
-            return PC;
-        }
         public void Clock()
         {
             NewInstruction = false;
@@ -122,36 +110,27 @@ namespace Z80
                     // TODO Check for BUSRQ
 
                     IInstruction instruction = null;
+                    
+                    PC++;
+                    instruction = instructions[Opcode];
 
-                    PostIncrementPC();
-
-                    if (!HALT)
+                    if (instruction != null)
                     {
-                        instruction = instructions[Opcode];
+                        _currentInstruction = instruction;
+                        _currentInstruction.Reset();
+                        _currentInstruction.StartExecution();
+                        SetupForNextInstructionIfRequired();
                     }
-
-                    if (!HALT || PendingNMI)
+                    else if (Opcode <= 0xFF) // TODO we could check for known prefixes here
                     {
-                        if (instruction != null)
-                        {
-                            HALT = false; // Break out of the halt mode as we must have been interrupted
-                            PendingNMI = false;
-                            _currentInstruction = instruction;
-                            _currentInstruction.Reset();
-                            _currentInstruction.StartExecution();
-                            SetupForNextInstructionIfRequired();
-                        }
-                        else if (Opcode <= 0xFF)
-                        {
-                            Opcode <<= 8;
-                            _fetchCycle.Reset();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Unknown instruction {Opcode:X4}");
-                            Opcode = 0x0;
-                            _fetchCycle.Reset();
-                        }
+                        Opcode <<= 8;
+                        _fetchCycle.Reset();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unknown instruction {Opcode:X4}");
+                        Opcode = 0x0;
+                        _fetchCycle.Reset();
                     }
                 }
             }
@@ -186,9 +165,12 @@ namespace Z80
                 if (PendingNMI)
                 {
                     _currentInstruction = new NMIHandler(this);
+                    HALT = false;
+                    PendingNMI = false;
                 }
                 else if (PendingINT)
                 {
+                    HALT = false;
                     PendingINT = false;
                     intAck = true;
                     switch (InterruptMode)
@@ -210,6 +192,10 @@ namespace Z80
                 {
                     Opcode = 0x0;
                     _currentInstruction = null;
+                }
+
+                if (HALT) {
+                    PC--; // This was incremented during M1 cycle. Decrement again as we're not breaking out of the HALT state yet
                 }
 
                 NewInstruction = true;
