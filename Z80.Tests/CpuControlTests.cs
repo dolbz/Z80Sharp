@@ -48,15 +48,15 @@ namespace Z80.Tests {
             _ram[0] = 0x76; // HALT
 
             _cpu.HALT  = false;
+            _cpu.Data = _ram[0];
 
             // Act
-            RunUntil(1);
             for(int i = 0; i < 100; i++) {
                 _cpu.Clock(); // Additional clock cycles would normal advance the PC if we weren't HALTed
             }
             
             // Assert
-            Assert.That(_cpu.PC, Is.EqualTo(1));
+            Assert.That(_cpu.PC, Is.EqualTo(0));
             Assert.That(_cpu.HALT, Is.True);
         }
 

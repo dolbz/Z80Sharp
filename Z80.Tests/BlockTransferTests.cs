@@ -68,7 +68,7 @@ namespace Z80.Tests
             _ram[0] = 0xed;
             _ram[1] = 0xa8;
 
-            WideRegister.BC.SetValueOnProcessor(_cpu, 2);
+            WideRegister.BC.SetValueOnProcessor(_cpu, 1);
 
             // Act
             RunUntil(3);
@@ -77,7 +77,7 @@ namespace Z80.Tests
             expectedFlags &= ~Z80Flags.AddSubtract_N; // Reset N
             expectedFlags &= ~Z80Flags.HalfCarry_H; // Reset H
             
-            expectedFlags &= ~Z80Flags.ParityOverflow_PV; // Reset PV as BC remains > 0
+            expectedFlags &= ~Z80Flags.ParityOverflow_PV; // Reset PV as BC == 0
             
             Assert.That(_cpu.Flags, Is.EqualTo(expectedFlags));
         }
@@ -93,13 +93,13 @@ namespace Z80.Tests
             _ram[0] = 0xed;
             _ram[1] = 0xa8;
 
-            WideRegister.BC.SetValueOnProcessor(_cpu, 1);
+            WideRegister.BC.SetValueOnProcessor(_cpu, 2);
 
             // Act
             RunUntil(3);
 
             // Assert
-            expectedFlags |= Z80Flags.ParityOverflow_PV; // Set PV as BC = 0
+            expectedFlags |= Z80Flags.ParityOverflow_PV; // Set PV as BC != 0
             
             Assert.That(_cpu.Flags, Is.EqualTo(expectedFlags));
         }
