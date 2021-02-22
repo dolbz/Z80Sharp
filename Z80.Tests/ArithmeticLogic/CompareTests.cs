@@ -86,8 +86,8 @@ namespace Z80.Tests.ArithmeticLogic
             // Arrange
             _ram[0] = 0xbb;
 
-            _cpu.A = 0x4;
-            _cpu.E = 0xa5;
+            _cpu.A = 0xfe;
+            _cpu.E = 0x7f;
 
             // Act
             RunUntil(2);

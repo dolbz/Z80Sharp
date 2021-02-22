@@ -71,10 +71,22 @@ namespace Z80.Instructions
                 carryIn = 1;
             }
 
+            var sourceOriginalValue = _valueReader.AddressedValue;
+            var destOriginalValue = _cpu.A;
+
             var result = _cpu.A + _valueReader.AddressedValue + carryIn;
+
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
             Z80Flags.Carry_C.SetOrReset(_cpu, result > 0xff);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 127);
+
+            // I'm sure there's a nicer way to do this but my brain isn't finding it today
+            var overflow =  ((sourceOriginalValue + carryIn) & 0x80) != (sourceOriginalValue & 0x80); // Test for carry in overflow first;
+            var operandsAreSameSign = (destOriginalValue & 0x80) == ((sourceOriginalValue + carryIn) & 0x80);
+            if (operandsAreSameSign) {
+                overflow = (result & 0x80) != (destOriginalValue & 0x80);
+            }
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, overflow);
+
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, ((_cpu.A & 0xf) + (_valueReader.AddressedValue & 0xf) + carryIn >= 0x10));
@@ -147,7 +159,14 @@ namespace Z80.Instructions
                 // Instructions with carry affect the Sign and Zero flags
                 Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xffff) == 0);
                 Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x8000) == 0x8000);
-                Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, result > 0x7fff);
+
+                // I'm sure there's a nicer way to do this but my brain isn't finding it today
+                var overflow =  ((sourceOriginalValue + carryIn) & 0x8000) != (sourceOriginalValue & 0x8000); // Test for carry in overflow first;
+                var operandsAreSameSign = (destOriginalValue & 0x8000) == ((sourceOriginalValue + carryIn) & 0x8000);
+                if (operandsAreSameSign) {
+                    overflow = (result & 0x8000) != (destOriginalValue & 0x8000);
+                }
+                Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, overflow);
             }
 
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, false);

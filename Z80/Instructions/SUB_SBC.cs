@@ -83,10 +83,22 @@ namespace Z80.Instructions
             {
                 carryIn = 1;
             }
+
+            var sourceOriginalValue = _readOperand.AddressedValue;
+            var destOriginalValue = _cpu.A;
+
             var result = _cpu.A - _readOperand.AddressedValue - carryIn;
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x80) == 0x80);
             Z80Flags.Carry_C.SetOrReset(_cpu, result < 0);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (_cpu.A >= 0x80 && result < 0x80) || result < -128);
+
+            // I'm sure there's a nicer way to do this but my brain isn't finding it today
+            var overflow = ((sourceOriginalValue + carryIn) & 0x80) != (sourceOriginalValue & 0x80); // Test for carry in overflow first
+            var operandsAreDifferentSign = (destOriginalValue & 0x80) != ((sourceOriginalValue + carryIn) & 0x80);
+            if (operandsAreDifferentSign) {
+                overflow = (result & 0x80) != (destOriginalValue & 0x80);
+            }
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, overflow);
+
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xff) == 0);
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, true);
             Z80Flags.HalfCarry_H.SetOrReset(_cpu, (((_cpu.A & 0xf) - (_readOperand.AddressedValue & 0xf) - carryIn) & 0x10) == 0x10);
@@ -127,7 +139,7 @@ namespace Z80.Instructions
                 _internalCycle.Clock();
 
                 if (_internalCycle.IsComplete) {
-                    PerformAdd();
+                    PerformSubtract();
                 }
             }
         }
@@ -144,7 +156,7 @@ namespace Z80.Instructions
             // Never anything to do for 16-bit additions immediately
         }
 
-        private void PerformAdd()
+        private void PerformSubtract()
         {
             var carryIn = 0;
             if (_cpu.Flags.HasFlag(Z80Flags.Carry_C))
@@ -158,7 +170,14 @@ namespace Z80.Instructions
 
             Z80Flags.Zero_Z.SetOrReset(_cpu, (result & 0xffff) == 0);
             Z80Flags.Sign_S.SetOrReset(_cpu, (result & 0x8000) == 0x8000);
-            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, (destOriginalValue >= 0x8000 && result < 0x8000) || result < -32768);
+
+            // I'm sure there's a nicer way to do this but my brain isn't finding it today
+            var overflow = ((sourceOriginalValue + carryIn) & 0x8000) != (sourceOriginalValue & 0x8000); // Test for carry in overflow first
+            var operandsAreDifferentSign = (destOriginalValue & 0x8000) != ((sourceOriginalValue + carryIn) & 0x8000);
+            if (operandsAreDifferentSign) {
+                overflow = (result & 0x8000) != (destOriginalValue & 0x8000);
+            }
+            Z80Flags.ParityOverflow_PV.SetOrReset(_cpu, overflow);
 
             Z80Flags.AddSubtract_N.SetOrReset(_cpu, true);
             Z80Flags.Carry_C.SetOrReset(_cpu, destOriginalValue < sourceOriginalValue + carryIn);
