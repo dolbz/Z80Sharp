@@ -1050,46 +1050,114 @@ namespace Z80
             #region Undocumented instructions
 
             // DD Prefix
-            instructions[0xdd24] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IXh)); // INC IXh
-            instructions[0xdd2c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IXl)); // INC IXl
-
-            instructions[0xdd25] = new Decrement(this, new RegAddrMode8Bit(this, Register.IXh)); // DEC IYh
-            
             instructions[0xdd26] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new ImmediateOperand(this)); // LD IXh, n
-            instructions[0xdd2e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new ImmediateOperand(this)); // LD IXl, n
-
+            instructions[0xdd44] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.IXh)); // LD B, IXh
+            instructions[0xdd4c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.IXh)); // LD C, IXh
             instructions[0xdd54] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.IXh)); // LD D, IXh
-            instructions[0xdd5d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IXl)); // LD E, IXl
-
+            instructions[0xdd5c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IXh)); // LD E, IXh
             instructions[0xdd60] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.B)); // LD IXh, B
+            instructions[0xdd61] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.C)); // LD IXh, C 
+            instructions[0xdd62] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.D)); // LD IXh, D 
+            instructions[0xdd63] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.E)); // LD IXh, E
+            instructions[0xdd64] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.IXh)); // LD IXh, IXh
+            instructions[0xdd67] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.A)); // LD IXh, A
+            instructions[0xdd7c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.IXh)); // LD A, IXh
+            instructions[0xdd84] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IXh)); // ADD A, IXh
+            instructions[0xdd8c] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IXh), true); // ADC A, IXh
+            instructions[0xdd94] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXh)); // SUB A, IXh
+            instructions[0xdd9c] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXh), true); // SBC A, IXh
+            instructions[0xdda4] = new AND(this, new RegAddrMode8Bit(this, Register.IXh)); // AND A, IXh
+            instructions[0xddac] = new XOR(this, new RegAddrMode8Bit(this, Register.IXh)); // XOR A, IXh
+            instructions[0xddb4] = new OR(this, new RegAddrMode8Bit(this, Register.IXh)); // OR A, IXh
+            instructions[0xddbc] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXh), updateAccumulator: false); // CP A, IXh
+            instructions[0xdd24] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IXh)); // INC IXh
+            instructions[0xdd25] = new Decrement(this, new RegAddrMode8Bit(this, Register.IXh)); // DEC IXh               
+            instructions[0xdd2e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new ImmediateOperand(this)); // LD IXl, n
+            instructions[0xdd45] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.IXl)); // LD B, IXl
+            instructions[0xdd4d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.IXl)); // LD C, IXl
+            instructions[0xdd55] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.IXl)); // LD D, IXl
+            instructions[0xdd5d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IXl)); // LD E, IXl
+            instructions[0xdd68] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.B)); // LD IXl, B
+            instructions[0xdd69] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.C)); // LD IXl, C 
+            instructions[0xdd6a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.D)); // LD IXl, D 
+            instructions[0xdd6b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.E)); // LD IXl, E
+            instructions[0xdd6d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.IXl)); // LD IXl, IXl
             instructions[0xdd6f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.A)); // LD IXl, A
-
             instructions[0xdd7d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.IXl)); // LD A, IXl
+            instructions[0xdd85] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IXl)); // ADD A, IXl
+            instructions[0xdd8d] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IXl), true); // ADC A, IXl
+            instructions[0xdd95] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXl)); // SUB A, IXl
+            instructions[0xdd9d] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXl), true); // SBC A, IXl
+            instructions[0xdda5] = new AND(this, new RegAddrMode8Bit(this, Register.IXl)); // AND A, IXl
+            instructions[0xddad] = new XOR(this, new RegAddrMode8Bit(this, Register.IXl)); // XOR A, IXl
+            instructions[0xddb5] = new OR(this, new RegAddrMode8Bit(this, Register.IXl)); // OR A, IXl
+            instructions[0xddbd] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IXl), updateAccumulator: false); // CP A, IXl
+            instructions[0xdd2c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IXl)); // INC IXl
+            instructions[0xdd2d] = new Decrement(this, new RegAddrMode8Bit(this, Register.IXl)); // DEC IXl
+            instructions[0xdd65] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXh), new RegAddrMode8Bit(this, Register.IXl)); // LD IXh, IXl
+            instructions[0xdd6c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IXl), new RegAddrMode8Bit(this, Register.IXh)); // LD IXl, IXh
 
+            // Populate all remaining DD instructions with their normal opcode counterpart
+            for (int i = 0xdd00; i < 0xddff; i++) {
+                if (instructions[i] == null) {
+                    instructions[i] = instructions[i & 0xff];
+                }
+            }
 
             // FD Prefix
-            instructions[0xfd24] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IYh)); // INC IYh
-            instructions[0xfd2c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IYl)); // INC IYl
-
-            instructions[0xfd25] = new Decrement(this, new RegAddrMode8Bit(this, Register.IYh)); // DEC IYh
-            
             instructions[0xfd26] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new ImmediateOperand(this)); // LD IYh, n
-            instructions[0xfd2e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new ImmediateOperand(this)); // LD IYl, n
-
+            instructions[0xfd44] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.IYh)); // LD B, IYh
+            instructions[0xfd4c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.IYh)); // LD C, IYh
             instructions[0xfd54] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.IYh)); // LD D, IYh
-            instructions[0xfd5d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IYl)); // LD E, IYl
-
+            instructions[0xfd5c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IYh)); // LD E, IYh
             instructions[0xfd60] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.B)); // LD IYh, B
+            instructions[0xfd61] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.C)); // LD IYh, C 
+            instructions[0xfd62] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.D)); // LD IYh, D 
+            instructions[0xfd63] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.E)); // LD IYh, E
+            instructions[0xfd64] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.IYh)); // LD IYh, IYh
+            instructions[0xfd67] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.A)); // LD IYh, A
+            instructions[0xfd7c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.IYh)); // LD A, IYh
+            instructions[0xfd84] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IYh)); // ADD A, IYh
+            instructions[0xfd8c] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IYh), true); // ADC A, IYh
+            instructions[0xfd94] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYh)); // SUB A, IYh
+            instructions[0xfd9c] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYh), true); // SBC A, IYh
+            instructions[0xfda4] = new AND(this, new RegAddrMode8Bit(this, Register.IYh)); // AND A, IYh
+            instructions[0xfdac] = new XOR(this, new RegAddrMode8Bit(this, Register.IYh)); // XOR A, IYh
+            instructions[0xfdb4] = new OR(this, new RegAddrMode8Bit(this, Register.IYh)); // OR A, IYh
+            instructions[0xfdbc] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYh), updateAccumulator: false); // CP A, IYh
+            instructions[0xfd24] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IYh)); // INC IYh
+            instructions[0xfd25] = new Decrement(this, new RegAddrMode8Bit(this, Register.IYh)); // DEC IYh               
+            instructions[0xfd2e] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new ImmediateOperand(this)); // LD IYl, n
+            instructions[0xfd45] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.B), new RegAddrMode8Bit(this, Register.IYl)); // LD B, IYl
+            instructions[0xfd4d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.C), new RegAddrMode8Bit(this, Register.IYl)); // LD C, IYl
+            instructions[0xfd55] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.D), new RegAddrMode8Bit(this, Register.IYl)); // LD D, IYl
+            instructions[0xfd5d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.E), new RegAddrMode8Bit(this, Register.IYl)); // LD E, IYl
+            instructions[0xfd68] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.B)); // LD IYl, B
+            instructions[0xfd69] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.C)); // LD IYl, C 
+            instructions[0xfd6a] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.D)); // LD IYl, D 
+            instructions[0xfd6b] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.E)); // LD IYl, E
+            instructions[0xfd6d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.IYl)); // LD IYl, IYl
             instructions[0xfd6f] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.A)); // LD IYl, A
-
             instructions[0xfd7d] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.A), new RegAddrMode8Bit(this, Register.IYl)); // LD A, IYl
+            instructions[0xfd85] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IYl)); // ADD A, IYl
+            instructions[0xfd8d] = new Add_8bit(this, new RegAddrMode8Bit(this, Register.IYl), true); // ADC A, IYl
+            instructions[0xfd95] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYl)); // SUB A, IYl
+            instructions[0xfd9d] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYl), true); // SBC A, IYl
+            instructions[0xfda5] = new AND(this, new RegAddrMode8Bit(this, Register.IYl)); // AND A, IYl
+            instructions[0xfdad] = new XOR(this, new RegAddrMode8Bit(this, Register.IYl)); // XOR A, IYl
+            instructions[0xfdb5] = new OR(this, new RegAddrMode8Bit(this, Register.IYl)); // OR A, IYl
+            instructions[0xfdbd] = new SubtractOrCompare(this, new RegAddrMode8Bit(this, Register.IYl), updateAccumulator: false); // CP A, IYl
+            instructions[0xfd2c] = new Increment_8bit(this, new RegAddrMode8Bit(this, Register.IYl)); // INC IYl
+            instructions[0xfd2d] = new Decrement(this, new RegAddrMode8Bit(this, Register.IYl)); // DEC IYl
+            instructions[0xfd65] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYh), new RegAddrMode8Bit(this, Register.IYl)); // LD IYh, IYl
+            instructions[0xfd6c] = new LD_8Bit(this, new RegAddrMode8Bit(this, Register.IYl), new RegAddrMode8Bit(this, Register.IYh)); // LD IYl, IYh
 
             // Populate all remaining FD instructions with their normal opcode counterpart
-            // for (int i = 0xfd00; i < 0xfdff; i++) {
-            //     if (instructions[i] == null) {
-            //         instructions[i] = instructions[i & 0xff];
-            //     }
-            // }
+            for (int i = 0xfd00; i < 0xfdff; i++) {
+                if (instructions[i] == null) {
+                    instructions[i] = instructions[i & 0xff];
+                }
+            }
 
             #endregion
         }
