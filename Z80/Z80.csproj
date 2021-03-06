@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <PackageId>Z80Sharp</PackageId>
+    <Version>1.0.0-alpha1</Version>
+    <Authors>Nathan Randle</Authors>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Description>A Zilog Z80 emulator</Description>
+    <PackageProjectUrl>https://github.com/dolbz/Z80Sharp</PackageProjectUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>
