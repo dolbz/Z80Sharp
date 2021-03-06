@@ -1,7 +1,7 @@
-Z80# - A .net 5 Z80 emulator
+Z80# - A .NET 5 Z80 emulator
 ============================
 
-Z80# is a Z80 emulator written in C# and targeting .net 5. It was written with the primary purpose of supporting [CPC#](https://github.com/dolbz/CPCSharp), an Amstrad CPC464 emulator.
+Z80# is a Z80 emulator written in C# and targeting .NET 5. It was written with the primary purpose of supporting [CPC#](https://github.com/dolbz/CPCSharp), an Amstrad CPC464 emulator.
 
 Currently supported:
 * Cycle accurate implementation of all documented instructions
